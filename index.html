@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Checklist Mantención · Jardines de Vicuña Mackenna</title>
+<style>
+  :root{
+    --bg:#10161D; --panel:#1B2430; --panel-alt:#232F3E; --line:#2C3947;
+    --text:#E8EDF2; --text-dim:#8B98A8; --accent:#E8A33D; --accent-dim:#8a6423;
+    --radius:10px; --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent; padding-bottom:calc(70px + var(--safe-b));
+  }
+  .mono{font-family:ui-monospace,"SF Mono","Roboto Mono","Courier New",monospace;}
+  button{font-family:inherit;}
+  .hidden{display:none !important;}
+  img{max-width:100%;}
+
+  .fullscreen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .card-setup{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px; max-width:420px; width:100%;}
+  .card-setup h1{font-size:1.15rem; margin:0 0 4px;}
+  .card-setup p{color:var(--text-dim); font-size:.88rem; line-height:1.5;}
+  .field{margin-top:14px;}
+  .field label{display:block; font-size:.78rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase; letter-spacing:.05em;}
+  .field input, .field textarea, .field select{
+    width:100%; background:var(--panel-alt); border:1px solid var(--line); color:var(--text);
+    border-radius:8px; padding:11px 12px; font-size:.95rem; outline:none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{border-color:var(--accent);}
+  .hint{font-size:.72rem; color:var(--text-dim); margin-top:4px;}
+  .btn{border:none; border-radius:9px; padding:12px 16px; font-size:.92rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px;}
+  .btn-primary{background:var(--accent); color:#1a1206; width:100%; margin-top:14px;}
+  .btn-ghost{background:transparent; color:var(--text-dim); border:1px solid var(--line);}
+  .btn-danger{background:#D6534A; color:#fff;}
+  .btn-sm{padding:9px 12px; font-size:.82rem; border-radius:7px;}
+  .btn-row{display:flex; gap:8px; margin-top:12px;}
+  .btn-row .btn{flex:1; margin-top:0;}
+  .err-msg{color:#D6534A; font-size:.82rem; margin-top:10px;}
+
+  header.app-header{position:sticky; top:0; z-index:20; background:linear-gradient(180deg,#141B24,#10161D); border-bottom:1px solid var(--line); padding:12px 14px 0;}
+  .h-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .h-title{font-size:.98rem; font-weight:700;}
+  .h-sub{font-size:.72rem; color:var(--text-dim); margin-top:1px;}
+  .h-actions{display:flex; gap:6px;}
+  .icon-btn{background:var(--panel-alt); border:1px solid var(--line); color:var(--text); width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; cursor:pointer;}
+
+  .summary-row{display:flex; gap:6px; margin:10px 0 8px; overflow-x:auto;}
+  .pill{flex:0 0 auto; font-size:.72rem; padding:5px 10px; border-radius:99px; border:1px solid var(--line); color:var(--text-dim); white-space:nowrap;}
+  .pill b{color:var(--text);}
+
+  .tabs{display:flex; gap:6px; margin-top:6px;}
+  .tab{flex:1; text-align:center; padding:9px 4px; border-radius:8px 8px 0 0; font-size:.85rem; font-weight:700; color:var(--text-dim); border:1px solid var(--line); border-bottom:none; background:var(--panel); cursor:pointer;}
+  .tab.active{color:var(--bg); background:var(--accent); border-color:var(--accent);}
+
+  .toolbar{display:flex; gap:8px; padding:10px 14px; background:var(--panel); border-bottom:1px solid var(--line); align-items:center;}
+  .toolbar input[type=text]{flex:1; background:var(--panel-alt); border:1px solid var(--line); color:var(--text); border-radius:8px; padding:9px 10px; font-size:.88rem; outline:none;}
+  .toggle-pend{display:flex; align-items:center; gap:6px; font-size:.74rem; color:var(--text-dim); white-space:nowrap;}
+  .switch{position:relative; width:38px; height:22px; background:var(--panel-alt); border:1px solid var(--line); border-radius:99px; cursor:pointer;}
+  .switch.on{background:var(--accent-dim); border-color:var(--accent);}
+  .switch .knob{position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--text-dim); transition:left .15s;}
+  .switch.on .knob{left:18px; background:var(--accent);}
+
+  .floor-dock{display:flex; gap:5px; overflow-x:auto; padding:9px 14px; background:var(--panel); border-bottom:1px solid var(--line); scrollbar-width:none;}
+  .floor-dock::-webkit-scrollbar{display:none;}
+  .floor-chip{flex:0 0 auto; width:34px; height:34px; border-radius:6px; background:#0D1218; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; color:var(--text-dim); cursor:pointer; position:relative; overflow:hidden;}
+  .floor-chip .led{position:absolute; bottom:2px; left:4px; right:4px; height:3px; border-radius:2px; background:#5B6675;}
+
+  main{padding:12px 14px 24px;}
+  .floor-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-bottom:12px; overflow:hidden; scroll-margin-top:150px;}
+  .floor-head{display:flex; align-items:center; justify-content:space-between; padding:11px 13px; background:var(--panel-alt); border-bottom:1px solid var(--line);}
+  .floor-num{font-family:ui-monospace,"SF Mono","Roboto Mono",monospace; font-weight:800; font-size:1.05rem;}
+  .floor-tag{font-size:.68rem; color:var(--text-dim); margin-left:6px;}
+  .floor-count{font-size:.72rem; color:var(--text-dim);}
+
+  .item-row{display:flex; align-items:center; gap:10px; padding:10px 13px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .item-row:last-of-type{border-bottom:none;}
+  .dot{width:10px; height:10px; border-radius:50%; flex:0 0 auto;}
+  .item-main{flex:1; min-width:0;}
+  .item-cat{font-size:.86rem; font-weight:600; display:flex; align-items:center; gap:6px;}
+  .folio-tag{font-size:.63rem; color:var(--text-dim); font-family:ui-monospace,monospace; font-weight:400;}
+  .item-detalle{font-size:.76rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px;}
+  .chev{color:var(--text-dim); font-size:.9rem;}
+
+  .add-fault-btn{display:block; width:100%; text-align:center; padding:10px; font-size:.82rem; color:var(--accent); background:transparent; border:none; border-top:1px dashed var(--line); cursor:pointer;}
+
+  .fab-wrap{position:fixed; right:14px; bottom:calc(16px + var(--safe-b)); display:flex; flex-direction:column; gap:10px; z-index:30;}
+  .fab{width:52px; height:52px; border-radius:50%; background:var(--accent); color:#1a1206; border:none; box-shadow:0 6px 16px rgba(0,0,0,.4); font-size:1.25rem; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .fab.secondary{background:var(--panel-alt); color:var(--text); border:1px solid var(--line); width:44px; height:44px; font-size:1.05rem;}
+
+  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(24px + var(--safe-b)); background:#0D1218; color:var(--text); padding:10px 16px; border-radius:99px; font-size:.82rem; border:1px solid var(--line); z-index:70; opacity:0; transition:opacity .2s;}
+  .toast.show{opacity:1;}
+
+  .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
+  .modal{background:var(--panel); border:1px solid var(--line); border-radius:16px 16px 0 0; padding:18px 16px calc(18px + var(--safe-b)); width:100%; max-width:520px; max-height:88vh; overflow-y:auto;}
+  .modal h2{font-size:1rem; margin:0 0 4px;}
+  .modal .sub{font-size:.76rem; color:var(--text-dim); margin-bottom:10px;}
+
+  .badge{display:inline-block; font-size:.72rem; font-weight:700; padding:4px 10px; border-radius:99px;}
+  .kv{display:flex; justify-content:space-between; font-size:.8rem; padding:6px 0; border-bottom:1px solid var(--line);}
+  .kv:last-child{border-bottom:none;}
+  .kv .k{color:var(--text-dim);}
+
+  .chip-row{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;}
+  .chip{padding:7px 11px; border-radius:99px; font-size:.78rem; border:1px solid var(--line); color:var(--text-dim); cursor:pointer;}
+  .chip.selected{color:var(--accent); border-color:var(--accent); background:#3a2c111a;}
+
+  .photo-row{display:flex; gap:8px; margin-top:8px;}
+  .photo-thumb{width:70px; height:70px; border-radius:8px; object-fit:cover; border:1px solid var(--line); cursor:pointer;}
+  .photo-preview{max-width:100%; border-radius:8px; margin-top:8px; display:block;}
+
+  .bit-entry{padding:8px 0; border-bottom:1px solid var(--line); font-size:.78rem;}
+  .bit-entry:last-child{border-bottom:none;}
+  .bit-date{color:var(--text-dim); font-size:.68rem;}
+  .bit-transition{font-weight:600; margin:2px 0;}
+
+  .action-list{display:flex; flex-direction:column; gap:8px; margin-top:12px;}
+  .action-list .btn{width:100%; margin-top:0;}
+
+  .banner{padding:9px 14px; font-size:.78rem; text-align:center;}
+  .banner.warn{background:#3A1E1C; color:#D6534A;}
+  .empty-note{color:var(--text-dim); font-size:.82rem; text-align:center; padding:30px 10px;}
+</style>
+</head>
+<body>
+
+<div id="setupScreen" class="fullscreen hidden">
+  <div class="card-setup">
+    <h1>⚙ Configuración inicial</h1>
+    <p>Pega aquí la URL de tu Apps Script (termina en <span class="mono">/exec</span>). Solo se hace una vez por celular.</p>
+    <div class="field"><label>URL de la API (Apps Script)</label><input type="text" id="setupApiUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec"></div>
+    <div class="field"><label>Tu nombre</label><input type="text" id="setupStaffName" placeholder="Ej: Patricio"></div>
+    <div class="field"><label>Clave de acceso (opcional)</label><input type="text" id="setupPasscode" placeholder="Ej: 1234"></div>
+    <button class="btn btn-primary" onclick="saveSetup()">Guardar y continuar</button>
+    <div class="err-msg hidden" id="setupErr"></div>
+  </div>
+</div>
+
+<div id="passScreen" class="fullscreen hidden">
+  <div class="card-setup">
+    <h1>🔒 Acceso</h1>
+    <p>Ingresa la clave para entrar al checklist.</p>
+    <div class="field"><input type="text" id="passInput" placeholder="Clave" inputmode="numeric"></div>
+    <button class="btn btn-primary" onclick="checkPasscode()">Entrar</button>
+    <div class="err-msg hidden" id="passErr">Clave incorrecta.</div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header class="app-header">
+    <div class="h-top">
+      <div><div class="h-title">Checklist de Mantención</div><div class="h-sub">Jardines de Vicuña Mackenna</div></div>
+      <div class="h-actions">
+        <button class="icon-btn" onclick="manualSync()" title="Sincronizar"><span id="syncIcon">⟳</span></button>
+        <button class="icon-btn" onclick="openSettings()" title="Configuración">⚙</button>
+      </div>
+    </div>
+    <div class="summary-row" id="summaryRow"></div>
+    <div class="tabs" id="tabsRow"></div>
+  </header>
+
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="Buscar folio, falla o detalle..." oninput="renderList()">
+    <div class="toggle-pend" onclick="togglePendOnly()">
+      <div class="switch" id="pendSwitch"><div class="knob"></div></div>
+      Solo activos
+    </div>
+  </div>
+
+  <div class="floor-dock" id="floorDock"></div>
+  <div id="offlineBanner" class="banner warn hidden">Sin conexión — mostrando datos guardados. Tus cambios se enviarán al recuperar señal.</div>
+  <main id="mainList"></main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div class="fab-wrap" id="fabWrap">
+  <button class="fab secondary" onclick="openReportModal()" title="Reporte de gestión">📊</button>
+  <button class="fab" onclick="openPdfActivasModal()" title="Generar PDF">📄</button>
+</div>
+
+<script>
+/* ================= CONFIG / ESTADO ================= */
+const CATS_FIJAS = ['LUCES','MANILLAS','PUERTAS','CARTEL S. EMERGENCIA'];
+const TORRES = ['Torre A','Torre B','Torre C','Torre D'];
+const ACTIVE_STATES = ['Nuevo','Pendiente','Derivado','En proceso'];
+const COMUNIDAD = 'Jardines de Vicuña Mackenna';
+
+const ESTADO_COLORS = {
+  'Sin revisar':'#5B6675', 'Nuevo':'#2FB6A3', 'Pendiente':'#D6534A', 'Derivado':'#9B7FE0',
+  'En proceso':'#E8A33D', 'Resuelto':'#3B82C4', 'OK':'#2FA86B', 'Descartado':'#8A7A68'
+};
+
+const TRANSICIONES = {
+  'Sin revisar': [
+    { label:'Marcar OK', to:'OK', code:'SINREVISAR_A_OK' },
+    { label:'Reportar falla', to:'Nuevo', code:'REPORTAR', needsDetalle:true }
+  ],
+  'Nuevo': [
+    { label:'Confirmar pendiente', to:'Pendiente', code:'NUEVO_A_PENDIENTE' },
+    { label:'Descartar', to:'Descartado', code:'NUEVO_A_DESCARTADO' }
+  ],
+  'Pendiente': [
+    { label:'Derivar a un área', to:'Derivado', code:'PENDIENTE_A_DERIVADO', needsArea:true }
+  ],
+  'Derivado': [
+    { label:'Marcar en proceso', to:'En proceso', code:'DERIVADO_A_PROCESO' },
+    { label:'Devolver a pendiente', to:'Pendiente', code:'DERIVADO_A_PENDIENTE' }
+  ],
+  'En proceso': [
+    { label:'Marcar resuelto', to:'Resuelto', code:'PROCESO_A_RESUELTO', fotoRecomendada:true }
+  ],
+  'Resuelto': [ { label:'Reabrir', to:'Pendiente', code:'REABRIR' } ],
+  'OK': [ { label:'Reabrir (reportar falla)', to:'Pendiente', code:'REABRIR' } ],
+  'Descartado': [ { label:'Reabrir', to:'Pendiente', code:'REABRIR' } ]
+};
+
+let CFG = { apiUrl:'', staffName:'', passcode:'' };
+let STATE = {
+  items:[], bitacora:[], categorias:[], derivaciones:[], motivos:[],
+  currentTorre:'Torre A', pendOnly:false, search:'', online:true, syncing:false
+};
+let activeModalBg = null;
+let pendingPhoto = { base64:null, mime:null };
+
+function floorsList(){
+  const arr=[]; for(let p=24;p>=1;p--) arr.push(p); for(let p=-1;p>=-3;p--) arr.push(p); return arr;
+}
+function catOrder(c){ const i = CATS_FIJAS.indexOf(c); return i===-1 ? 100 : i; }
+function parseFH(str){ if(!str) return null; return new Date(String(str).replace(' ','T')); }
+function diasEntre(a,b){ if(!a) return null; const d2=b?parseFH(b):new Date(); const d1=parseFH(a); if(!d1) return null; return Math.max(0, Math.round((d2-d1)/86400000)); }
+function esc(s){ return (s===undefined||s===null) ? '' : String(s).replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+
+/* ================= ARRANQUE ================= */
+window.addEventListener('load', init);
+window.addEventListener('online', ()=>{ STATE.online=true; flushQueue(); });
+window.addEventListener('offline', ()=>{ STATE.online=false; updateSyncIcon(); });
+
+function init(){
+  const savedCfg = localStorage.getItem('mant_cfg');
+  if(!savedCfg){ document.getElementById('setupScreen').classList.remove('hidden'); return; }
+  CFG = JSON.parse(savedCfg);
+  if(CFG.passcode && !sessionStorage.getItem('mant_pass_ok')){
+    document.getElementById('passScreen').classList.remove('hidden'); return;
+  }
+  startApp();
+}
+function saveSetup(){
+  const url = document.getElementById('setupApiUrl').value.trim();
+  const name = document.getElementById('setupStaffName').value.trim();
+  const pass = document.getElementById('setupPasscode').value.trim();
+  if(!url.startsWith('https://')){
+    const e = document.getElementById('setupErr');
+    e.textContent = 'Ingresa una URL válida (debe empezar con https://)'; e.classList.remove('hidden'); return;
+  }
+  CFG = { apiUrl:url, staffName:name, passcode:pass };
+  localStorage.setItem('mant_cfg', JSON.stringify(CFG));
+  document.getElementById('setupScreen').classList.add('hidden');
+  if(pass){ document.getElementById('passScreen').classList.remove('hidden'); } else { startApp(); }
+}
+function checkPasscode(){
+  const val = document.getElementById('passInput').value.trim();
+  if(val === CFG.passcode){
+    sessionStorage.setItem('mant_pass_ok','1');
+    document.getElementById('passScreen').classList.add('hidden'); startApp();
+  } else { document.getElementById('passErr').classList.remove('hidden'); }
+}
+function startApp(){
+  document.getElementById('app').classList.remove('hidden');
+  renderTabs(); loadData(); setInterval(flushQueue, 25000);
+}
+
+/* ================= CARGA / SYNC ================= */
+function updateSyncIcon(){
+  document.getElementById('syncIcon').textContent = STATE.syncing ? '⏳' : (STATE.online ? '⟳' : '⚠');
+}
+function loadData(){
+  STATE.syncing = true; updateSyncIcon();
+  fetch(CFG.apiUrl + '?action=list')
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.success){
+        STATE.items = res.data.checklist.map(normalizeItem);
+        STATE.bitacora = res.data.bitacora;
+        STATE.categorias = res.data.categorias;
+        STATE.derivaciones = res.data.derivaciones;
+        STATE.motivos = res.data.motivos;
+        localStorage.setItem('mant_cache', JSON.stringify(res.data));
+        STATE.online = true;
+        document.getElementById('offlineBanner').classList.add('hidden');
+        flushQueue();
+      } else {
+        showToast('Error del servidor: ' + (res.error||''));
+        loadFromCache();
+      }
+      STATE.syncing = false; updateSyncIcon(); renderAll();
+    })
+    .catch(()=>{
+      STATE.online = false; STATE.syncing = false; updateSyncIcon();
+      loadFromCache();
+      document.getElementById('offlineBanner').classList.remove('hidden');
+      renderAll();
+    });
+}
+function loadFromCache(){
+  const c = localStorage.getItem('mant_cache');
+  if(c){
+    const d = JSON.parse(c);
+    STATE.items = d.checklist.map(normalizeItem);
+    STATE.bitacora = d.bitacora; STATE.categorias = d.categorias;
+    STATE.derivaciones = d.derivaciones; STATE.motivos = d.motivos;
+  }
+}
+function normalizeItem(it){ it.Piso = typeof it.Piso === 'string' ? parseInt(it.Piso,10) : it.Piso; return it; }
+function manualSync(){ loadData(); showToast('Sincronizando...'); }
+
+function queueAdd(op){
+  const q = JSON.parse(localStorage.getItem('mant_queue') || '[]');
+  q.push(op); localStorage.setItem('mant_queue', JSON.stringify(q));
+}
+function flushQueue(){
+  let q = JSON.parse(localStorage.getItem('mant_queue') || '[]');
+  if(q.length === 0 || !navigator.onLine) return;
+  const next = q.shift();
+  localStorage.setItem('mant_queue', JSON.stringify(q));
+  apiPost(next).then(()=>{ flushQueue(); }).catch(()=>{
+    q.unshift(next); localStorage.setItem('mant_queue', JSON.stringify(q));
+  });
+}
+function apiPost(payload){
+  return fetch(CFG.apiUrl, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(payload) })
+    .then(r=>r.json());
+}
+
+/* ================= HEADER / TABS / RESUMEN ================= */
+function renderTabs(){
+  document.getElementById('tabsRow').innerHTML = TORRES.map(t=>
+    `<div class="tab ${t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
+  ).join('');
+}
+function selectTorre(t){ STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+function renderSummary(){
+  const items = STATE.items;
+  const activos = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
+  const count = est => items.filter(i=>i.Estado===est).length;
+  document.getElementById('summaryRow').innerHTML = `
+    <div class="pill" style="border-color:#D6534A;color:#D6534A">Activos <b>${activos}</b></div>
+    <div class="pill" style="border-color:#2FA86B;color:#2FA86B">OK <b>${count('OK')}</b></div>
+    <div class="pill" style="border-color:#3B82C4;color:#3B82C4">Resueltos <b>${count('Resuelto')}</b></div>
+    <div class="pill" style="border-color:#8A7A68;color:#8A7A68">Descartados <b>${count('Descartado')}</b></div>
+    <div class="pill">Sin revisar <b>${count('Sin revisar')}</b></div>
+  `;
+}
+function togglePendOnly(){
+  STATE.pendOnly = !STATE.pendOnly;
+  document.getElementById('pendSwitch').classList.toggle('on', STATE.pendOnly);
+  renderList();
+}
+
+/* ================= FLOOR DOCK ================= */
+function renderFloorDock(){
+  const dock = document.getElementById('floorDock');
+  dock.innerHTML = floorsList().map(p=>{
+    const items = STATE.items.filter(i=>i.Torre===STATE.currentTorre && i.Piso===p);
+    const hasActive = items.some(i=>ACTIVE_STATES.includes(i.Estado));
+    const allDone = items.length>0 && items.every(i=>['OK','Resuelto'].includes(i.Estado));
+    const led = hasActive ? '#D6534A' : (allDone ? '#2FA86B' : '#5B6675');
+    return `<div class="floor-chip" onclick="jumpToFloor(${p})">${p}<span class="led" style="background:${led}"></span></div>`;
+  }).join('');
+}
+function jumpToFloor(p){
+  const el = document.getElementById('floor-'+STATE.currentTorre.replace(' ','_')+'-'+p);
+  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ================= RENDER PRINCIPAL ================= */
+function renderAll(){ renderSummary(); renderFloorDock(); renderList(); }
+
+function matchesFilters(i){
+  if(STATE.pendOnly && !ACTIVE_STATES.includes(i.Estado)) return false;
+  const s = STATE.search.trim().toLowerCase();
+  if(s){
+    const hay = (i.Folio+' '+i.Categoria+' '+i.Detalle+' '+(i.Notas||'')+' '+(i.Origen||'')+' '+(i.Grupo||'')).toLowerCase();
+    if(!hay.includes(s)) return false;
+  }
+  return true;
+}
+
+function renderList(){
+  STATE.search = document.getElementById('searchInput').value;
+  const main = document.getElementById('mainList');
+  const floors = floorsList();
+  let html = ''; let anyVisible = false;
+
+  floors.forEach(p=>{
+    let items = STATE.items.filter(i=>i.Torre===STATE.currentTorre && i.Piso===p);
+    items = items.slice().sort((a,b)=>catOrder(a.Categoria)-catOrder(b.Categoria));
+    const visibleItems = items.filter(matchesFilters);
+    if(STATE.pendOnly || STATE.search){ if(visibleItems.length===0) return; }
+    anyVisible = true;
+    const idSafe = STATE.currentTorre.replace(' ','_')+'-'+p;
+    const activeCount = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
+    html += `<div class="floor-card" id="floor-${idSafe}">
+      <div class="floor-head">
+        <div><span class="floor-num">${p}</span><span class="floor-tag">${p<=-1?'Subterráneo':''}</span></div>
+        <div class="floor-count">${activeCount>0 ? activeCount+' activo'+(activeCount>1?'s':'') : 'OK'}</div>
+      </div>`;
+    const toShow = (STATE.pendOnly || STATE.search) ? visibleItems : items;
+    toShow.forEach(i=>{ html += renderItemRow(i); });
+    html += `<button class="add-fault-btn" onclick="openAddReportModal('${STATE.currentTorre}', ${p})">+ Agregar falla en este piso</button></div>`;
+  });
+
+  if(!anyVisible){ html = `<div class="empty-note">No hay ítems que coincidan con el filtro actual.</div>`; }
+  main.innerHTML = html;
+}
+
+function renderItemRow(i){
+  const est = i.Estado || 'Sin revisar';
+  const color = ESTADO_COLORS[est] || '#5B6675';
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
+      <div class="dot" style="background:${color}"></div>
+      <div class="item-main">
+        <div class="item-cat">${i.Categoria} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
+      </div>
+      <div class="chev">›</div>
+    </div>`;
+}
+
+/* ================= MODAL GENÉRICO ================= */
+function showModal(innerHtml){
+  if(!activeModalBg){
+    activeModalBg = document.createElement('div');
+    activeModalBg.className = 'modal-bg';
+    activeModalBg.onclick = (e)=>{ if(e.target===activeModalBg) closeModal(); };
+    document.body.appendChild(activeModalBg);
+  }
+  activeModalBg.innerHTML = `<div class="modal">${innerHtml}</div>`;
+}
+function closeModal(){
+  if(activeModalBg){ activeModalBg.remove(); activeModalBg=null; }
+  pendingPhoto = { base64:null, mime:null };
+}
+
+/* ================= DETALLE DE ÍTEM ================= */
+function openItemModal(folio){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  if(!item) return;
+  showModal(itemDetailHtml(item));
+}
+
+function itemDetailHtml(item){
+  const est = item.Estado || 'Sin revisar';
+  const color = ESTADO_COLORS[est] || '#5B6675';
+  const transiciones = TRANSICIONES[est] || [];
+  const diasDetTxt = item.Fecha_Deteccion ? (diasEntre(item.Fecha_Deteccion) + ' días desde detección') : '';
+  const diasResTxt = (item.Fecha_Deteccion && item.Fecha_Resolucion) ? ('Resuelto en ' + diasEntre(item.Fecha_Deteccion, item.Fecha_Resolucion) + ' días') : '';
+
+  let photos = '';
+  if(item.Foto_Deteccion_URL || item.Foto_Resolucion_URL){
+    photos = '<div class="photo-row">';
+    if(item.Foto_Deteccion_URL) photos += `<img class="photo-thumb" src="${item.Foto_Deteccion_URL}" onclick="window.open('${item.Foto_Deteccion_URL}','_blank')" title="Foto detección">`;
+    if(item.Foto_Resolucion_URL) photos += `<img class="photo-thumb" src="${item.Foto_Resolucion_URL}" onclick="window.open('${item.Foto_Resolucion_URL}','_blank')" title="Foto resolución">`;
+    photos += '</div>';
+  }
+
+  const actions = transiciones.map(t=>
+    `<button class="btn btn-primary btn-sm" style="background:${ESTADO_COLORS[t.to]}" onclick="showTransitionForm('${item.Folio}','${esc(t.label)}','${t.to}','${t.code}',${t.needsArea?1:0},${t.needsDetalle?1:0})">${t.label}</button>`
+  ).join('');
+
+  return `
+    <h2>${item.Categoria} <span class="folio-tag">${item.Folio}</span></h2>
+    <div class="sub">${item.Torre} · ${item.Piso<=-1?'Subterráneo ':'Piso '}${item.Piso}</div>
+    <span class="badge" style="background:${color}22;color:${color};border:1px solid ${color}">${est}</span>
+    <div style="margin-top:12px; font-size:.88rem; line-height:1.4;">${item.Detalle || '<span style="color:var(--text-dim)">Sin detalle registrado</span>'}</div>
+    ${photos}
+    <div class="kv"><div class="k">Origen</div><div>${item.Origen || '—'}</div></div>
+    <div class="kv"><div class="k">Grupo</div><div>${item.Grupo || '—'}</div></div>
+    <div class="kv"><div class="k">Área derivada</div><div>${item.Area_Derivacion || '—'}</div></div>
+    <div class="kv"><div class="k">Detectado</div><div>${item.Fecha_Deteccion || '—'} ${diasDetTxt && est!=='Resuelto' ? '('+diasEntre(item.Fecha_Deteccion)+'d)' : ''}</div></div>
+    ${diasResTxt ? `<div class="kv"><div class="k">Resolución</div><div>${diasResTxt}</div></div>` : ''}
+    <div class="kv"><div class="k">Última actualización</div><div>${item.Fecha_Ultima_Actualizacion || '—'} · ${item.Actualizado_Por||'—'}</div></div>
+    ${item.Notas ? `<div class="kv"><div class="k">Notas</div><div>${item.Notas}</div></div>` : ''}
+
+    <div class="action-list">${actions}</div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="showEditFieldsForm('${item.Folio}')">Editar datos</button>
+      <button class="btn btn-ghost btn-sm" onclick="showBitacora('${item.Folio}')">Ver historial</button>
+    </div>
+    <button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="deleteItemUI('${item.Folio}')">Eliminar ítem</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="closeModal()">Cerrar</button>
+  `;
+}
+
+/* ================= FORMULARIO DE TRANSICIÓN ================= */
+function showTransitionForm(folio, label, to, code, needsArea, needsDetalle){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  const motivos = STATE.motivos.filter(m=>m.Transicion===code);
+  pendingPhoto = { base64:null, mime:null };
+
+  const areaOptions = needsArea ? STATE.derivaciones.map(d=>`<option value="${esc(d)}">${d}</option>`).join('') : '';
+
+  showModal(`
+    <h2>${label}</h2>
+    <div class="sub">${item.Folio} · ${item.Categoria}</div>
+    ${needsDetalle ? `<div class="field"><label>Detalle de la falla</label><textarea id="tDetalle">${item.Detalle||''}</textarea></div>` : ''}
+    ${needsArea ? `<div class="field"><label>Área de derivación</label><select id="tArea"><option value="">Selecciona...</option>${areaOptions}</select>
+      <div class="hint" onclick="promptNewArea()" style="color:var(--accent);cursor:pointer;margin-top:6px;">+ Agregar nueva área</div></div>` : ''}
+    <div class="field">
+      <label>Motivo</label>
+      <div class="chip-row" id="motivoChips">
+        ${motivos.map(m=>`<div class="chip" onclick="selectMotivoChip(this,'${esc(m.Motivo)}')">${m.Motivo}</div>`).join('')}
+        <div class="chip" onclick="selectMotivoChip(this,'__otro__')">Otro...</div>
+      </div>
+      <input type="text" id="tMotivoCustom" placeholder="Escribe el motivo" class="hidden">
+    </div>
+    <div class="field"><label>Nota (opcional)</label><textarea id="tNota"></textarea></div>
+    <div class="field">
+      <label>Foto (opcional)</label>
+      <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
+      <img id="photoPreview" class="photo-preview hidden">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="openItemModal('${folio}')">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="confirmTransition('${folio}','${to}','${code}',${needsArea?1:0},${needsDetalle?1:0})">Confirmar</button>
+    </div>
+  `);
+}
+
+let selectedMotivo = '';
+function selectMotivoChip(el, val){
+  document.querySelectorAll('#motivoChips .chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  const customInput = document.getElementById('tMotivoCustom');
+  if(val === '__otro__'){ customInput.classList.remove('hidden'); customInput.focus(); selectedMotivo = '__otro__'; }
+  else { customInput.classList.add('hidden'); selectedMotivo = val; }
+}
+function promptNewArea(){
+  const val = prompt('Nombre de la nueva área de derivación:');
+  if(!val) return;
+  STATE.derivaciones.push(val);
+  const payload = { action:'addConfig', tipo:'derivacion', valor: val };
+  if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
+  const sel = document.getElementById('tArea');
+  const opt = document.createElement('option'); opt.value = val; opt.textContent = val;
+  sel.appendChild(opt); sel.value = val;
+}
+
+function handlePhotoSelect(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const maxW = 1280;
+      let w = img.width, h = img.height;
+      if(w > maxW){ h = Math.round(h*maxW/w); w = maxW; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      pendingPhoto.base64 = dataUrl.split(',')[1];
+      pendingPhoto.mime = 'image/jpeg';
+      const prev = document.getElementById('photoPreview');
+      if(prev){ prev.src = dataUrl; prev.classList.remove('hidden'); }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function confirmTransition(folio, to, code, needsArea, needsDetalle){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  let motivo = selectedMotivo === '__otro__' ? (document.getElementById('tMotivoCustom').value.trim()) : selectedMotivo;
+  const nota = document.getElementById('tNota').value.trim();
+  const detalle = needsDetalle ? document.getElementById('tDetalle').value.trim() : undefined;
+  const area = needsArea ? document.getElementById('tArea').value : undefined;
+
+  if(needsDetalle && !detalle){ showToast('Escribe el detalle de la falla'); return; }
+  if(needsArea && !area){ showToast('Selecciona un área de derivación'); return; }
+
+  const ts = new Date().toISOString().slice(0,16).replace('T',' ');
+  item.Estado = to;
+  if(detalle) item.Detalle = detalle;
+  if(area !== undefined) item.Area_Derivacion = area;
+  item.Fecha_Ultima_Actualizacion = ts;
+  item.Actualizado_Por = CFG.staffName || item.Actualizado_Por;
+  if(to === 'Resuelto') item.Fecha_Resolucion = ts;
+  if(to === 'Pendiente' || to === 'Nuevo') item.Fecha_Resolucion = '';
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+
+  const payload = { action:'transition', folio, estado_nuevo:to, motivo, nota, autor: CFG.staffName||'' };
+  if(area !== undefined) payload.area_derivacion = area;
+  if(detalle) payload.detalle = detalle;
+  if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
+
+  if(navigator.onLine){
+    apiPost(payload).then(res=>{
+      if(res.success){ showToast('Actualizado ✓'); loadData(); }
+      else { showToast('No se pudo guardar en el servidor'); queueAdd(payload); }
+    }).catch(()=>{ queueAdd(payload); showToast('Guardado localmente, se enviará al recuperar señal'); });
+  } else {
+    queueAdd(payload); showToast('Sin conexión: guardado localmente');
+  }
+  closeModal();
+  renderAll();
+}
+
+/* ================= EDITAR DATOS (sin cambio de estado) ================= */
+function showEditFieldsForm(folio){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  showModal(`
+    <h2>Editar datos</h2>
+    <div class="sub">${item.Folio}</div>
+    <div class="field"><label>Detalle</label><textarea id="eDetalle">${item.Detalle||''}</textarea></div>
+    <div class="field"><label>Origen (depto / área)</label><input type="text" id="eOrigen" value="${esc(item.Origen)}"></div>
+    <div class="field"><label>Grupo</label><input type="text" id="eGrupo" value="${esc(item.Grupo)}"></div>
+    <div class="field"><label>Notas</label><textarea id="eNotas">${item.Notas||''}</textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="openItemModal('${folio}')">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="saveEditFields('${folio}')">Guardar</button>
+    </div>
+  `);
+}
+function saveEditFields(folio){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  const detalle = document.getElementById('eDetalle').value;
+  const origen = document.getElementById('eOrigen').value;
+  const grupo = document.getElementById('eGrupo').value;
+  const notas = document.getElementById('eNotas').value;
+  item.Detalle = detalle; item.Origen = origen; item.Grupo = grupo; item.Notas = notas;
+  item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+
+  const payload = { action:'updateFields', folio, detalle, origen, grupo, notas, autor: CFG.staffName||'' };
+  if(navigator.onLine){ apiPost(payload).then(()=>showToast('Guardado ✓')).catch(()=>{ queueAdd(payload); }); }
+  else { queueAdd(payload); showToast('Sin conexión: guardado localmente'); }
+  closeModal(); renderAll();
+}
+
+/* ================= ELIMINAR ================= */
+function deleteItemUI(folio){
+  if(!confirm('¿Eliminar este ítem y su historial? No se puede deshacer.')) return;
+  STATE.items = STATE.items.filter(x=>x.Folio!==folio);
+  STATE.bitacora = STATE.bitacora.filter(x=>x.Folio!==folio);
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+  const payload = { action:'delete', folio };
+  if(navigator.onLine){ apiPost(payload).then(res=>showToast(res.success?'Eliminado':'Error al eliminar')); }
+  else { queueAdd(payload); showToast('Sin conexión: se eliminará al recuperar señal'); }
+  closeModal(); renderAll();
+}
+
+/* ================= BITÁCORA ================= */
+function showBitacora(folio){
+  const entries = STATE.bitacora.filter(b=>b.Folio===folio).slice().sort((a,b)=> (b.Fecha_Hora||'').localeCompare(a.Fecha_Hora||''));
+  const html = entries.map(b=>`
+    <div class="bit-entry">
+      <div class="bit-date">${b.Fecha_Hora} · ${b.Autor||'—'}</div>
+      <div class="bit-transition">${b.Estado_Anterior ? (b.Estado_Anterior+' → '+b.Estado_Nuevo) : b.Estado_Nuevo}</div>
+      ${b.Motivo ? `<div>${b.Motivo}</div>` : ''}
+      ${b.Nota ? `<div style="color:var(--text-dim)">${b.Nota}</div>` : ''}
+      ${b.Area_Derivacion ? `<div style="color:var(--text-dim)">Área: ${b.Area_Derivacion}</div>` : ''}
+      ${b.Foto_URL ? `<img class="photo-thumb" style="margin-top:6px" src="${b.Foto_URL}" onclick="window.open('${b.Foto_URL}','_blank')">` : ''}
+    </div>`).join('') || '<div class="empty-note">Sin movimientos registrados aún.</div>';
+  showModal(`
+    <h2>Historial</h2>
+    <div class="sub">${folio}</div>
+    ${html}
+    <button class="btn btn-ghost" style="width:100%;margin-top:12px" onclick="openItemModal('${folio}')">Volver</button>
+  `);
+}
+
+/* ================= AGREGAR NUEVO REPORTE ================= */
+function openAddReportModal(torre, piso){
+  pendingPhoto = { base64:null, mime:null };
+  const catOptions = STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('');
+  showModal(`
+    <h2>Reportar falla</h2>
+    <div class="sub">${torre} · Piso ${piso}</div>
+    <div class="field"><label>Categoría</label><select id="nCat">${catOptions}</select>
+      <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewCategoria()">+ Agregar nueva categoría</div>
+    </div>
+    <div class="field"><label>Detalle de la falla</label><textarea id="nDetalle" placeholder="Ej: Ventana quebrada en pasillo"></textarea></div>
+    <div class="field"><label>Origen (depto / área, opcional)</label><input type="text" id="nOrigen" placeholder="Ej: Depto 1204"></div>
+    <div class="field"><label>Grupo (opcional)</label><input type="text" id="nGrupo" placeholder="Ej: Ronda-12-08-2026"></div>
+    <div class="field">
+      <label>Foto (recomendada)</label>
+      <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
+      <img id="photoPreview" class="photo-preview hidden">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="submitAddReport('${torre}', ${piso})">Reportar</button>
+    </div>
+  `);
+}
+function promptNewCategoria(){
+  const val = prompt('Nombre de la nueva categoría:');
+  if(!val) return;
+  STATE.categorias.push(val);
+  const payload = { action:'addConfig', tipo:'categoria', valor: val };
+  if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
+  const sel = document.getElementById('nCat');
+  const opt = document.createElement('option'); opt.value = val; opt.textContent = val;
+  sel.appendChild(opt); sel.value = val;
+}
+function submitAddReport(torre, piso){
+  const cat = document.getElementById('nCat').value;
+  const det = document.getElementById('nDetalle').value.trim();
+  const origen = document.getElementById('nOrigen').value.trim();
+  const grupo = document.getElementById('nGrupo').value.trim();
+  if(!det){ showToast('Escribe el detalle de la falla'); return; }
+
+  const tempFolio = 'TEMP-'+Date.now();
+  const ts = new Date().toISOString().slice(0,16).replace('T',' ');
+  const newItem = {
+    Folio: tempFolio, Torre: torre, Piso: piso, Categoria: cat, Origen: origen, Grupo: grupo,
+    Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
+    Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
+    Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
+    Actualizado_Por: CFG.staffName||'', Notas:''
+  };
+  STATE.items.push(newItem);
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+
+  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, autor: CFG.staffName||'' };
+  if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
+
+  if(navigator.onLine){
+    apiPost(payload).then(res=>{
+      if(res.success){ showToast('Falla reportada ✓'); loadData(); }
+      else { showToast('No se pudo agregar en el servidor'); queueAdd(payload); }
+    }).catch(()=>{ queueAdd(payload); });
+  } else { queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal'); }
+  closeModal(); renderAll();
+}
+
+/* ================= CONFIGURACIÓN ================= */
+function openSettings(){
+  showModal(`
+    <h2>⚙ Configuración</h2>
+    <div class="field"><label>URL de la API</label><input type="text" id="cfgUrl" value="${esc(CFG.apiUrl)}"></div>
+    <div class="field"><label>Tu nombre</label><input type="text" id="cfgName" value="${esc(CFG.staffName)}"></div>
+    <div class="field"><label>Clave de acceso (vacío = sin clave)</label><input type="text" id="cfgPass" value="${esc(CFG.passcode)}"></div>
+    <button class="btn btn-primary" onclick="saveSettings()">Guardar</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="closeModal()">Cerrar</button>
+  `);
+}
+function saveSettings(){
+  CFG.apiUrl = document.getElementById('cfgUrl').value.trim();
+  CFG.staffName = document.getElementById('cfgName').value.trim();
+  CFG.passcode = document.getElementById('cfgPass').value.trim();
+  localStorage.setItem('mant_cfg', JSON.stringify(CFG));
+  closeModal(); showToast('Configuración guardada'); loadData();
+}
+
+/* ================= TOAST ================= */
+let toastTimer=null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ================= PDF: FALLAS ACTIVAS ================= */
+function openPdfActivasModal(){
+  const estadosDefault = ['Nuevo','Pendiente','Derivado','En proceso'];
+  const estadosTodos = ['Sin revisar','Nuevo','Pendiente','Derivado','En proceso'];
+  const areaOptions = STATE.derivaciones.map(d=>`<option value="${esc(d)}">${d}</option>`).join('');
+  showModal(`
+    <h2>📄 PDF · Fallas activas</h2>
+    <div class="field"><label>Estados a incluir</label>
+      <div class="chip-row" id="pdfEstadoChips">
+        ${estadosTodos.map(e=>`<div class="chip ${estadosDefault.includes(e)?'selected':''}" data-estado="${e}" onclick="this.classList.toggle('selected')">${e}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field"><label>Área (opcional)</label><select id="pdfArea"><option value="">Todas</option>${areaOptions}</select></div>
+    <div class="field"><label>Grupo (opcional)</label><input type="text" id="pdfGrupo" placeholder="Ej: Ronda-12-08-2026"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="generarPdfActivas()">Generar PDF</button>
+    </div>
+  `);
+}
+function generarPdfActivas(){
+  const estadosSel = Array.from(document.querySelectorAll('#pdfEstadoChips .chip.selected')).map(c=>c.dataset.estado);
+  const area = document.getElementById('pdfArea').value;
+  const grupo = document.getElementById('pdfGrupo').value.trim().toLowerCase();
+  closeModal();
+  showToast('Generando PDF...');
+  loadJsPdf(()=>buildPdfActivas(estadosSel, area, grupo));
+}
+function loadJsPdf(cb){
+  if(window.jspdf){ cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+  s.onload = cb;
+  s.onerror = ()=> showToast('No se pudo cargar el generador de PDF (revisa tu conexión)');
+  document.body.appendChild(s);
+}
+
+function buildPdfActivas(estadosSel, area, grupo){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'a4'});
+  const marginX = 40; let y = 50;
+  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
+  function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
+
+  let items = STATE.items.filter(i=>estadosSel.includes(i.Estado));
+  if(area) items = items.filter(i=>i.Area_Derivacion===area);
+  if(grupo) items = items.filter(i=>(i.Grupo||'').toLowerCase().includes(grupo));
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(15);
+  doc.text('Informe de Fallas Activas', marginX, y); y+=20;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
+  doc.text(COMUNIDAD, marginX, y); y+=14;
+  doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
+  if(area) { y+=12; doc.text('Área: ' + area, marginX, y); }
+  if(grupo) { y+=12; doc.text('Grupo: ' + grupo, marginX, y); }
+  doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
+  doc.setTextColor(0);
+
+  if(items.length===0){ doc.setFontSize(11); doc.text('No hay ítems que coincidan con los filtros seleccionados.', marginX, y); }
+
+  const groupKey = it => it.Area_Derivacion || 'Sin área asignada';
+  const areas = [...new Set(items.map(groupKey))];
+  let total = 0;
+  areas.forEach(a=>{
+    const aItems = items.filter(i=>groupKey(i)===a);
+    if(aItems.length===0) return;
+    ensure(30);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.text(a + ' — ' + aItems.length + ' ítem(s)', marginX, y); y+=16;
+
+    TORRES.forEach(torre=>{
+      const tItems = aItems.filter(i=>i.Torre===torre);
+      if(tItems.length===0) return;
+      ensure(14); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.text(torre, marginX+8, y); y+=13;
+      const floors = [...new Set(tItems.map(i=>i.Piso))].sort((x,z)=>z-x);
+      floors.forEach(p=>{
+        const fItems = tItems.filter(i=>i.Piso===p);
+        const label = p<=-1 ? ('Subterráneo '+p) : ('Piso '+p);
+        ensure(13); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+        doc.text(label, marginX+16, y); y+=12;
+        fItems.forEach(i=>{
+          total++;
+          const dias = diasEntre(i.Fecha_Deteccion);
+          const text = '[' + i.Folio + '] ' + i.Categoria + ' (' + i.Estado + '): ' + (i.Detalle||'—') + (dias!==null ? (' — '+dias+'d') : '');
+          const lines = doc.splitTextToSize(text, pageW-marginX*2-30);
+          ensure(lines.length*11+4);
+          doc.setFont('helvetica','normal'); doc.setFontSize(9);
+          doc.text('• '+lines[0], marginX+26, y);
+          for(let k=1;k<lines.length;k++){ y+=11; doc.text('   '+lines[k], marginX+26, y); }
+          y+=12;
+        });
+      });
+    });
+    y+=8;
+  });
+
+  ensure(90); y = Math.max(y, pageH-140);
+  doc.setDrawColor(200); doc.line(marginX, y, pageW-marginX, y); y+=24;
+  doc.setFontSize(9.5); doc.setFont('helvetica','normal');
+  doc.text('Total de ítems: ' + total, marginX, y); y+=30;
+  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y+=34;
+  doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
+
+  doc.save('Fallas_Activas_' + new Date().toISOString().slice(0,10) + '.pdf');
+  showToast('PDF generado ✓');
+}
+
+/* ================= PDF: REPORTE DE GESTIÓN ================= */
+function openReportModal(){
+  const hoy = new Date().toISOString().slice(0,10);
+  const hace30 = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+  showModal(`
+    <h2>📊 Reporte de gestión</h2>
+    <div class="sub">Fallas resueltas y tiempos de respuesta por área</div>
+    <div class="field"><label>Desde</label><input type="date" id="repDesde" value="${hace30}"></div>
+    <div class="field"><label>Hasta</label><input type="date" id="repHasta" value="${hoy}"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="generarReporteGestion()">Generar PDF</button>
+    </div>
+  `);
+}
+function generarReporteGestion(){
+  const desde = document.getElementById('repDesde').value;
+  const hasta = document.getElementById('repHasta').value;
+  closeModal(); showToast('Generando reporte...');
+  loadJsPdf(()=>buildPdfGestion(desde, hasta));
+}
+function buildPdfGestion(desde, hasta){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'a4'});
+  const marginX = 40; let y = 50;
+  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
+  function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
+
+  const desdeD = new Date(desde+'T00:00:00'), hastaD = new Date(hasta+'T23:59:59');
+  const items = STATE.items.filter(i=>{
+    if(i.Estado !== 'Resuelto' || !i.Fecha_Resolucion) return false;
+    const fr = parseFH(i.Fecha_Resolucion);
+    return fr >= desdeD && fr <= hastaD;
+  });
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(15);
+  doc.text('Reporte de Gestión de Mantención', marginX, y); y+=20;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
+  doc.text(COMUNIDAD, marginX, y); y+=14;
+  doc.text('Período: ' + desde + ' a ' + hasta, marginX, y); y+=14;
+  doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
+  doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=20;
+  doc.setTextColor(0);
+
+  if(items.length===0){
+    doc.setFontSize(11); doc.text('No hay fallas resueltas en el período seleccionado.', marginX, y);
+    doc.save('Reporte_Gestion_'+desde+'_a_'+hasta+'.pdf'); showToast('PDF generado ✓'); return;
+  }
+
+  const groupKey = it => it.Area_Derivacion || 'Sin área asignada';
+  const areas = [...new Set(items.map(groupKey))];
+  doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('Resumen por área', marginX, y); y+=18;
+
+  let totalDias = 0, totalCount = 0;
+  const resumenRows = areas.map(a=>{
+    const aItems = items.filter(i=>groupKey(i)===a);
+    const dias = aItems.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(d=>d!==null);
+    const prom = dias.length ? (dias.reduce((s,x)=>s+x,0)/dias.length) : 0;
+    totalDias += dias.reduce((s,x)=>s+x,0); totalCount += dias.length;
+    return { area:a, count:aItems.length, prom: prom.toFixed(1) };
+  }).sort((a,b)=>b.count-a.count);
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+  doc.text('Área', marginX, y); doc.text('Resueltos', marginX+260, y); doc.text('Prom. días', marginX+350, y); y+=6;
+  doc.setDrawColor(220); doc.line(marginX, y, pageW-marginX, y); y+=12;
+  doc.setFont('helvetica','normal');
+  resumenRows.forEach(r=>{
+    ensure(14);
+    doc.text(r.area, marginX, y); doc.text(String(r.count), marginX+260, y); doc.text(r.prom+'d', marginX+350, y); y+=14;
+  });
+  y+=6; ensure(16);
+  doc.setFont('helvetica','bold');
+  doc.text('Promedio general: ' + (totalCount? (totalDias/totalCount).toFixed(1):'0') + ' días · Total resueltos: ' + items.length, marginX, y);
+  y+=24;
+
+  ensure(20); doc.setFontSize(12); doc.text('Detalle', marginX, y); y+=16;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  items.sort((a,b)=>(a.Fecha_Resolucion||'').localeCompare(b.Fecha_Resolucion||'')).forEach(i=>{
+    const dias = diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion);
+    const text = '[' + i.Folio + '] ' + i.Torre + ' P' + i.Piso + ' · ' + i.Categoria + ' · ' + groupKey(i) + ' · ' + dias + 'd (' + i.Fecha_Deteccion + ' → ' + i.Fecha_Resolucion + ')';
+    const lines = doc.splitTextToSize(text, pageW-marginX*2);
+    ensure(lines.length*11+3);
+    lines.forEach((l,idx)=>{ doc.text(idx===0?'• '+l:'   '+l, marginX, y); y+=11; });
+  });
+
+  doc.save('Reporte_Gestion_'+desde+'_a_'+hasta+'.pdf');
+  showToast('PDF generado ✓');
+}
+</script>
+</body>
+</html>

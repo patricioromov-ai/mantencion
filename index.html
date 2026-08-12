@@ -206,7 +206,8 @@ const TRANSICIONES = {
     { label:'Descartar', to:'Descartado', code:'NUEVO_A_DESCARTADO' }
   ],
   'Pendiente': [
-    { label:'Derivar a un área', to:'Derivado', code:'PENDIENTE_A_DERIVADO', needsArea:true }
+    { label:'Derivar a un área', to:'Derivado', code:'PENDIENTE_A_DERIVADO', needsArea:true },
+    { label:'Cerrar (sin falla)', to:'Descartado', code:'PENDIENTE_A_DESCARTADO' }
   ],
   'Derivado': [
     { label:'Marcar en proceso', to:'En proceso', code:'DERIVADO_A_PROCESO' },

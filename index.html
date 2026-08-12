@@ -220,6 +220,8 @@ const TRANSICIONES = {
   'Descartado': [ { label:'Reabrir', to:'Pendiente', code:'REABRIR' } ]
 };
 
+const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyx_scztWVMGLkrFMka3D4-2Ya7JVkWyOZPLaOQY_1s8Q4PcuRBTgdkyJz4JpP5pMXl/exec';
+
 let CFG = { apiUrl:'', staffName:'', passcode:'' };
 let STATE = {
   items:[], bitacora:[], categorias:[], derivaciones:[], motivos:[],
@@ -243,8 +245,14 @@ window.addEventListener('offline', ()=>{ STATE.online=false; updateSyncIcon(); }
 
 function init(){
   const savedCfg = localStorage.getItem('mant_cfg');
-  if(!savedCfg){ document.getElementById('setupScreen').classList.remove('hidden'); return; }
-  CFG = JSON.parse(savedCfg);
+  if(!savedCfg){
+    // Primera vez en este dispositivo: usa la URL fija, sin pedir nada.
+    CFG = { apiUrl: DEFAULT_API_URL, staffName:'', passcode:'' };
+    localStorage.setItem('mant_cfg', JSON.stringify(CFG));
+  } else {
+    CFG = JSON.parse(savedCfg);
+    if(!CFG.apiUrl){ CFG.apiUrl = DEFAULT_API_URL; localStorage.setItem('mant_cfg', JSON.stringify(CFG)); }
+  }
   if(CFG.passcode && !sessionStorage.getItem('mant_pass_ok')){
     document.getElementById('passScreen').classList.remove('hidden'); return;
   }

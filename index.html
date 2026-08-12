@@ -791,6 +791,7 @@ function openPdfActivasModal(){
         ${estadosTodos.map(e=>`<div class="chip ${estadosDefault.includes(e)?'selected':''}" data-estado="${e}" onclick="this.classList.toggle('selected')">${e}</div>`).join('')}
       </div>
     </div>
+    <div class="field"><label>Torre (opcional)</label><select id="pdfTorre"><option value="">Todas</option>${TORRES.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
     <div class="field"><label>Área (opcional)</label><select id="pdfArea"><option value="">Todas</option>${areaOptions}</select></div>
     <div class="field"><label>Grupo (opcional)</label><input type="text" id="pdfGrupo" placeholder="Ej: Ronda-12-08-2026"></div>
     <div class="btn-row">
@@ -801,11 +802,12 @@ function openPdfActivasModal(){
 }
 function generarPdfActivas(){
   const estadosSel = Array.from(document.querySelectorAll('#pdfEstadoChips .chip.selected')).map(c=>c.dataset.estado);
+  const torre = document.getElementById('pdfTorre').value;
   const area = document.getElementById('pdfArea').value;
   const grupo = document.getElementById('pdfGrupo').value.trim().toLowerCase();
   closeModal();
   showToast('Generando PDF...');
-  loadJsPdf(()=>buildPdfActivas(estadosSel, area, grupo));
+  loadJsPdf(()=>buildPdfActivas(estadosSel, torre, area, grupo));
 }
 function loadJsPdf(cb){
   if(window.jspdf){ cb(); return; }
@@ -816,7 +818,7 @@ function loadJsPdf(cb){
   document.body.appendChild(s);
 }
 
-function buildPdfActivas(estadosSel, area, grupo){
+function buildPdfActivas(estadosSel, torre, area, grupo){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'pt', format:'a4'});
   const marginX = 40; let y = 50;
@@ -824,6 +826,7 @@ function buildPdfActivas(estadosSel, area, grupo){
   function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
 
   let items = STATE.items.filter(i=>estadosSel.includes(i.Estado));
+  if(torre) items = items.filter(i=>i.Torre===torre);
   if(area) items = items.filter(i=>i.Area_Derivacion===area);
   if(grupo) items = items.filter(i=>(i.Grupo||'').toLowerCase().includes(grupo));
 
@@ -832,6 +835,7 @@ function buildPdfActivas(estadosSel, area, grupo){
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
   doc.text(COMUNIDAD, marginX, y); y+=14;
   doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
+  if(torre) { y+=12; doc.text('Torre: ' + torre, marginX, y); }
   if(area) { y+=12; doc.text('Área: ' + area, marginX, y); }
   if(grupo) { y+=12; doc.text('Grupo: ' + grupo, marginX, y); }
   doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
@@ -849,11 +853,12 @@ function buildPdfActivas(estadosSel, area, grupo){
     doc.setFont('helvetica','bold'); doc.setFontSize(12);
     doc.text(a + ' — ' + aItems.length + ' ítem(s)', marginX, y); y+=16;
 
-    TORRES.forEach(torre=>{
-      const tItems = aItems.filter(i=>i.Torre===torre);
+    const torresAMostrar = torre ? [torre] : TORRES;
+    torresAMostrar.forEach(t=>{
+      const tItems = aItems.filter(i=>i.Torre===t);
       if(tItems.length===0) return;
       ensure(14); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-      doc.text(torre, marginX+8, y); y+=13;
+      doc.text(t, marginX+8, y); y+=13;
       const floors = [...new Set(tItems.map(i=>i.Piso))].sort((x,z)=>z-x);
       floors.forEach(p=>{
         const fItems = tItems.filter(i=>i.Piso===p);

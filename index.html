@@ -606,6 +606,11 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle){
   if(to === 'Pendiente' || to === 'Nuevo') item.Fecha_Resolucion = '';
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
 
+  // Feedback inmediato: reabre el detalle del ítem ya en su nuevo estado,
+  // para poder seguir encadenando la siguiente acción sin volver a la lista.
+  renderAll();
+  openItemModal(folio);
+
   const payload = { action:'transition', folio, estado_nuevo:to, motivo, nota, autor: CFG.staffName||'' };
   if(area !== undefined) payload.area_derivacion = area;
   if(detalle) payload.detalle = detalle;
@@ -619,8 +624,6 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle){
   } else {
     queueAdd(payload); showToast('Sin conexión: guardado localmente');
   }
-  closeModal();
-  renderAll();
 }
 
 /* ================= EDITAR DATOS (sin cambio de estado) ================= */

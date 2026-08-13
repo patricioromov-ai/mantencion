@@ -125,6 +125,18 @@
   .banner{padding:9px 14px; font-size:.78rem; text-align:center;}
   .banner.warn{background:#3A1E1C; color:#D6534A;}
   .empty-note{color:var(--text-dim); font-size:.82rem; text-align:center; padding:30px 10px;}
+  .section-label{font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); margin:16px 0 8px;}
+
+  .dash-tiles{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:6px 0 4px;}
+  .tile{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center;}
+  .tile-num{font-size:1.4rem; font-weight:800; font-family:ui-monospace,"SF Mono",monospace;}
+  .tile-label{font-size:.66rem; color:var(--text-dim); margin-top:2px; text-transform:uppercase; letter-spacing:.04em;}
+  .bar-row{display:flex; align-items:center; gap:8px; padding:5px 0; font-size:.78rem;}
+  .bar-label{width:118px; flex:0 0 auto; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .bar-track{flex:1; height:10px; background:var(--panel-alt); border-radius:5px; overflow:hidden;}
+  .bar-fill{height:100%; border-radius:5px;}
+  .bar-count{width:26px; flex:0 0 auto; text-align:right; color:var(--text-dim); font-family:ui-monospace,monospace;}
+  .dash-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 13px; margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -164,7 +176,7 @@
     <div class="tabs" id="tabsRow"></div>
   </header>
 
-  <div class="toolbar">
+  <div class="toolbar" id="toolbarBar">
     <input type="text" id="searchInput" placeholder="Buscar folio, falla o detalle..." oninput="renderList()">
     <div class="toggle-pend" onclick="togglePendOnly()">
       <div class="switch" id="pendSwitch"><div class="knob"></div></div>
@@ -226,7 +238,8 @@ const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyx_scztWVMGLkr
 let CFG = { apiUrl:'', staffName:'', passcode:'' };
 let STATE = {
   items:[], bitacora:[], categorias:[], derivaciones:[], motivos:[],
-  currentTorre:'Torre A', pendOnly:false, search:'', online:true, syncing:false
+  currentTorre:'Torre A', view:'checklist', pendOnly:false, search:'', online:true, syncing:false,
+  dash:null
 };
 let activeModalBg = null;
 let pendingPhoto = { base64:null, mime:null };
@@ -348,11 +361,14 @@ function apiPost(payload){
 
 /* ================= HEADER / TABS / RESUMEN ================= */
 function renderTabs(){
-  document.getElementById('tabsRow').innerHTML = TORRES.map(t=>
-    `<div class="tab ${t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
+  const torreTabs = TORRES.map(t=>
+    `<div class="tab ${STATE.view==='checklist' && t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
   ).join('');
+  const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
+  document.getElementById('tabsRow').innerHTML = torreTabs + dashTab;
 }
-function selectTorre(t){ STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function selectTorre(t){ STATE.view='checklist'; STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function selectDashboard(){ STATE.view='dashboard'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function renderSummary(){
   const items = STATE.items;
@@ -389,7 +405,21 @@ function jumpToFloor(p){
 }
 
 /* ================= RENDER PRINCIPAL ================= */
-function renderAll(){ renderSummary(); renderFloorDock(); renderList(); }
+function renderAll(){
+  renderSummary();
+  const floorDock = document.getElementById('floorDock');
+  const toolbarBar = document.getElementById('toolbarBar');
+  if(STATE.view === 'dashboard'){
+    floorDock.style.display = 'none';
+    toolbarBar.style.display = 'none';
+    renderDashboard();
+  } else {
+    floorDock.style.display = 'flex';
+    toolbarBar.style.display = 'flex';
+    renderFloorDock();
+    renderList();
+  }
+}
 
 function matchesFilters(i){
   if(STATE.pendOnly && !ACTIVE_STATES.includes(i.Estado)) return false;
@@ -440,6 +470,181 @@ function renderItemRow(i){
       </div>
       <div class="chev">›</div>
     </div>`;
+}
+
+/* ================= PANEL / DASHBOARD ================= */
+const ALL_ESTADOS = Object.keys(ESTADO_COLORS);
+
+function ensureDashState(){
+  if(!STATE.dash){
+    STATE.dash = { torres:[...TORRES], estados:[...ALL_ESTADOS], categoria:'', area:'', grupo:'' };
+  }
+}
+function dashFilteredItems(){
+  const d = STATE.dash;
+  return STATE.items.filter(i=>
+    d.torres.includes(i.Torre) &&
+    d.estados.includes(i.Estado || 'Sin revisar') &&
+    (!d.categoria || i.Categoria === d.categoria) &&
+    (!d.area || i.Area_Derivacion === d.area) &&
+    (!d.grupo || (i.Grupo||'').toLowerCase().includes(d.grupo.toLowerCase()))
+  );
+}
+function countBy(items, keyFn){
+  const map = {};
+  items.forEach(i=>{ const k = keyFn(i) || 'Sin asignar'; map[k] = (map[k]||0)+1; });
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
+}
+function barRow(label, count, max, color){
+  const pct = max>0 ? Math.round(count/max*100) : 0;
+  return `<div class="bar-row">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color||'var(--accent)'}"></div></div>
+    <div class="bar-count">${count}</div>
+  </div>`;
+}
+
+function renderDashboard(){
+  ensureDashState();
+  const d = STATE.dash;
+  const main = document.getElementById('mainList');
+  main.innerHTML = `
+    <div class="dash-card">
+      <div class="section-label" style="margin-top:0">Torres</div>
+      <div class="chip-row">${TORRES.map(t=>`<div class="chip ${d.torres.includes(t)?'selected':''}" onclick="toggleDashTorre('${t}',this)">${t.replace('Torre ','T. ')}</div>`).join('')}</div>
+      <div class="section-label">Estados</div>
+      <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${d.estados.includes(e)?'selected':''}" onclick="toggleDashEstado('${e}',this)">${e}</div>`).join('')}</div>
+      <div class="field"><label>Tipo de falla</label>
+        <select onchange="setDashField('categoria', this.value)">
+          <option value="">Todas</option>
+          ${STATE.categorias.map(c=>`<option value="${esc(c)}" ${d.categoria===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>Área de derivación</label>
+        <select onchange="setDashField('area', this.value)">
+          <option value="">Todas</option>
+          ${STATE.derivaciones.map(a=>`<option value="${esc(a)}" ${d.area===a?'selected':''}>${a}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>Grupo</label>
+        <input type="text" value="${esc(d.grupo)}" oninput="setDashField('grupo', this.value)" placeholder="Ej: Ronda-12-08-2026">
+      </div>
+    </div>
+    <div id="dashMetrics"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="buildPdfDashboard()">📄 Imprimir / PDF de este panel</button>
+  `;
+  renderDashMetrics();
+}
+
+function toggleDashTorre(t, el){
+  const d = STATE.dash;
+  const idx = d.torres.indexOf(t);
+  if(idx>=0){ if(d.torres.length>1){ d.torres.splice(idx,1); el.classList.remove('selected'); } }
+  else { d.torres.push(t); el.classList.add('selected'); }
+  renderDashMetrics();
+}
+function toggleDashEstado(e, el){
+  const d = STATE.dash;
+  const idx = d.estados.indexOf(e);
+  if(idx>=0){ if(d.estados.length>1){ d.estados.splice(idx,1); el.classList.remove('selected'); } }
+  else { d.estados.push(e); el.classList.add('selected'); }
+  renderDashMetrics();
+}
+function setDashField(field, val){ STATE.dash[field] = val; renderDashMetrics(); }
+
+function renderDashMetrics(){
+  const wrap = document.getElementById('dashMetrics');
+  if(!wrap) return;
+  const items = dashFilteredItems();
+  const activos = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
+  const resueltos = items.filter(i=>i.Estado==='Resuelto');
+  const diasArr = resueltos.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
+  const promDias = diasArr.length ? (diasArr.reduce((s,x)=>s+x,0)/diasArr.length).toFixed(1) : '—';
+
+  const byEstado = countBy(items, i=>i.Estado||'Sin revisar');
+  const byTorre = countBy(items, i=>i.Torre);
+  const byCategoria = countBy(items, i=>i.Categoria);
+  const byArea = countBy(items.filter(i=>i.Area_Derivacion), i=>i.Area_Derivacion);
+
+  const maxE = Math.max(1, ...byEstado.map(x=>x[1]));
+  const maxT = Math.max(1, ...byTorre.map(x=>x[1]));
+  const maxC = Math.max(1, ...byCategoria.map(x=>x[1]));
+  const maxA = Math.max(1, ...byArea.map(x=>x[1]));
+
+  wrap.innerHTML = `
+    <div class="dash-tiles">
+      <div class="tile"><div class="tile-num">${items.length}</div><div class="tile-label">Total ítems</div></div>
+      <div class="tile"><div class="tile-num" style="color:#D6534A">${activos}</div><div class="tile-label">Activos</div></div>
+      <div class="tile"><div class="tile-num" style="color:#3B82C4">${resueltos.length}</div><div class="tile-label">Resueltos</div></div>
+      <div class="tile"><div class="tile-num" style="color:var(--accent)">${promDias}</div><div class="tile-label">Días prom. resolución</div></div>
+    </div>
+    <div class="section-label">Por estado</div>
+    ${byEstado.map(([k,v])=>barRow(k,v,maxE,ESTADO_COLORS[k])).join('') || '<div class="empty-note">Sin datos</div>'}
+    <div class="section-label">Por torre</div>
+    ${byTorre.map(([k,v])=>barRow(k.replace('Torre ','T. '),v,maxT)).join('') || '<div class="empty-note">Sin datos</div>'}
+    <div class="section-label">Por tipo de falla</div>
+    ${byCategoria.map(([k,v])=>barRow(k,v,maxC)).join('') || '<div class="empty-note">Sin datos</div>'}
+    <div class="section-label">Por área de derivación</div>
+    ${byArea.length ? byArea.map(([k,v])=>barRow(k,v,maxA)).join('') : '<div class="empty-note">Sin fallas derivadas en este filtro.</div>'}
+  `;
+}
+
+function buildPdfDashboard(){
+  loadJsPdf(()=>{
+    const d = STATE.dash;
+    const items = dashFilteredItems();
+    const byEstado = countBy(items, i=>i.Estado||'Sin revisar');
+    const byTorre = countBy(items, i=>i.Torre);
+    const byCategoria = countBy(items, i=>i.Categoria);
+    const byArea = countBy(items.filter(i=>i.Area_Derivacion), i=>i.Area_Derivacion);
+    const resueltos = items.filter(i=>i.Estado==='Resuelto');
+    const diasArr = resueltos.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
+    const promDias = diasArr.length ? (diasArr.reduce((s,x)=>s+x,0)/diasArr.length).toFixed(1) : '—';
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({unit:'pt', format:'a4'});
+    const marginX = 40; let y = 50;
+    const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
+    function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(15);
+    doc.text('Panel de Mantención — Resumen', marginX, y); y+=20;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
+    doc.text(COMUNIDAD, marginX, y); y+=14;
+    doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=14;
+    const filtrosTxt = 'Torres: ' + (d.torres.length===TORRES.length?'Todas':d.torres.join(', ')) +
+      ' · Estados: ' + (d.estados.length===ALL_ESTADOS.length?'Todos':d.estados.join(', ')) +
+      (d.categoria?(' · Falla: '+d.categoria):'') + (d.area?(' · Área: '+d.area):'') + (d.grupo?(' · Grupo: '+d.grupo):'');
+    doc.splitTextToSize(filtrosTxt, pageW-marginX*2).forEach(l=>{ doc.text(l, marginX, y); y+=12; });
+    doc.setDrawColor(200); y+=6; doc.line(marginX, y, pageW-marginX, y); y+=20;
+    doc.setTextColor(0);
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('Total: ' + items.length + '   ·   Activos: ' + items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length +
+      '   ·   Resueltos: ' + resueltos.length + '   ·   Prom. días resolución: ' + promDias, marginX, y);
+    y += 26;
+
+    function table(titulo, rows){
+      ensure(24);
+      doc.setFont('helvetica','bold'); doc.setFontSize(12);
+      doc.text(titulo, marginX, y); y+=16;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+      rows.forEach(([k,v])=>{
+        ensure(13);
+        doc.text(String(k), marginX+8, y);
+        doc.text(String(v), marginX+320, y);
+        y+=13;
+      });
+      y+=12;
+    }
+    table('Por estado', byEstado);
+    table('Por torre', byTorre.map(([k,v])=>[k,v]));
+    table('Por tipo de falla', byCategoria);
+    table('Por área de derivación', byArea.length ? byArea : [['Sin fallas derivadas en este filtro','']]);
+
+    doc.save('Panel_Mantencion_' + new Date().toISOString().slice(0,10) + '.pdf');
+    showToast('PDF generado ✓');
+  });
 }
 
 /* ================= MODAL GENÉRICO ================= */

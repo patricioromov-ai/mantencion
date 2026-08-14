@@ -54,8 +54,9 @@
   .pill{flex:0 0 auto; font-size:.72rem; padding:5px 10px; border-radius:99px; border:1px solid var(--line); color:var(--text-dim); white-space:nowrap;}
   .pill b{color:var(--text);}
 
-  .tabs{display:flex; gap:6px; margin-top:6px;}
-  .tab{flex:1; text-align:center; padding:9px 4px; border-radius:8px 8px 0 0; font-size:.85rem; font-weight:700; color:var(--text-dim); border:1px solid var(--line); border-bottom:none; background:var(--panel); cursor:pointer;}
+  .tabs{display:flex; gap:6px; margin-top:6px; overflow-x:auto; scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto; min-width:64px; text-align:center; padding:9px 10px; border-radius:8px 8px 0 0; font-size:.85rem; font-weight:700; color:var(--text-dim); border:1px solid var(--line); border-bottom:none; background:var(--panel); cursor:pointer; white-space:nowrap;}
   .tab.active{color:var(--bg); background:var(--accent); border-color:var(--accent);}
 
   .toolbar{display:flex; gap:8px; padding:10px 14px; background:var(--panel); border-bottom:1px solid var(--line); align-items:center;}
@@ -200,6 +201,8 @@
 /* ================= CONFIG / ESTADO ================= */
 const CATS_FIJAS = ['LUCES','MANILLAS','PUERTAS','CARTEL S. EMERGENCIA'];
 const TORRES = ['Torre A','Torre B','Torre C','Torre D'];
+const TORRES_ALL = [...TORRES, 'Común'];
+const CATEGORIA_FUGA = 'FUGAS/FILTRACIONES';
 const ACTIVE_STATES = ['Nuevo','Pendiente','Derivado','En proceso'];
 const COMUNIDAD = 'Jardines de Vicuña Mackenna';
 
@@ -237,9 +240,9 @@ const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyx_scztWVMGLkr
 
 let CFG = { apiUrl:'', staffName:'', passcode:'' };
 let STATE = {
-  items:[], bitacora:[], categorias:[], derivaciones:[], motivos:[],
+  items:[], bitacora:[], categorias:[], derivaciones:[], motivos:[], ubicaciones:[],
   currentTorre:'Torre A', view:'checklist', pendOnly:false, search:'', online:true, syncing:false,
-  dash:null
+  dash:null, fugas:null
 };
 let activeModalBg = null;
 let pendingPhoto = { base64:null, mime:null };
@@ -312,6 +315,7 @@ function loadData(){
         STATE.categorias = res.data.categorias;
         STATE.derivaciones = res.data.derivaciones;
         STATE.motivos = res.data.motivos;
+        STATE.ubicaciones = res.data.ubicaciones || [];
         localStorage.setItem('mant_cache', JSON.stringify(res.data));
         STATE.online = true;
         document.getElementById('offlineBanner').classList.add('hidden');
@@ -336,6 +340,7 @@ function loadFromCache(){
     STATE.items = d.checklist.map(normalizeItem);
     STATE.bitacora = d.bitacora; STATE.categorias = d.categorias;
     STATE.derivaciones = d.derivaciones; STATE.motivos = d.motivos;
+    STATE.ubicaciones = d.ubicaciones || [];
   }
 }
 function normalizeItem(it){ it.Piso = typeof it.Piso === 'string' ? parseInt(it.Piso,10) : it.Piso; return it; }
@@ -365,10 +370,12 @@ function renderTabs(){
     `<div class="tab ${STATE.view==='checklist' && t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
-  document.getElementById('tabsRow').innerHTML = torreTabs + dashTab;
+  const fugasTab = `<div class="tab ${STATE.view==='fugas'?'active':''}" onclick="selectFugas()">💧 Fugas</div>`;
+  document.getElementById('tabsRow').innerHTML = torreTabs + dashTab + fugasTab;
 }
 function selectTorre(t){ STATE.view='checklist'; STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 function selectDashboard(){ STATE.view='dashboard'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function selectFugas(){ STATE.view='fugas'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function renderSummary(){
   const items = STATE.items;
@@ -413,6 +420,10 @@ function renderAll(){
     floorDock.style.display = 'none';
     toolbarBar.style.display = 'none';
     renderDashboard();
+  } else if(STATE.view === 'fugas'){
+    floorDock.style.display = 'none';
+    toolbarBar.style.display = 'none';
+    renderFugas();
   } else {
     floorDock.style.display = 'flex';
     toolbarBar.style.display = 'flex';
@@ -477,7 +488,7 @@ const ALL_ESTADOS = Object.keys(ESTADO_COLORS);
 
 function ensureDashState(){
   if(!STATE.dash){
-    STATE.dash = { torres:[...TORRES], estados:[...ALL_ESTADOS], categoria:'', area:'', grupo:'' };
+    STATE.dash = { torres:[...TORRES_ALL], estados:[...ALL_ESTADOS], categoria:'', area:'', grupo:'' };
   }
 }
 function dashFilteredItems(){
@@ -511,7 +522,7 @@ function renderDashboard(){
   main.innerHTML = `
     <div class="dash-card">
       <div class="section-label" style="margin-top:0">Torres</div>
-      <div class="chip-row">${TORRES.map(t=>`<div class="chip ${d.torres.includes(t)?'selected':''}" onclick="toggleDashTorre('${t}',this)">${t.replace('Torre ','T. ')}</div>`).join('')}</div>
+      <div class="chip-row">${TORRES_ALL.map(t=>`<div class="chip ${d.torres.includes(t)?'selected':''}" onclick="toggleDashTorre('${t}',this)">${t.replace('Torre ','T. ')}</div>`).join('')}</div>
       <div class="section-label">Estados</div>
       <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${d.estados.includes(e)?'selected':''}" onclick="toggleDashEstado('${e}',this)">${e}</div>`).join('')}</div>
       <div class="field"><label>Tipo de falla</label>
@@ -612,7 +623,7 @@ function buildPdfDashboard(){
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
     doc.text(COMUNIDAD, marginX, y); y+=14;
     doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=14;
-    const filtrosTxt = 'Torres: ' + (d.torres.length===TORRES.length?'Todas':d.torres.join(', ')) +
+    const filtrosTxt = 'Torres: ' + (d.torres.length===TORRES_ALL.length?'Todas':d.torres.join(', ')) +
       ' · Estados: ' + (d.estados.length===ALL_ESTADOS.length?'Todos':d.estados.join(', ')) +
       (d.categoria?(' · Falla: '+d.categoria):'') + (d.area?(' · Área: '+d.area):'') + (d.grupo?(' · Grupo: '+d.grupo):'');
     doc.splitTextToSize(filtrosTxt, pageW-marginX*2).forEach(l=>{ doc.text(l, marginX, y); y+=12; });
@@ -645,6 +656,196 @@ function buildPdfDashboard(){
     doc.save('Panel_Mantencion_' + new Date().toISOString().slice(0,10) + '.pdf');
     showToast('PDF generado ✓');
   });
+}
+
+/* ================= FUGAS Y FILTRACIONES ================= */
+function ensureFugasState(){
+  if(!STATE.fugas){ STATE.fugas = { torre:'', estados:[...ACTIVE_STATES], search:'' }; }
+}
+function fugaItems(){ return STATE.items.filter(i=>i.Categoria === CATEGORIA_FUGA); }
+function fugaFilteredItems(){
+  ensureFugasState();
+  const f = STATE.fugas;
+  return fugaItems().filter(i=>
+    (!f.torre || i.Torre===f.torre) &&
+    f.estados.includes(i.Estado||'Sin revisar') &&
+    (!f.search || (i.Folio+' '+i.Detalle+' '+(i.Origen||'')+' '+(i.Grupo||'')).toLowerCase().includes(f.search.toLowerCase()))
+  );
+}
+function toggleFugaEstado(e, el){
+  const f = STATE.fugas;
+  const idx = f.estados.indexOf(e);
+  if(idx>=0){ if(f.estados.length>1){ f.estados.splice(idx,1); el.classList.remove('selected'); } }
+  else { f.estados.push(e); el.classList.add('selected'); }
+  renderFugasList();
+}
+function setFugaTorre(val){ STATE.fugas.torre = val; renderFugasList(); }
+function setFugaSearch(val){ STATE.fugas.search = val; renderFugasList(); }
+
+function renderFugas(){
+  ensureFugasState();
+  const f = STATE.fugas;
+  const main = document.getElementById('mainList');
+  main.innerHTML = `
+    <div class="dash-card">
+      <div class="section-label" style="margin-top:0">Torre / área</div>
+      <select onchange="setFugaTorre(this.value)">
+        <option value="">Todas</option>
+        ${TORRES_ALL.map(t=>`<option value="${esc(t)}" ${f.torre===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <div class="section-label">Estados</div>
+      <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${f.estados.includes(e)?'selected':''}" onclick="toggleFugaEstado('${e}',this)">${e}</div>`).join('')}</div>
+      <div class="field"><label>Buscar</label><input type="text" placeholder="Folio, depto, detalle..." value="${esc(f.search)}" oninput="setFugaSearch(this.value)"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:10px" onclick="openReportFugaModal()">+ Reportar fuga o filtración</button>
+    <div id="fugasList"></div>
+  `;
+  renderFugasList();
+}
+
+function renderFugasList(){
+  const wrap = document.getElementById('fugasList');
+  if(!wrap) return;
+  const items = fugaFilteredItems();
+  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fugas o filtraciones que coincidan con el filtro.</div>'; return; }
+
+  const grupos = {};
+  items.forEach(i=>{
+    const key = i.Torre || 'Común';
+    if(!grupos[key]) grupos[key] = [];
+    grupos[key].push(i);
+  });
+
+  let html = '';
+  TORRES_ALL.forEach(t=>{
+    const grp = grupos[t];
+    if(!grp || grp.length===0) return;
+    html += `<div class="floor-card">
+      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
+    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0)).forEach(i=>{ html += renderFugaRow(i); });
+    html += `</div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function renderFugaRow(i){
+  const est = i.Estado || 'Sin revisar';
+  const color = ESTADO_COLORS[est] || '#5B6675';
+  const ubic = i.Origen || (i.Piso ? ('Piso '+i.Piso) : 'Sin ubicación');
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
+      <div class="dot" style="background:${color}"></div>
+      <div class="item-main">
+        <div class="item-cat">${ubic} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
+      </div>
+      <div class="chev">›</div>
+    </div>`;
+}
+
+/* ================= REPORTAR FUGA ================= */
+function openReportFugaModal(){
+  pendingPhoto = { base64:null, mime:null };
+  showModal(`
+    <h2>💧 Reportar fuga / filtración</h2>
+    <div class="field"><label>Tipo de ubicación</label>
+      <select id="fTipo" onchange="renderFugaUbicacionFields()">
+        <option value="depto">Departamento</option>
+        <option value="ascensor">Ascensor</option>
+        <option value="acceso">Acceso principal</option>
+        <option value="comun">Área común (piscina, quincho, sala común, conserjería...)</option>
+      </select>
+    </div>
+    <div id="fUbicacionFields"></div>
+    <div class="field"><label>Detalle</label><textarea id="fDetalle" placeholder="Ej: Filtración en muro sobre ducha, gotea hacia el depto de abajo"></textarea></div>
+    <div class="field"><label>Grupo (opcional)</label><input type="text" id="fGrupo" placeholder="Ej: Reclamo-Depto1204"></div>
+    <div class="field">
+      <label>Foto (recomendada)</label>
+      <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
+      <img id="photoPreview" class="photo-preview hidden">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="submitFugaReport()">Reportar</button>
+    </div>
+  `);
+  renderFugaUbicacionFields();
+}
+
+function renderFugaUbicacionFields(){
+  const tipo = document.getElementById('fTipo').value;
+  const wrap = document.getElementById('fUbicacionFields');
+  const torreOptions = TORRES.map(t=>`<option value="${t}">${t}</option>`).join('');
+  if(tipo === 'depto'){
+    wrap.innerHTML = `
+      <div class="field"><label>Torre</label><select id="fTorre">${torreOptions}</select></div>
+      <div class="field"><label>Piso</label><input type="number" id="fPiso" placeholder="Ej: 12"></div>
+      <div class="field"><label>N° depto (opcional)</label><input type="text" id="fDepto" placeholder="Ej: 1204"></div>
+    `;
+  } else if(tipo === 'ascensor' || tipo === 'acceso'){
+    wrap.innerHTML = `<div class="field"><label>Torre</label><select id="fTorre">${torreOptions}</select></div>`;
+  } else {
+    const comunes = STATE.ubicaciones.filter(u=>!u.startsWith('Ascensor') && !u.startsWith('Acceso Principal'));
+    wrap.innerHTML = `
+      <div class="field"><label>Ubicación</label><select id="fUbicComun">${comunes.map(u=>`<option value="${esc(u)}">${u}</option>`).join('')}</select>
+        <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewUbicacion()">+ Agregar nueva ubicación</div>
+      </div>`;
+  }
+}
+
+function promptNewUbicacion(){
+  const val = prompt('Nombre de la nueva ubicación común:');
+  if(!val) return;
+  STATE.ubicaciones.push(val);
+  const payload = { action:'addConfig', tipo:'ubicacion', valor: val };
+  if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
+  const sel = document.getElementById('fUbicComun');
+  if(sel){ const opt=document.createElement('option'); opt.value=val; opt.textContent=val; sel.appendChild(opt); sel.value=val; }
+}
+
+function submitFugaReport(){
+  const tipo = document.getElementById('fTipo').value;
+  const det = document.getElementById('fDetalle').value.trim();
+  const grupo = document.getElementById('fGrupo').value.trim();
+  if(!det){ showToast('Escribe el detalle de la falla'); return; }
+
+  let torre, piso, origen;
+  if(tipo === 'depto'){
+    torre = document.getElementById('fTorre').value;
+    piso = parseInt(document.getElementById('fPiso').value, 10);
+    if(isNaN(piso)){ showToast('Ingresa el piso'); return; }
+    const depto = document.getElementById('fDepto').value.trim();
+    origen = depto ? ('Depto '+depto) : '';
+  } else if(tipo === 'ascensor'){
+    torre = document.getElementById('fTorre').value; piso = 0; origen = 'Ascensor';
+  } else if(tipo === 'acceso'){
+    torre = document.getElementById('fTorre').value; piso = 0; origen = 'Acceso Principal';
+  } else {
+    torre = 'Común'; piso = 0; origen = document.getElementById('fUbicComun').value;
+  }
+
+  const tempFolio = 'TEMP-'+Date.now();
+  const ts = new Date().toISOString().slice(0,16).replace('T',' ');
+  const newItem = {
+    Folio: tempFolio, Torre: torre, Piso: piso, Categoria: CATEGORIA_FUGA, Origen: origen, Grupo: grupo,
+    Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
+    Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
+    Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
+    Actualizado_Por: CFG.staffName||'', Notas:''
+  };
+  STATE.items.push(newItem);
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
+
+  const payload = { action:'add', torre, piso, categoria:CATEGORIA_FUGA, detalle:det, origen, grupo, autor: CFG.staffName||'' };
+  if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
+
+  if(navigator.onLine){
+    apiPost(payload).then(res=>{
+      if(res.success){ showToast('Fuga reportada ✓'); loadData(); }
+      else { showToast('No se pudo agregar en el servidor'); queueAdd(payload); }
+    }).catch(()=>{ queueAdd(payload); });
+  } else { queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal'); }
+  closeModal();
+  renderAll();
 }
 
 /* ================= MODAL GENÉRICO ================= */
@@ -809,7 +1010,7 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle){
   item.Actualizado_Por = CFG.staffName || item.Actualizado_Por;
   if(to === 'Resuelto') item.Fecha_Resolucion = ts;
   if(to === 'Pendiente' || to === 'Nuevo') item.Fecha_Resolucion = '';
-  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
   // Feedback inmediato: reabre el detalle del ítem ya en su nuevo estado,
   // para poder seguir encadenando la siguiente acción sin volver a la lista.
@@ -855,7 +1056,7 @@ function saveEditFields(folio){
   const notas = document.getElementById('eNotas').value;
   item.Detalle = detalle; item.Origen = origen; item.Grupo = grupo; item.Notas = notas;
   item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
-  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
   const payload = { action:'updateFields', folio, detalle, origen, grupo, notas, autor: CFG.staffName||'' };
   if(navigator.onLine){ apiPost(payload).then(()=>showToast('Guardado ✓')).catch(()=>{ queueAdd(payload); }); }
@@ -868,7 +1069,7 @@ function deleteItemUI(folio){
   if(!confirm('¿Eliminar este ítem y su historial? No se puede deshacer.')) return;
   STATE.items = STATE.items.filter(x=>x.Folio!==folio);
   STATE.bitacora = STATE.bitacora.filter(x=>x.Folio!==folio);
-  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
   const payload = { action:'delete', folio };
   if(navigator.onLine){ apiPost(payload).then(res=>showToast(res.success?'Eliminado':'Error al eliminar')); }
   else { queueAdd(payload); showToast('Sin conexión: se eliminará al recuperar señal'); }
@@ -946,7 +1147,7 @@ function submitAddReport(torre, piso){
     Actualizado_Por: CFG.staffName||'', Notas:''
   };
   STATE.items.push(newItem);
-  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos}));
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
   const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, autor: CFG.staffName||'' };
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
@@ -999,7 +1200,7 @@ function openPdfActivasModal(){
         ${estadosTodos.map(e=>`<div class="chip ${estadosDefault.includes(e)?'selected':''}" data-estado="${e}" onclick="this.classList.toggle('selected')">${e}</div>`).join('')}
       </div>
     </div>
-    <div class="field"><label>Torre (opcional)</label><select id="pdfTorre"><option value="">Todas</option>${TORRES.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
+    <div class="field"><label>Torre (opcional)</label><select id="pdfTorre"><option value="">Todas</option>${TORRES_ALL.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
     <div class="field"><label>Área (opcional)</label><select id="pdfArea"><option value="">Todas</option>${areaOptions}</select></div>
     <div class="field"><label>Grupo (opcional)</label><input type="text" id="pdfGrupo" placeholder="Ej: Ronda-12-08-2026"></div>
     <div class="btn-row">
@@ -1061,7 +1262,7 @@ function buildPdfActivas(estadosSel, torre, area, grupo){
     doc.setFont('helvetica','bold'); doc.setFontSize(12);
     doc.text(a + ' — ' + aItems.length + ' ítem(s)', marginX, y); y+=16;
 
-    const torresAMostrar = torre ? [torre] : TORRES;
+    const torresAMostrar = torre ? [torre] : TORRES_ALL;
     torresAMostrar.forEach(t=>{
       const tItems = aItems.filter(i=>i.Torre===t);
       if(tItems.length===0) return;

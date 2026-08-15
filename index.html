@@ -202,7 +202,8 @@
 const CATS_FIJAS = ['LUCES','MANILLAS','PUERTAS','CARTEL S. EMERGENCIA'];
 const TORRES = ['Torre A','Torre B','Torre C','Torre D'];
 const TORRES_ALL = [...TORRES, 'Común'];
-const CATEGORIA_FUGA = 'FUGAS/FILTRACIONES';
+const CATEGORIA_FUGA = 'FILTRACIONES';
+const CATEGORIA_FUGA_LEGACY = 'FUGAS/FILTRACIONES'; // compatibilidad con reportes ya creados antes del cambio de nombre
 const ACTIVE_STATES = ['Nuevo','Pendiente','Derivado','En proceso'];
 const COMUNIDAD = 'Jardines de Vicuña Mackenna';
 
@@ -370,7 +371,7 @@ function renderTabs(){
     `<div class="tab ${STATE.view==='checklist' && t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
-  const fugasTab = `<div class="tab ${STATE.view==='fugas'?'active':''}" onclick="selectFugas()">💧 Fugas</div>`;
+  const fugasTab = `<div class="tab ${STATE.view==='fugas'?'active':''}" onclick="selectFugas()">💧 Filtraciones</div>`;
   document.getElementById('tabsRow').innerHTML = torreTabs + dashTab + fugasTab;
 }
 function selectTorre(t){ STATE.view='checklist'; STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -662,7 +663,7 @@ function buildPdfDashboard(){
 function ensureFugasState(){
   if(!STATE.fugas){ STATE.fugas = { torre:'', estados:[...ACTIVE_STATES], search:'' }; }
 }
-function fugaItems(){ return STATE.items.filter(i=>i.Categoria === CATEGORIA_FUGA); }
+function fugaItems(){ return STATE.items.filter(i=>i.Categoria === CATEGORIA_FUGA || i.Categoria === CATEGORIA_FUGA_LEGACY); }
 function fugaFilteredItems(){
   ensureFugasState();
   const f = STATE.fugas;
@@ -697,7 +698,8 @@ function renderFugas(){
       <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${f.estados.includes(e)?'selected':''}" onclick="toggleFugaEstado('${e}',this)">${e}</div>`).join('')}</div>
       <div class="field"><label>Buscar</label><input type="text" placeholder="Folio, depto, detalle..." value="${esc(f.search)}" oninput="setFugaSearch(this.value)"></div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:10px" onclick="openReportFugaModal()">+ Reportar fuga o filtración</button>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="openReportFugaModal()">+ Reportar filtración</button>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:10px" onclick="generarPdfFiltraciones()">📄 Imprimir filtraciones (PDF)</button>
     <div id="fugasList"></div>
   `;
   renderFugasList();
@@ -707,7 +709,7 @@ function renderFugasList(){
   const wrap = document.getElementById('fugasList');
   if(!wrap) return;
   const items = fugaFilteredItems();
-  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fugas o filtraciones que coincidan con el filtro.</div>'; return; }
+  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay filtraciones que coincidan con el filtro.</div>'; return; }
 
   const grupos = {};
   items.forEach(i=>{
@@ -746,7 +748,7 @@ function renderFugaRow(i){
 function openReportFugaModal(){
   pendingPhoto = { base64:null, mime:null };
   showModal(`
-    <h2>💧 Reportar fuga / filtración</h2>
+    <h2>💧 Reportar filtración</h2>
     <div class="field"><label>Tipo de ubicación</label>
       <select id="fTipo" onchange="renderFugaUbicacionFields()">
         <option value="depto">Departamento</option>
@@ -840,12 +842,76 @@ function submitFugaReport(){
 
   if(navigator.onLine){
     apiPost(payload).then(res=>{
-      if(res.success){ showToast('Fuga reportada ✓'); loadData(); }
+      if(res.success){ showToast('Filtración reportada ✓'); loadData(); }
       else { showToast('No se pudo agregar en el servidor'); queueAdd(payload); }
     }).catch(()=>{ queueAdd(payload); });
   } else { queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal'); }
   closeModal();
   renderAll();
+}
+
+/* ================= PDF: SOLO FILTRACIONES ================= */
+function generarPdfFiltraciones(){
+  showToast('Generando PDF...');
+  loadJsPdf(()=>buildPdfFiltraciones());
+}
+function buildPdfFiltraciones(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'a4'});
+  const marginX = 40; let y = 50;
+  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
+  function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
+
+  const items = fugaFilteredItems();
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(15);
+  doc.text('Informe de Filtraciones', marginX, y); y+=20;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
+  doc.text(COMUNIDAD, marginX, y); y+=14;
+  doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=16;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(214,83,74);
+  doc.text('Atención prioritaria — protocolo de respuesta distinto al resto de fallas.', marginX, y); y+=10;
+  doc.setTextColor(0); doc.setFont('helvetica','normal');
+  doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
+
+  if(items.length===0){ doc.setFontSize(11); doc.text('No hay filtraciones que coincidan con el filtro actual.', marginX, y); }
+
+  const grupos = {};
+  items.forEach(i=>{ const key = i.Torre || 'Común'; if(!grupos[key]) grupos[key]=[]; grupos[key].push(i); });
+
+  let total = 0;
+  TORRES_ALL.forEach(t=>{
+    const grp = grupos[t];
+    if(!grp || grp.length===0) return;
+    ensure(18);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.text(t + ' — ' + grp.length + ' ítem(s)', marginX, y); y+=16;
+    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0)).forEach(i=>{
+      total++;
+      const ubic = i.Origen || (i.Piso ? ('Piso '+i.Piso) : '');
+      const dias = diasEntre(i.Fecha_Deteccion);
+      const text = '[' + i.Folio + '] ' + ubic + ' (' + i.Estado + ')' +
+        (i.Area_Derivacion ? (' · Derivado a: '+i.Area_Derivacion) : '') +
+        ': ' + (i.Detalle||'—') + (dias!==null ? (' — '+dias+'d') : '');
+      const lines = doc.splitTextToSize(text, pageW-marginX*2-20);
+      ensure(lines.length*11+4);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9);
+      doc.text('• '+lines[0], marginX+10, y);
+      for(let k=1;k<lines.length;k++){ y+=11; doc.text('   '+lines[k], marginX+10, y); }
+      y+=12;
+    });
+    y+=6;
+  });
+
+  ensure(90); y = Math.max(y, pageH-140);
+  doc.setDrawColor(200); doc.line(marginX, y, pageW-marginX, y); y+=24;
+  doc.setFontSize(9.5); doc.setFont('helvetica','normal');
+  doc.text('Total de filtraciones: ' + total, marginX, y); y+=30;
+  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y+=34;
+  doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
+
+  doc.save('Filtraciones_' + new Date().toISOString().slice(0,10) + '.pdf');
+  showToast('PDF generado ✓');
 }
 
 /* ================= MODAL GENÉRICO ================= */

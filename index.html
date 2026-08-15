@@ -243,7 +243,7 @@ let CFG = { apiUrl:'', staffName:'', passcode:'' };
 let STATE = {
   items:[], bitacora:[], categorias:[], derivaciones:[], motivos:[], ubicaciones:[],
   currentTorre:'Torre A', view:'checklist', pendOnly:false, search:'', online:true, syncing:false,
-  dash:null, fugas:null
+  dash:null, fugas:null, deptos:null
 };
 let activeModalBg = null;
 let pendingPhoto = { base64:null, mime:null };
@@ -372,11 +372,13 @@ function renderTabs(){
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
   const fugasTab = `<div class="tab ${STATE.view==='fugas'?'active':''}" onclick="selectFugas()">💧 Filtraciones</div>`;
-  document.getElementById('tabsRow').innerHTML = torreTabs + dashTab + fugasTab;
+  const deptosTab = `<div class="tab ${STATE.view==='deptos'?'active':''}" onclick="selectDeptos()">🔧 Fallas Depto</div>`;
+  document.getElementById('tabsRow').innerHTML = torreTabs + dashTab + fugasTab + deptosTab;
 }
 function selectTorre(t){ STATE.view='checklist'; STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 function selectDashboard(){ STATE.view='dashboard'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 function selectFugas(){ STATE.view='fugas'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function selectDeptos(){ STATE.view='deptos'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function renderSummary(){
   const items = STATE.items;
@@ -425,6 +427,10 @@ function renderAll(){
     floorDock.style.display = 'none';
     toolbarBar.style.display = 'none';
     renderFugas();
+  } else if(STATE.view === 'deptos'){
+    floorDock.style.display = 'none';
+    toolbarBar.style.display = 'none';
+    renderDeptos();
   } else {
     floorDock.style.display = 'flex';
     toolbarBar.style.display = 'flex';
@@ -914,6 +920,225 @@ function buildPdfFiltraciones(){
   showToast('PDF generado ✓');
 }
 
+/* ================= FALLAS DE DEPARTAMENTOS (genérico, cualquier tipo de falla) ================= */
+function ensureDeptosState(){
+  if(!STATE.deptos){ STATE.deptos = { torre:'', categoria:'', estados:[...ACTIVE_STATES], search:'' }; }
+}
+function deptoItems(){
+  return STATE.items.filter(i=>(i.Origen||'').trim().toLowerCase().startsWith('depto'));
+}
+function deptoFilteredItems(){
+  ensureDeptosState();
+  const f = STATE.deptos;
+  return deptoItems().filter(i=>
+    (!f.torre || i.Torre===f.torre) &&
+    (!f.categoria || i.Categoria===f.categoria) &&
+    f.estados.includes(i.Estado||'Sin revisar') &&
+    (!f.search || (i.Folio+' '+i.Categoria+' '+i.Detalle+' '+(i.Origen||'')+' '+(i.Grupo||'')).toLowerCase().includes(f.search.toLowerCase()))
+  );
+}
+function toggleDeptoEstado(e, el){
+  const f = STATE.deptos;
+  const idx = f.estados.indexOf(e);
+  if(idx>=0){ if(f.estados.length>1){ f.estados.splice(idx,1); el.classList.remove('selected'); } }
+  else { f.estados.push(e); el.classList.add('selected'); }
+  renderDeptosList();
+}
+function setDeptoTorre(val){ STATE.deptos.torre = val; renderDeptosList(); }
+function setDeptoCategoria(val){ STATE.deptos.categoria = val; renderDeptosList(); }
+function setDeptoSearch(val){ STATE.deptos.search = val; renderDeptosList(); }
+
+function renderDeptos(){
+  ensureDeptosState();
+  const f = STATE.deptos;
+  const main = document.getElementById('mainList');
+  main.innerHTML = `
+    <div class="dash-card">
+      <div class="section-label" style="margin-top:0">Torre</div>
+      <select onchange="setDeptoTorre(this.value)">
+        <option value="">Todas</option>
+        ${TORRES.map(t=>`<option value="${t}" ${f.torre===t?'selected':''}>${t}</option>`).join('')}
+      </select>
+      <div class="section-label">Tipo de falla</div>
+      <select onchange="setDeptoCategoria(this.value)">
+        <option value="">Todas</option>
+        ${STATE.categorias.map(c=>`<option value="${esc(c)}" ${f.categoria===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+      <div class="section-label">Estados</div>
+      <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${f.estados.includes(e)?'selected':''}" onclick="toggleDeptoEstado('${e}',this)">${e}</div>`).join('')}</div>
+      <div class="field"><label>Buscar</label><input type="text" placeholder="Folio, depto, detalle..." value="${esc(f.search)}" oninput="setDeptoSearch(this.value)"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="openReportDeptoModal()">+ Reportar falla de depto</button>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:10px" onclick="generarPdfDeptos()">📄 Imprimir fallas de depto (PDF)</button>
+    <div id="deptosList"></div>
+  `;
+  renderDeptosList();
+}
+
+function renderDeptosList(){
+  const wrap = document.getElementById('deptosList');
+  if(!wrap) return;
+  const items = deptoFilteredItems();
+  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fallas de departamento que coincidan con el filtro.</div>'; return; }
+
+  const grupos = {};
+  items.forEach(i=>{
+    const key = i.Torre || 'Sin torre';
+    if(!grupos[key]) grupos[key] = [];
+    grupos[key].push(i);
+  });
+
+  let html = '';
+  TORRES.forEach(t=>{
+    const grp = grupos[t];
+    if(!grp || grp.length===0) return;
+    html += `<div class="floor-card">
+      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
+    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0) || (a.Origen||'').localeCompare(b.Origen||'')).forEach(i=>{ html += renderDeptoRow(i); });
+    html += `</div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function renderDeptoRow(i){
+  const est = i.Estado || 'Sin revisar';
+  const color = ESTADO_COLORS[est] || '#5B6675';
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
+      <div class="dot" style="background:${color}"></div>
+      <div class="item-main">
+        <div class="item-cat">${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
+      </div>
+      <div class="chev">›</div>
+    </div>`;
+}
+
+/* ================= REPORTAR FALLA DE DEPTO ================= */
+function openReportDeptoModal(){
+  pendingPhoto = { base64:null, mime:null };
+  const torreOptions = TORRES.map(t=>`<option value="${t}">${t}</option>`).join('');
+  const catOptions = STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('');
+  showModal(`
+    <h2>🔧 Reportar falla de depto</h2>
+    <div class="field"><label>Torre</label><select id="dTorre">${torreOptions}</select></div>
+    <div class="field"><label>Piso</label><input type="number" id="dPiso" placeholder="Ej: 12"></div>
+    <div class="field"><label>N° depto</label><input type="text" id="dDepto" placeholder="Ej: 1204"></div>
+    <div class="field"><label>Tipo de falla</label><select id="dCat">${catOptions}</select>
+      <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewCategoria('dCat')">+ Agregar nuevo tipo de falla</div>
+    </div>
+    <div class="field"><label>Detalle</label><textarea id="dDetalle" placeholder="Ej: Enchufe de cocina sin luz, se cortó el automático"></textarea></div>
+    <div class="field"><label>Grupo (opcional)</label><input type="text" id="dGrupo" placeholder="Ej: Reclamo-Depto1204"></div>
+    <div class="field">
+      <label>Foto (recomendada)</label>
+      <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
+      <img id="photoPreview" class="photo-preview hidden">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="submitDeptoReport()">Reportar</button>
+    </div>
+  `);
+}
+
+function submitDeptoReport(){
+  const torre = document.getElementById('dTorre').value;
+  const piso = parseInt(document.getElementById('dPiso').value, 10);
+  const depto = document.getElementById('dDepto').value.trim();
+  const cat = document.getElementById('dCat').value;
+  const det = document.getElementById('dDetalle').value.trim();
+  const grupo = document.getElementById('dGrupo').value.trim();
+
+  if(isNaN(piso)){ showToast('Ingresa el piso'); return; }
+  if(!depto){ showToast('Ingresa el número de depto'); return; }
+  if(!det){ showToast('Escribe el detalle de la falla'); return; }
+
+  const origen = 'Depto ' + depto;
+  const tempFolio = 'TEMP-'+Date.now();
+  const ts = new Date().toISOString().slice(0,16).replace('T',' ');
+  const newItem = {
+    Folio: tempFolio, Torre: torre, Piso: piso, Categoria: cat, Origen: origen, Grupo: grupo,
+    Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
+    Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
+    Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
+    Actualizado_Por: CFG.staffName||'', Notas:''
+  };
+  STATE.items.push(newItem);
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
+
+  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, autor: CFG.staffName||'' };
+  if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
+
+  if(navigator.onLine){
+    apiPost(payload).then(res=>{
+      if(res.success){ showToast('Falla reportada ✓'); loadData(); }
+      else { showToast('No se pudo agregar en el servidor'); queueAdd(payload); }
+    }).catch(()=>{ queueAdd(payload); });
+  } else { queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal'); }
+  closeModal();
+  renderAll();
+}
+
+/* ================= PDF: SOLO FALLAS DE DEPTO ================= */
+function generarPdfDeptos(){
+  showToast('Generando PDF...');
+  loadJsPdf(()=>buildPdfDeptos());
+}
+function buildPdfDeptos(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'a4'});
+  const marginX = 40; let y = 50;
+  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
+  function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
+
+  const items = deptoFilteredItems();
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(15);
+  doc.text('Informe de Fallas de Departamentos', marginX, y); y+=20;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
+  doc.text(COMUNIDAD, marginX, y); y+=14;
+  doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
+  doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
+  doc.setTextColor(0);
+
+  if(items.length===0){ doc.setFontSize(11); doc.text('No hay fallas de departamento que coincidan con el filtro actual.', marginX, y); }
+
+  const grupos = {};
+  items.forEach(i=>{ const key = i.Torre || 'Sin torre'; if(!grupos[key]) grupos[key]=[]; grupos[key].push(i); });
+
+  let total = 0;
+  TORRES.forEach(t=>{
+    const grp = grupos[t];
+    if(!grp || grp.length===0) return;
+    ensure(18);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12);
+    doc.text(t + ' — ' + grp.length + ' ítem(s)', marginX, y); y+=16;
+    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0)).forEach(i=>{
+      total++;
+      const dias = diasEntre(i.Fecha_Deteccion);
+      const text = '[' + i.Folio + '] ' + (i.Origen||'') + ' · ' + i.Categoria + ' (' + i.Estado + ')' +
+        (i.Area_Derivacion ? (' · Derivado a: '+i.Area_Derivacion) : '') +
+        ': ' + (i.Detalle||'—') + (dias!==null ? (' — '+dias+'d') : '');
+      const lines = doc.splitTextToSize(text, pageW-marginX*2-20);
+      ensure(lines.length*11+4);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9);
+      doc.text('• '+lines[0], marginX+10, y);
+      for(let k=1;k<lines.length;k++){ y+=11; doc.text('   '+lines[k], marginX+10, y); }
+      y+=12;
+    });
+    y+=6;
+  });
+
+  ensure(90); y = Math.max(y, pageH-140);
+  doc.setDrawColor(200); doc.line(marginX, y, pageW-marginX, y); y+=24;
+  doc.setFontSize(9.5); doc.setFont('helvetica','normal');
+  doc.text('Total de fallas de depto: ' + total, marginX, y); y+=30;
+  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y+=34;
+  doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
+
+  doc.save('Fallas_Depto_' + new Date().toISOString().slice(0,10) + '.pdf');
+  showToast('PDF generado ✓');
+}
+
 /* ================= MODAL GENÉRICO ================= */
 function showModal(innerHtml){
   if(!activeModalBg){
@@ -1186,13 +1411,13 @@ function openAddReportModal(torre, piso){
     </div>
   `);
 }
-function promptNewCategoria(){
+function promptNewCategoria(targetSelectId){
   const val = prompt('Nombre de la nueva categoría:');
   if(!val) return;
   STATE.categorias.push(val);
   const payload = { action:'addConfig', tipo:'categoria', valor: val };
   if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
-  const sel = document.getElementById('nCat');
+  const sel = document.getElementById(targetSelectId || 'nCat');
   const opt = document.createElement('option'); opt.value = val; opt.textContent = val;
   sel.appendChild(opt); sel.value = val;
 }

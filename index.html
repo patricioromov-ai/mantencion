@@ -372,7 +372,7 @@ function renderTabs(){
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
   const fugasTab = `<div class="tab ${STATE.view==='fugas'?'active':''}" onclick="selectFugas()">💧 Filtraciones</div>`;
-  const deptosTab = `<div class="tab ${STATE.view==='deptos'?'active':''}" onclick="selectDeptos()">🔧 Fallas Depto</div>`;
+  const deptosTab = `<div class="tab ${STATE.view==='deptos'?'active':''}" onclick="selectDeptos()">🔧 Deptos y Comunes</div>`;
   document.getElementById('tabsRow').innerHTML = torreTabs + dashTab + fugasTab + deptosTab;
 }
 function selectTorre(t){ STATE.view='checklist'; STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -920,12 +920,20 @@ function buildPdfFiltraciones(){
   showToast('PDF generado ✓');
 }
 
-/* ================= FALLAS DE DEPARTAMENTOS (genérico, cualquier tipo de falla) ================= */
+/* ================= DEPTOS Y COMUNES (genérico: cualquier tipo de falla, cualquier ubicación) ================= */
 function ensureDeptosState(){
   if(!STATE.deptos){ STATE.deptos = { torre:'', categoria:'', estados:[...ACTIVE_STATES], search:'' }; }
 }
 function deptoItems(){
-  return STATE.items.filter(i=>(i.Origen||'').trim().toLowerCase().startsWith('depto'));
+  return STATE.items.filter(i=>{
+    const esFiltracion = i.Categoria===CATEGORIA_FUGA || i.Categoria===CATEGORIA_FUGA_LEGACY;
+    if(esFiltracion) return false; // esas viven en la pestaña Filtraciones
+    const origen = (i.Origen||'').trim().toLowerCase();
+    const esDepto = origen.startsWith('depto');
+    const esAscensorOAcceso = origen==='ascensor' || origen==='acceso principal';
+    const esComun = i.Torre === 'Común';
+    return esDepto || esAscensorOAcceso || esComun;
+  });
 }
 function deptoFilteredItems(){
   ensureDeptosState();
@@ -954,10 +962,10 @@ function renderDeptos(){
   const main = document.getElementById('mainList');
   main.innerHTML = `
     <div class="dash-card">
-      <div class="section-label" style="margin-top:0">Torre</div>
+      <div class="section-label" style="margin-top:0">Torre / área</div>
       <select onchange="setDeptoTorre(this.value)">
         <option value="">Todas</option>
-        ${TORRES.map(t=>`<option value="${t}" ${f.torre===t?'selected':''}>${t}</option>`).join('')}
+        ${TORRES_ALL.map(t=>`<option value="${esc(t)}" ${f.torre===t?'selected':''}>${t}</option>`).join('')}
       </select>
       <div class="section-label">Tipo de falla</div>
       <select onchange="setDeptoCategoria(this.value)">
@@ -968,8 +976,8 @@ function renderDeptos(){
       <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${f.estados.includes(e)?'selected':''}" onclick="toggleDeptoEstado('${e}',this)">${e}</div>`).join('')}</div>
       <div class="field"><label>Buscar</label><input type="text" placeholder="Folio, depto, detalle..." value="${esc(f.search)}" oninput="setDeptoSearch(this.value)"></div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="openReportDeptoModal()">+ Reportar falla de depto</button>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:10px" onclick="generarPdfDeptos()">📄 Imprimir fallas de depto (PDF)</button>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="openReportDeptoModal()">+ Reportar falla (depto, ascensor, acceso o área común)</button>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:10px" onclick="generarPdfDeptos()">📄 Imprimir (PDF)</button>
     <div id="deptosList"></div>
   `;
   renderDeptosList();
@@ -979,7 +987,7 @@ function renderDeptosList(){
   const wrap = document.getElementById('deptosList');
   if(!wrap) return;
   const items = deptoFilteredItems();
-  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fallas de departamento que coincidan con el filtro.</div>'; return; }
+  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fallas que coincidan con el filtro. Usa el botón de arriba para reportar una en un depto, ascensor, acceso o área común.</div>'; return; }
 
   const grupos = {};
   items.forEach(i=>{
@@ -989,7 +997,7 @@ function renderDeptosList(){
   });
 
   let html = '';
-  TORRES.forEach(t=>{
+  TORRES_ALL.forEach(t=>{
     const grp = grupos[t];
     if(!grp || grp.length===0) return;
     html += `<div class="floor-card">
@@ -1013,20 +1021,25 @@ function renderDeptoRow(i){
     </div>`;
 }
 
-/* ================= REPORTAR FALLA DE DEPTO ================= */
+/* ================= REPORTAR FALLA (DEPTO / ASCENSOR / ACCESO / COMÚN) ================= */
 function openReportDeptoModal(){
   pendingPhoto = { base64:null, mime:null };
-  const torreOptions = TORRES.map(t=>`<option value="${t}">${t}</option>`).join('');
-  const catOptions = STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('');
+  const catOptions = STATE.categorias.filter(c=>c!==CATEGORIA_FUGA && c!==CATEGORIA_FUGA_LEGACY).map(c=>`<option value="${esc(c)}">${c}</option>`).join('');
   showModal(`
-    <h2>🔧 Reportar falla de depto</h2>
-    <div class="field"><label>Torre</label><select id="dTorre">${torreOptions}</select></div>
-    <div class="field"><label>Piso</label><input type="number" id="dPiso" placeholder="Ej: 12"></div>
-    <div class="field"><label>N° depto</label><input type="text" id="dDepto" placeholder="Ej: 1204"></div>
+    <h2>🔧 Reportar falla</h2>
+    <div class="field"><label>Tipo de ubicación</label>
+      <select id="dTipo" onchange="renderDeptoUbicacionFields()">
+        <option value="depto">Departamento</option>
+        <option value="ascensor">Ascensor</option>
+        <option value="acceso">Acceso principal</option>
+        <option value="comun">Área común (piscina, quincho, sala común, conserjería...)</option>
+      </select>
+    </div>
+    <div id="dUbicacionFields"></div>
     <div class="field"><label>Tipo de falla</label><select id="dCat">${catOptions}</select>
       <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewCategoria('dCat')">+ Agregar nuevo tipo de falla</div>
     </div>
-    <div class="field"><label>Detalle</label><textarea id="dDetalle" placeholder="Ej: Enchufe de cocina sin luz, se cortó el automático"></textarea></div>
+    <div class="field"><label>Detalle</label><textarea id="dDetalle" placeholder="Ej: Timbre de conserjería no suena"></textarea></div>
     <div class="field"><label>Grupo (opcional)</label><input type="text" id="dGrupo" placeholder="Ej: Reclamo-Depto1204"></div>
     <div class="field">
       <label>Foto (recomendada)</label>
@@ -1038,21 +1051,63 @@ function openReportDeptoModal(){
       <button class="btn btn-primary" style="margin-top:0" onclick="submitDeptoReport()">Reportar</button>
     </div>
   `);
+  renderDeptoUbicacionFields();
+}
+
+function renderDeptoUbicacionFields(){
+  const tipo = document.getElementById('dTipo').value;
+  const wrap = document.getElementById('dUbicacionFields');
+  const torreOptions = TORRES.map(t=>`<option value="${t}">${t}</option>`).join('');
+  if(tipo === 'depto'){
+    wrap.innerHTML = `
+      <div class="field"><label>Torre</label><select id="dTorre">${torreOptions}</select></div>
+      <div class="field"><label>Piso</label><input type="number" id="dPiso" placeholder="Ej: 12"></div>
+      <div class="field"><label>N° depto</label><input type="text" id="dDepto" placeholder="Ej: 1204"></div>
+    `;
+  } else if(tipo === 'ascensor' || tipo === 'acceso'){
+    wrap.innerHTML = `<div class="field"><label>Torre</label><select id="dTorre">${torreOptions}</select></div>`;
+  } else {
+    const comunes = STATE.ubicaciones.filter(u=>!u.startsWith('Ascensor') && !u.startsWith('Acceso Principal'));
+    wrap.innerHTML = `
+      <div class="field"><label>Ubicación</label><select id="dUbicComun">${comunes.map(u=>`<option value="${esc(u)}">${u}</option>`).join('')}</select>
+        <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewUbicacionDepto()">+ Agregar nueva ubicación</div>
+      </div>`;
+  }
+}
+
+function promptNewUbicacionDepto(){
+  const val = prompt('Nombre de la nueva ubicación común:');
+  if(!val) return;
+  STATE.ubicaciones.push(val);
+  const payload = { action:'addConfig', tipo:'ubicacion', valor: val };
+  if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
+  const sel = document.getElementById('dUbicComun');
+  if(sel){ const opt=document.createElement('option'); opt.value=val; opt.textContent=val; sel.appendChild(opt); sel.value=val; }
 }
 
 function submitDeptoReport(){
-  const torre = document.getElementById('dTorre').value;
-  const piso = parseInt(document.getElementById('dPiso').value, 10);
-  const depto = document.getElementById('dDepto').value.trim();
+  const tipo = document.getElementById('dTipo').value;
   const cat = document.getElementById('dCat').value;
   const det = document.getElementById('dDetalle').value.trim();
   const grupo = document.getElementById('dGrupo').value.trim();
-
-  if(isNaN(piso)){ showToast('Ingresa el piso'); return; }
-  if(!depto){ showToast('Ingresa el número de depto'); return; }
   if(!det){ showToast('Escribe el detalle de la falla'); return; }
 
-  const origen = 'Depto ' + depto;
+  let torre, piso, origen;
+  if(tipo === 'depto'){
+    torre = document.getElementById('dTorre').value;
+    piso = parseInt(document.getElementById('dPiso').value, 10);
+    if(isNaN(piso)){ showToast('Ingresa el piso'); return; }
+    const depto = document.getElementById('dDepto').value.trim();
+    if(!depto){ showToast('Ingresa el número de depto'); return; }
+    origen = 'Depto ' + depto;
+  } else if(tipo === 'ascensor'){
+    torre = document.getElementById('dTorre').value; piso = 0; origen = 'Ascensor';
+  } else if(tipo === 'acceso'){
+    torre = document.getElementById('dTorre').value; piso = 0; origen = 'Acceso Principal';
+  } else {
+    torre = 'Común'; piso = 0; origen = document.getElementById('dUbicComun').value;
+  }
+
   const tempFolio = 'TEMP-'+Date.now();
   const ts = new Date().toISOString().slice(0,16).replace('T',' ');
   const newItem = {
@@ -1093,20 +1148,20 @@ function buildPdfDeptos(){
   const items = deptoFilteredItems();
 
   doc.setFont('helvetica','bold'); doc.setFontSize(15);
-  doc.text('Informe de Fallas de Departamentos', marginX, y); y+=20;
+  doc.text('Informe de Fallas — Deptos y Espacios Comunes', marginX, y); y+=20;
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
   doc.text(COMUNIDAD, marginX, y); y+=14;
   doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
   doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
   doc.setTextColor(0);
 
-  if(items.length===0){ doc.setFontSize(11); doc.text('No hay fallas de departamento que coincidan con el filtro actual.', marginX, y); }
+  if(items.length===0){ doc.setFontSize(11); doc.text('No hay fallas que coincidan con el filtro actual.', marginX, y); }
 
   const grupos = {};
   items.forEach(i=>{ const key = i.Torre || 'Sin torre'; if(!grupos[key]) grupos[key]=[]; grupos[key].push(i); });
 
   let total = 0;
-  TORRES.forEach(t=>{
+  TORRES_ALL.forEach(t=>{
     const grp = grupos[t];
     if(!grp || grp.length===0) return;
     ensure(18);
@@ -1131,11 +1186,11 @@ function buildPdfDeptos(){
   ensure(90); y = Math.max(y, pageH-140);
   doc.setDrawColor(200); doc.line(marginX, y, pageW-marginX, y); y+=24;
   doc.setFontSize(9.5); doc.setFont('helvetica','normal');
-  doc.text('Total de fallas de depto: ' + total, marginX, y); y+=30;
+  doc.text('Total de fallas: ' + total, marginX, y); y+=30;
   doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y+=34;
   doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
 
-  doc.save('Fallas_Depto_' + new Date().toISOString().slice(0,10) + '.pdf');
+  doc.save('Fallas_Deptos_Comunes_' + new Date().toISOString().slice(0,10) + '.pdf');
   showToast('PDF generado ✓');
 }
 

@@ -793,12 +793,31 @@ function renderFugas(){
   renderFugasList();
 }
 
+function recencyStr(i){ return i.Fecha_Ultima_Actualizacion || i.Fecha_Deteccion || ''; }
+
 function renderFugasList(){
   const wrap = document.getElementById('fugasList');
   if(!wrap) return;
-  const items = fugaFilteredItems().slice().sort((a,b)=>(b.Fecha_Deteccion||'').localeCompare(a.Fecha_Deteccion||''));
+  const items = fugaFilteredItems();
   if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay filtraciones que coincidan con el filtro.</div>'; return; }
-  wrap.innerHTML = `<div class="floor-card">${items.map(i=>renderFugaRow(i)).join('')}</div>`;
+
+  const grupos = {};
+  items.forEach(i=>{
+    const key = i.Torre || 'Común';
+    if(!grupos[key]) grupos[key] = [];
+    grupos[key].push(i);
+  });
+
+  let html = '';
+  TORRES_ALL.forEach(t=>{
+    const grp = grupos[t];
+    if(!grp || grp.length===0) return;
+    html += `<div class="floor-card">
+      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
+    grp.slice().sort((a,b)=>recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderFugaRow(i); });
+    html += `</div>`;
+  });
+  wrap.innerHTML = html;
 }
 
 function isStale(i){
@@ -815,7 +834,7 @@ function renderFugaRow(i){
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${i.Torre} · ${ubic} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${ubic} <span class="folio-tag">${i.Folio}</span></div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
         ${staleBadge}
       </div>
@@ -1059,9 +1078,26 @@ function renderDeptos(){
 function renderDeptosList(){
   const wrap = document.getElementById('deptosList');
   if(!wrap) return;
-  const items = deptoFilteredItems().slice().sort((a,b)=>(b.Fecha_Deteccion||'').localeCompare(a.Fecha_Deteccion||''));
+  const items = deptoFilteredItems();
   if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fallas que coincidan con el filtro. Usa el botón de arriba para reportar una en un depto, ascensor, acceso o área común.</div>'; return; }
-  wrap.innerHTML = `<div class="floor-card">${items.map(i=>renderDeptoRow(i)).join('')}</div>`;
+
+  const grupos = {};
+  items.forEach(i=>{
+    const key = i.Torre || 'Sin torre';
+    if(!grupos[key]) grupos[key] = [];
+    grupos[key].push(i);
+  });
+
+  let html = '';
+  TORRES_ALL.forEach(t=>{
+    const grp = grupos[t];
+    if(!grp || grp.length===0) return;
+    html += `<div class="floor-card">
+      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
+    grp.slice().sort((a,b)=>recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderDeptoRow(i); });
+    html += `</div>`;
+  });
+  wrap.innerHTML = html;
 }
 
 function renderDeptoRow(i){
@@ -1071,7 +1107,7 @@ function renderDeptoRow(i){
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${i.Torre} · ${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
         ${staleBadge}
       </div>

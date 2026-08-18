@@ -142,25 +142,19 @@
 </head>
 <body>
 
-<div id="setupScreen" class="fullscreen hidden">
+<div id="loginScreen" class="fullscreen hidden">
   <div class="card-setup">
-    <h1>⚙ Configuración inicial</h1>
-    <p>Pega aquí la URL de tu Apps Script (termina en <span class="mono">/exec</span>). Solo se hace una vez por celular.</p>
-    <div class="field"><label>URL de la API (Apps Script)</label><input type="text" id="setupApiUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec"></div>
-    <div class="field"><label>Tu nombre</label><input type="text" id="setupStaffName" placeholder="Ej: Patricio"></div>
-    <div class="field"><label>Clave de acceso (opcional)</label><input type="text" id="setupPasscode" placeholder="Ej: 1234"></div>
-    <button class="btn btn-primary" onclick="saveSetup()">Guardar y continuar</button>
-    <div class="err-msg hidden" id="setupErr"></div>
-  </div>
-</div>
-
-<div id="passScreen" class="fullscreen hidden">
-  <div class="card-setup">
-    <h1>🔒 Acceso</h1>
-    <p>Ingresa la clave para entrar al checklist.</p>
-    <div class="field"><input type="text" id="passInput" placeholder="Clave" inputmode="numeric"></div>
-    <button class="btn btn-primary" onclick="checkPasscode()">Entrar</button>
-    <div class="err-msg hidden" id="passErr">Clave incorrecta.</div>
+    <h1>🔒 Iniciar sesión</h1>
+    <p>Ingresa tus datos y el código de acceso. Queda registrado quién entra, cuándo y desde dónde.</p>
+    <div class="field"><label>Nombre</label><input type="text" id="loginNombre" placeholder="Ej: Patricio"></div>
+    <div class="field"><label>Correo (recomendado)</label><input type="email" id="loginEmail" placeholder="tucorreo@ejemplo.com"></div>
+    <div class="field"><label>Código de acceso</label><input type="password" id="loginCodigo" placeholder="Código" inputmode="text"></div>
+    <div class="field" style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+      <input type="checkbox" id="loginRemember" style="width:auto;">
+      <label style="margin:0; text-transform:none; font-size:.82rem; color:var(--text-dim);" for="loginRemember">Recordar mis datos en este dispositivo (solo si es tu celular personal)</label>
+    </div>
+    <button class="btn btn-primary" id="loginBtn" onclick="submitLogin()">Ingresar</button>
+    <div class="err-msg hidden" id="loginErr"></div>
   </div>
 </div>
 
@@ -239,7 +233,8 @@ const TRANSICIONES = {
 
 const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbyx_scztWVMGLkrFMka3D4-2Ya7JVkWyOZPLaOQY_1s8Q4PcuRBTgdkyJz4JpP5pMXl/exec';
 
-let CFG = { apiUrl:'', staffName:'', passcode:'' };
+let CFG = { apiUrl: DEFAULT_API_URL };
+let CURRENT_USER = null; // { nombre, email, rol: 'Admin' | 'Volante' }
 let STATE = {
   items:[], bitacora:[], categorias:[], derivaciones:[], motivos:[], ubicaciones:[],
   currentTorre:'Torre A', view:'checklist', pendOnly:false, search:'', online:true, syncing:false,
@@ -255,49 +250,115 @@ function catOrder(c){ const i = CATS_FIJAS.indexOf(c); return i===-1 ? 100 : i; 
 function parseFH(str){ if(!str) return null; return new Date(String(str).replace(' ','T')); }
 function diasEntre(a,b){ if(!a) return null; const d2=b?parseFH(b):new Date(); const d1=parseFH(a); if(!d1) return null; return Math.max(0, Math.round((d2-d1)/86400000)); }
 function esc(s){ return (s===undefined||s===null) ? '' : String(s).replace(/'/g,"&#39;").replace(/"/g,'&quot;'); }
+function userTag(){
+  return {
+    usuario: CURRENT_USER ? CURRENT_USER.nombre : '',
+    email: CURRENT_USER ? CURRENT_USER.email : '',
+    rol: CURRENT_USER ? CURRENT_USER.rol : '',
+    autor: CURRENT_USER ? CURRENT_USER.nombre : '',
+    userAgent: navigator.userAgent
+  };
+}
 
-/* ================= ARRANQUE ================= */
+/* ================= ARRANQUE / LOGIN ================= */
 window.addEventListener('load', init);
 window.addEventListener('online', ()=>{ STATE.online=true; flushQueue(); });
 window.addEventListener('offline', ()=>{ STATE.online=false; updateSyncIcon(); });
 
 function init(){
   const savedCfg = localStorage.getItem('mant_cfg');
-  if(!savedCfg){
-    // Primera vez en este dispositivo: usa la URL fija, sin pedir nada.
-    CFG = { apiUrl: DEFAULT_API_URL, staffName:'', passcode:'' };
-    localStorage.setItem('mant_cfg', JSON.stringify(CFG));
-  } else {
-    CFG = JSON.parse(savedCfg);
-    if(!CFG.apiUrl){ CFG.apiUrl = DEFAULT_API_URL; localStorage.setItem('mant_cfg', JSON.stringify(CFG)); }
-  }
-  if(CFG.passcode && !sessionStorage.getItem('mant_pass_ok')){
-    document.getElementById('passScreen').classList.remove('hidden'); return;
-  }
-  startApp();
-}
-function saveSetup(){
-  const url = document.getElementById('setupApiUrl').value.trim();
-  const name = document.getElementById('setupStaffName').value.trim();
-  const pass = document.getElementById('setupPasscode').value.trim();
-  if(!url.startsWith('https://')){
-    const e = document.getElementById('setupErr');
-    e.textContent = 'Ingresa una URL válida (debe empezar con https://)'; e.classList.remove('hidden'); return;
-  }
-  CFG = { apiUrl:url, staffName:name, passcode:pass };
+  CFG = savedCfg ? JSON.parse(savedCfg) : { apiUrl: DEFAULT_API_URL };
+  if(!CFG.apiUrl){ CFG.apiUrl = DEFAULT_API_URL; }
   localStorage.setItem('mant_cfg', JSON.stringify(CFG));
-  document.getElementById('setupScreen').classList.add('hidden');
-  if(pass){ document.getElementById('passScreen').classList.remove('hidden'); } else { startApp(); }
+
+  const sessionUser = sessionStorage.getItem('mant_session_user');
+  if(sessionUser){
+    CURRENT_USER = JSON.parse(sessionUser);
+    startApp();
+    return;
+  }
+
+  const remembered = localStorage.getItem('mant_remember');
+  if(remembered){
+    const r = JSON.parse(remembered);
+    doLogin(r.nombre, r.email, r.codigo, true, true);
+    return;
+  }
+
+  showLoginScreen();
 }
-function checkPasscode(){
-  const val = document.getElementById('passInput').value.trim();
-  if(val === CFG.passcode){
-    sessionStorage.setItem('mant_pass_ok','1');
-    document.getElementById('passScreen').classList.add('hidden'); startApp();
-  } else { document.getElementById('passErr').classList.remove('hidden'); }
+
+function showLoginScreen(prefill){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  if(prefill){
+    document.getElementById('loginNombre').value = prefill.nombre || '';
+    document.getElementById('loginEmail').value = prefill.email || '';
+  }
 }
+
+function getLocationString(){
+  return new Promise(resolve=>{
+    if(!navigator.geolocation){ resolve('No disponible (sin soporte)'); return; }
+    const timer = setTimeout(()=>resolve('No disponible (sin permiso o tiempo agotado)'), 6000);
+    navigator.geolocation.getCurrentPosition(
+      pos=>{ clearTimeout(timer); resolve(pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5)); },
+      ()=>{ clearTimeout(timer); resolve('No disponible (permiso denegado)'); },
+      { timeout:5000 }
+    );
+  });
+}
+
+function submitLogin(){
+  const nombre = document.getElementById('loginNombre').value.trim();
+  const email = document.getElementById('loginEmail').value.trim();
+  const codigo = document.getElementById('loginCodigo').value.trim();
+  const remember = document.getElementById('loginRemember').checked;
+  if(!nombre){ showLoginError('Ingresa tu nombre'); return; }
+  if(!codigo){ showLoginError('Ingresa el código de acceso'); return; }
+  doLogin(nombre, email, codigo, remember, false);
+}
+
+function showLoginError(msg){
+  const e = document.getElementById('loginErr');
+  e.textContent = msg; e.classList.remove('hidden');
+}
+
+async function doLogin(nombre, email, codigo, remember, silent){
+  const btn = document.getElementById('loginBtn');
+  if(btn && !silent){ btn.textContent = 'Verificando...'; btn.disabled = true; }
+  const ubicacion = await getLocationString();
+  const payload = { action:'login', nombre, email, codigo, userAgent: navigator.userAgent, ubicacion };
+  try {
+    const res = await apiPost(payload);
+    if(res.success){
+      CURRENT_USER = { nombre, email, rol: res.rol };
+      sessionStorage.setItem('mant_session_user', JSON.stringify(CURRENT_USER));
+      if(remember){ localStorage.setItem('mant_remember', JSON.stringify({nombre, email, codigo})); }
+      else { localStorage.removeItem('mant_remember'); }
+      document.getElementById('loginScreen').classList.add('hidden');
+      startApp();
+    } else {
+      showLoginScreen({nombre, email});
+      showLoginError(res.error || 'Código de acceso incorrecto');
+    }
+  } catch(err){
+    showLoginScreen({nombre, email});
+    showLoginError('No se pudo verificar el acceso. Revisa tu conexión e intenta de nuevo.');
+  } finally {
+    if(btn){ btn.textContent = 'Ingresar'; btn.disabled = false; }
+  }
+}
+
+function logout(){
+  sessionStorage.removeItem('mant_session_user');
+  localStorage.removeItem('mant_remember');
+  location.reload();
+}
+
 function startApp(){
   document.getElementById('app').classList.remove('hidden');
+  if(CURRENT_USER.rol !== 'Admin'){ STATE.view = 'fugas'; }
+  document.getElementById('fabWrap').style.display = (CURRENT_USER.rol === 'Admin') ? 'flex' : 'none';
   renderTabs(); loadData(); setInterval(flushQueue, 25000);
 }
 
@@ -367,12 +428,17 @@ function apiPost(payload){
 
 /* ================= HEADER / TABS / RESUMEN ================= */
 function renderTabs(){
+  const isAdmin = CURRENT_USER && CURRENT_USER.rol === 'Admin';
+  const fugasTab = `<div class="tab ${STATE.view==='fugas'?'active':''}" onclick="selectFugas()">💧 Filtraciones</div>`;
+  const deptosTab = `<div class="tab ${STATE.view==='deptos'?'active':''}" onclick="selectDeptos()">🔧 Deptos y Comunes</div>`;
+  if(!isAdmin){
+    document.getElementById('tabsRow').innerHTML = fugasTab + deptosTab;
+    return;
+  }
   const torreTabs = TORRES.map(t=>
     `<div class="tab ${STATE.view==='checklist' && t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
-  const fugasTab = `<div class="tab ${STATE.view==='fugas'?'active':''}" onclick="selectFugas()">💧 Filtraciones</div>`;
-  const deptosTab = `<div class="tab ${STATE.view==='deptos'?'active':''}" onclick="selectDeptos()">🔧 Deptos y Comunes</div>`;
   document.getElementById('tabsRow').innerHTML = torreTabs + dashTab + fugasTab + deptosTab;
 }
 function selectTorre(t){ STATE.view='checklist'; STATE.currentTorre=t; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -381,7 +447,8 @@ function selectFugas(){ STATE.view='fugas'; renderTabs(); renderAll(); window.sc
 function selectDeptos(){ STATE.view='deptos'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function renderSummary(){
-  const items = STATE.items;
+  const isAdmin = CURRENT_USER && CURRENT_USER.rol === 'Admin';
+  const items = isAdmin ? STATE.items : [...fugaItems(), ...deptoItems()];
   const activos = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
   const count = est => items.filter(i=>i.Estado===est).length;
   document.getElementById('summaryRow').innerHTML = `
@@ -804,7 +871,7 @@ function promptNewUbicacion(){
   const val = prompt('Nombre de la nueva ubicación común:');
   if(!val) return;
   STATE.ubicaciones.push(val);
-  const payload = { action:'addConfig', tipo:'ubicacion', valor: val };
+  const payload = { action:'addConfig', tipo:'ubicacion', valor: val, ...userTag() };
   if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
   const sel = document.getElementById('fUbicComun');
   if(sel){ const opt=document.createElement('option'); opt.value=val; opt.textContent=val; sel.appendChild(opt); sel.value=val; }
@@ -838,12 +905,12 @@ function submitFugaReport(){
     Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
     Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
     Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
-    Actualizado_Por: CFG.staffName||'', Notas:''
+    Actualizado_Por: CURRENT_USER.nombre||'', Notas:''
   };
   STATE.items.push(newItem);
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
-  const payload = { action:'add', torre, piso, categoria:CATEGORIA_FUGA, detalle:det, origen, grupo, autor: CFG.staffName||'' };
+  const payload = { action:'add', torre, piso, categoria:CATEGORIA_FUGA, detalle:det, origen, grupo, ...userTag() };
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
 
   if(navigator.onLine){
@@ -1079,7 +1146,7 @@ function promptNewUbicacionDepto(){
   const val = prompt('Nombre de la nueva ubicación común:');
   if(!val) return;
   STATE.ubicaciones.push(val);
-  const payload = { action:'addConfig', tipo:'ubicacion', valor: val };
+  const payload = { action:'addConfig', tipo:'ubicacion', valor: val, ...userTag() };
   if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
   const sel = document.getElementById('dUbicComun');
   if(sel){ const opt=document.createElement('option'); opt.value=val; opt.textContent=val; sel.appendChild(opt); sel.value=val; }
@@ -1115,12 +1182,12 @@ function submitDeptoReport(){
     Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
     Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
     Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
-    Actualizado_Por: CFG.staffName||'', Notas:''
+    Actualizado_Por: CURRENT_USER.nombre||'', Notas:''
   };
   STATE.items.push(newItem);
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
-  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, autor: CFG.staffName||'' };
+  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, ...userTag() };
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
 
   if(navigator.onLine){
@@ -1307,7 +1374,7 @@ function promptNewArea(){
   const val = prompt('Nombre de la nueva área de derivación:');
   if(!val) return;
   STATE.derivaciones.push(val);
-  const payload = { action:'addConfig', tipo:'derivacion', valor: val };
+  const payload = { action:'addConfig', tipo:'derivacion', valor: val, ...userTag() };
   if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
   const sel = document.getElementById('tArea');
   const opt = document.createElement('option'); opt.value = val; opt.textContent = val;
@@ -1353,7 +1420,7 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle){
   if(detalle) item.Detalle = detalle;
   if(area !== undefined) item.Area_Derivacion = area;
   item.Fecha_Ultima_Actualizacion = ts;
-  item.Actualizado_Por = CFG.staffName || item.Actualizado_Por;
+  item.Actualizado_Por = CURRENT_USER.nombre || item.Actualizado_Por;
   if(to === 'Resuelto') item.Fecha_Resolucion = ts;
   if(to === 'Pendiente' || to === 'Nuevo') item.Fecha_Resolucion = '';
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
@@ -1363,7 +1430,7 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle){
   renderAll();
   openItemModal(folio);
 
-  const payload = { action:'transition', folio, estado_nuevo:to, motivo, nota, autor: CFG.staffName||'' };
+  const payload = { action:'transition', folio, estado_nuevo:to, motivo, nota, ...userTag() };
   if(area !== undefined) payload.area_derivacion = area;
   if(detalle) payload.detalle = detalle;
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
@@ -1404,7 +1471,7 @@ function saveEditFields(folio){
   item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
-  const payload = { action:'updateFields', folio, detalle, origen, grupo, notas, autor: CFG.staffName||'' };
+  const payload = { action:'updateFields', folio, detalle, origen, grupo, notas, ...userTag() };
   if(navigator.onLine){ apiPost(payload).then(()=>showToast('Guardado ✓')).catch(()=>{ queueAdd(payload); }); }
   else { queueAdd(payload); showToast('Sin conexión: guardado localmente'); }
   closeModal(); renderAll();
@@ -1416,7 +1483,7 @@ function deleteItemUI(folio){
   STATE.items = STATE.items.filter(x=>x.Folio!==folio);
   STATE.bitacora = STATE.bitacora.filter(x=>x.Folio!==folio);
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
-  const payload = { action:'delete', folio };
+  const payload = { action:'delete', folio, ...userTag() };
   if(navigator.onLine){ apiPost(payload).then(res=>showToast(res.success?'Eliminado':'Error al eliminar')); }
   else { queueAdd(payload); showToast('Sin conexión: se eliminará al recuperar señal'); }
   closeModal(); renderAll();
@@ -1470,7 +1537,7 @@ function promptNewCategoria(targetSelectId){
   const val = prompt('Nombre de la nueva categoría:');
   if(!val) return;
   STATE.categorias.push(val);
-  const payload = { action:'addConfig', tipo:'categoria', valor: val };
+  const payload = { action:'addConfig', tipo:'categoria', valor: val, ...userTag() };
   if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
   const sel = document.getElementById(targetSelectId || 'nCat');
   const opt = document.createElement('option'); opt.value = val; opt.textContent = val;
@@ -1490,12 +1557,12 @@ function submitAddReport(torre, piso){
     Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
     Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
     Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
-    Actualizado_Por: CFG.staffName||'', Notas:''
+    Actualizado_Por: CURRENT_USER.nombre||'', Notas:''
   };
   STATE.items.push(newItem);
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
-  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, autor: CFG.staffName||'' };
+  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, ...userTag() };
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
 
   if(navigator.onLine){
@@ -1511,17 +1578,16 @@ function submitAddReport(torre, piso){
 function openSettings(){
   showModal(`
     <h2>⚙ Configuración</h2>
+    <div class="kv"><div class="k">Sesión</div><div>${esc(CURRENT_USER.nombre)} (${CURRENT_USER.rol})</div></div>
+    ${CURRENT_USER.email ? `<div class="kv"><div class="k">Correo</div><div>${esc(CURRENT_USER.email)}</div></div>` : ''}
     <div class="field"><label>URL de la API</label><input type="text" id="cfgUrl" value="${esc(CFG.apiUrl)}"></div>
-    <div class="field"><label>Tu nombre</label><input type="text" id="cfgName" value="${esc(CFG.staffName)}"></div>
-    <div class="field"><label>Clave de acceso (vacío = sin clave)</label><input type="text" id="cfgPass" value="${esc(CFG.passcode)}"></div>
     <button class="btn btn-primary" onclick="saveSettings()">Guardar</button>
     <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="closeModal()">Cerrar</button>
+    <button class="btn btn-danger" style="width:100%;margin-top:8px" onclick="logout()">Cerrar sesión</button>
   `);
 }
 function saveSettings(){
   CFG.apiUrl = document.getElementById('cfgUrl').value.trim();
-  CFG.staffName = document.getElementById('cfgName').value.trim();
-  CFG.passcode = document.getElementById('cfgPass').value.trim();
   localStorage.setItem('mant_cfg', JSON.stringify(CFG));
   closeModal(); showToast('Configuración guardada'); loadData();
 }

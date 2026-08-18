@@ -85,6 +85,7 @@
   .item-main{flex:1; min-width:0;}
   .item-cat{font-size:.86rem; font-weight:600; display:flex; align-items:center; gap:6px;}
   .folio-tag{font-size:.63rem; color:var(--text-dim); font-family:ui-monospace,monospace; font-weight:400;}
+  .stale-badge{font-size:.68rem; color:#E8A33D; display:inline-block; margin-top:2px;}
   .item-detalle{font-size:.76rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px;}
   .chev{color:var(--text-dim); font-size:.9rem;}
 
@@ -164,7 +165,7 @@
       <div><div class="h-title">Checklist de Mantención</div><div class="h-sub">Jardines de Vicuña Mackenna</div></div>
       <div class="h-actions">
         <button class="icon-btn" onclick="manualSync()" title="Sincronizar"><span id="syncIcon">⟳</span></button>
-        <button class="icon-btn" onclick="openSettings()" title="Configuración">⚙</button>
+        <button class="icon-btn" onclick="confirmLogout()" title="Cerrar sesión">🚪</button>
       </div>
     </div>
     <div class="summary-row" id="summaryRow"></div>
@@ -360,11 +361,24 @@ function startApp(){
   if(CURRENT_USER.rol !== 'Admin'){ STATE.view = 'fugas'; }
   document.getElementById('fabWrap').style.display = (CURRENT_USER.rol === 'Admin') ? 'flex' : 'none';
   renderTabs(); loadData(); setInterval(flushQueue, 25000);
+  setInterval(loadData, 90000); // auto-refresh cada 90s para detectar registros nuevos
 }
 
 /* ================= CARGA / SYNC ================= */
 function updateSyncIcon(){
   document.getElementById('syncIcon').textContent = STATE.syncing ? '⏳' : (STATE.online ? '⟳' : '⚠');
+}
+let previousFolios = null;
+function checkNewRecords(items){
+  const currentFolios = new Set(items.map(i=>i.Folio));
+  if(previousFolios){
+    let newCount = 0;
+    currentFolios.forEach(f=>{ if(!previousFolios.has(f)) newCount++; });
+    if(newCount > 0){
+      showToast('🆕 ' + newCount + ' nuevo' + (newCount>1?'s registros':' registro') + ' desde tu última revisión');
+    }
+  }
+  previousFolios = currentFolios;
 }
 function loadData(){
   STATE.syncing = true; updateSyncIcon();
@@ -381,6 +395,7 @@ function loadData(){
         localStorage.setItem('mant_cache', JSON.stringify(res.data));
         STATE.online = true;
         document.getElementById('offlineBanner').classList.add('hidden');
+        checkNewRecords(STATE.items);
         flushQueue();
       } else {
         showToast('Error del servidor: ' + (res.error||''));
@@ -781,37 +796,28 @@ function renderFugas(){
 function renderFugasList(){
   const wrap = document.getElementById('fugasList');
   if(!wrap) return;
-  const items = fugaFilteredItems();
+  const items = fugaFilteredItems().slice().sort((a,b)=>(b.Fecha_Deteccion||'').localeCompare(a.Fecha_Deteccion||''));
   if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay filtraciones que coincidan con el filtro.</div>'; return; }
+  wrap.innerHTML = `<div class="floor-card">${items.map(i=>renderFugaRow(i)).join('')}</div>`;
+}
 
-  const grupos = {};
-  items.forEach(i=>{
-    const key = i.Torre || 'Común';
-    if(!grupos[key]) grupos[key] = [];
-    grupos[key].push(i);
-  });
-
-  let html = '';
-  TORRES_ALL.forEach(t=>{
-    const grp = grupos[t];
-    if(!grp || grp.length===0) return;
-    html += `<div class="floor-card">
-      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0)).forEach(i=>{ html += renderFugaRow(i); });
-    html += `</div>`;
-  });
-  wrap.innerHTML = html;
+function isStale(i){
+  if(!ACTIVE_STATES.includes(i.Estado)) return false;
+  const dias = diasEntre(i.Fecha_Ultima_Actualizacion || i.Fecha_Deteccion);
+  return dias !== null && dias >= 2;
 }
 
 function renderFugaRow(i){
   const est = i.Estado || 'Sin revisar';
   const color = ESTADO_COLORS[est] || '#5B6675';
   const ubic = i.Origen || (i.Piso ? ('Piso '+i.Piso) : 'Sin ubicación');
+  const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${ubic} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${i.Torre} · ${ubic} <span class="folio-tag">${i.Folio}</span></div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
+        ${staleBadge}
       </div>
       <div class="chev">›</div>
     </div>`;
@@ -1053,36 +1059,21 @@ function renderDeptos(){
 function renderDeptosList(){
   const wrap = document.getElementById('deptosList');
   if(!wrap) return;
-  const items = deptoFilteredItems();
+  const items = deptoFilteredItems().slice().sort((a,b)=>(b.Fecha_Deteccion||'').localeCompare(a.Fecha_Deteccion||''));
   if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fallas que coincidan con el filtro. Usa el botón de arriba para reportar una en un depto, ascensor, acceso o área común.</div>'; return; }
-
-  const grupos = {};
-  items.forEach(i=>{
-    const key = i.Torre || 'Sin torre';
-    if(!grupos[key]) grupos[key] = [];
-    grupos[key].push(i);
-  });
-
-  let html = '';
-  TORRES_ALL.forEach(t=>{
-    const grp = grupos[t];
-    if(!grp || grp.length===0) return;
-    html += `<div class="floor-card">
-      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0) || (a.Origen||'').localeCompare(b.Origen||'')).forEach(i=>{ html += renderDeptoRow(i); });
-    html += `</div>`;
-  });
-  wrap.innerHTML = html;
+  wrap.innerHTML = `<div class="floor-card">${items.map(i=>renderDeptoRow(i)).join('')}</div>`;
 }
 
 function renderDeptoRow(i){
   const est = i.Estado || 'Sin revisar';
   const color = ESTADO_COLORS[est] || '#5B6675';
+  const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${i.Torre} · ${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
+        ${staleBadge}
       </div>
       <div class="chev">›</div>
     </div>`;
@@ -1575,21 +1566,8 @@ function submitAddReport(torre, piso){
 }
 
 /* ================= CONFIGURACIÓN ================= */
-function openSettings(){
-  showModal(`
-    <h2>⚙ Configuración</h2>
-    <div class="kv"><div class="k">Sesión</div><div>${esc(CURRENT_USER.nombre)} (${CURRENT_USER.rol})</div></div>
-    ${CURRENT_USER.email ? `<div class="kv"><div class="k">Correo</div><div>${esc(CURRENT_USER.email)}</div></div>` : ''}
-    <div class="field"><label>URL de la API</label><input type="text" id="cfgUrl" name="mant_apiurl_field" value="${esc(CFG.apiUrl)}" autocomplete="off"></div>
-    <button class="btn btn-primary" onclick="saveSettings()">Guardar</button>
-    <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="closeModal()">Cerrar</button>
-    <button class="btn btn-danger" style="width:100%;margin-top:8px" onclick="logout()">Cerrar sesión</button>
-  `);
-}
-function saveSettings(){
-  CFG.apiUrl = document.getElementById('cfgUrl').value.trim();
-  localStorage.setItem('mant_cfg', JSON.stringify(CFG));
-  closeModal(); showToast('Configuración guardada'); loadData();
+function confirmLogout(){
+  if(confirm('¿Cerrar sesión?')) logout();
 }
 
 /* ================= TOAST ================= */

@@ -181,7 +181,7 @@
   </div>
 
   <div class="floor-dock" id="floorDock"></div>
-  <div id="offlineBanner" class="banner warn hidden">Sin conexión — mostrando datos guardados. Tus cambios se enviarán al recuperar señal.</div>
+  <div id="offlineBanner" class="banner warn hidden">Sin conexión — mostrando datos guardados. Tus cambios se enviarán al recuperar señal. <span style="text-decoration:underline;cursor:pointer" onclick="manualSync()">Reintentar</span></div>
   <main id="mainList"></main>
 </div>
 
@@ -267,9 +267,7 @@ window.addEventListener('online', ()=>{ STATE.online=true; flushQueue(); });
 window.addEventListener('offline', ()=>{ STATE.online=false; updateSyncIcon(); });
 
 function init(){
-  const savedCfg = localStorage.getItem('mant_cfg');
-  CFG = savedCfg ? JSON.parse(savedCfg) : { apiUrl: DEFAULT_API_URL };
-  if(!CFG.apiUrl){ CFG.apiUrl = DEFAULT_API_URL; }
+  CFG = { apiUrl: DEFAULT_API_URL };
   localStorage.setItem('mant_cfg', JSON.stringify(CFG));
 
   const sessionUser = sessionStorage.getItem('mant_session_user');

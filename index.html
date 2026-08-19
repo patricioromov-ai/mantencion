@@ -381,7 +381,10 @@ function checkNewRecords(items){
 function loadData(){
   STATE.syncing = true; updateSyncIcon();
   fetch(CFG.apiUrl + '?action=list')
-    .then(r=>r.json())
+    .then(r=>r.text().then(text=>{
+      try { return JSON.parse(text); }
+      catch(e){ const err = new Error('RESPUESTA_NO_JSON'); err.raw = text; throw err; }
+    }))
     .then(res=>{
       if(res.success){
         STATE.items = res.data.checklist.map(normalizeItem);
@@ -401,10 +404,16 @@ function loadData(){
       }
       STATE.syncing = false; updateSyncIcon(); renderAll();
     })
-    .catch(()=>{
+    .catch((err)=>{
       STATE.online = false; STATE.syncing = false; updateSyncIcon();
       loadFromCache();
-      document.getElementById('offlineBanner').classList.remove('hidden');
+      const banner = document.getElementById('offlineBanner');
+      if(err && err.message === 'RESPUESTA_NO_JSON'){
+        banner.innerHTML = '⚠ La API respondió algo que no es válido (probablemente un bloqueador de contenido o un problema de permisos en Apps Script — revisa que la implementación esté como "Cualquier usuario"). <span style="text-decoration:underline;cursor:pointer" onclick="manualSync()">Reintentar</span>';
+      } else {
+        banner.innerHTML = 'Sin conexión — mostrando datos guardados. Tus cambios se enviarán al recuperar señal. <span style="text-decoration:underline;cursor:pointer" onclick="manualSync()">Reintentar</span>';
+      }
+      banner.classList.remove('hidden');
       renderAll();
     });
 }

@@ -598,7 +598,7 @@ function dashFilteredItems(){
     d.estados.includes(i.Estado || 'Sin revisar') &&
     (!d.categoria || i.Categoria === d.categoria) &&
     (!d.area || i.Area_Derivacion === d.area) &&
-    (!d.grupo || (i.Grupo||'').toLowerCase().includes(d.grupo.toLowerCase())) &&
+    (!d.grupo || String(i.Grupo||'').toLowerCase().includes(d.grupo.toLowerCase())) &&
     (!d.piso || String(i.Piso) === String(d.piso)) &&
     (!d.soloSeguimiento || esSeguimiento(i))
   );
@@ -1045,7 +1045,7 @@ function deptoItems(){
   return STATE.items.filter(i=>{
     const esFiltracion = i.Categoria===CATEGORIA_FUGA || i.Categoria===CATEGORIA_FUGA_LEGACY;
     if(esFiltracion) return false; // esas viven en la pestaña Filtraciones
-    const origen = (i.Origen||'').trim().toLowerCase();
+    const origen = String(i.Origen||'').trim().toLowerCase();
     const esDepto = origen.startsWith('depto');
     const esAscensorOAcceso = origen==='ascensor' || origen==='acceso principal';
     const esComun = i.Torre === 'Común';
@@ -1782,7 +1782,7 @@ function buildPdfActivas(estadosSel, torre, area, grupo, piso, categoria, soloSe
   if(piso) items = items.filter(i=>String(i.Piso)===String(piso));
   if(categoria) items = items.filter(i=>i.Categoria===categoria);
   if(area) items = items.filter(i=>i.Area_Derivacion===area);
-  if(grupo) items = items.filter(i=>(i.Grupo||'').toLowerCase().includes(grupo));
+  if(grupo) items = items.filter(i=>String(i.Grupo||'').toLowerCase().includes(grupo));
   if(soloSeguimiento) items = items.filter(i=>esSeguimiento(i));
 
   doc.setFont('helvetica','bold'); doc.setFontSize(15);

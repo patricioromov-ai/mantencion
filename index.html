@@ -214,18 +214,18 @@ const TRANSICIONES = {
   ],
   'Nuevo': [
     { label:'Confirmar pendiente', to:'Pendiente', code:'NUEVO_A_PENDIENTE' },
-    { label:'Descartar', to:'Descartado', code:'NUEVO_A_DESCARTADO' }
+    { label:'Descartar', to:'Descartado', code:'NUEVO_A_DESCARTADO', requiereMotivo:true }
   ],
   'Pendiente': [
     { label:'Derivar a un área', to:'Derivado', code:'PENDIENTE_A_DERIVADO', needsArea:true },
-    { label:'Cerrar (sin falla)', to:'Descartado', code:'PENDIENTE_A_DESCARTADO' }
+    { label:'Cerrar (sin falla)', to:'Descartado', code:'PENDIENTE_A_DESCARTADO', requiereMotivo:true }
   ],
   'Derivado': [
     { label:'Marcar en proceso', to:'En proceso', code:'DERIVADO_A_PROCESO' },
     { label:'Devolver a pendiente', to:'Pendiente', code:'DERIVADO_A_PENDIENTE' }
   ],
   'En proceso': [
-    { label:'Marcar resuelto', to:'Resuelto', code:'PROCESO_A_RESUELTO', fotoRecomendada:true }
+    { label:'Marcar resuelto', to:'Resuelto', code:'PROCESO_A_RESUELTO', fotoRecomendada:true, requiereMotivo:true }
   ],
   'Resuelto': [ { label:'Reabrir', to:'Pendiente', code:'REABRIR' } ],
   'OK': [ { label:'Reabrir (reportar falla)', to:'Pendiente', code:'REABRIR' } ],
@@ -562,11 +562,15 @@ function renderList(){
 function renderItemRow(i){
   const est = i.Estado || 'Sin revisar';
   const color = ESTADO_COLORS[est] || '#5B6675';
-  return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
+  const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
+  const urgentPrefix = esUrgente(i) ? '🚨 ' : '';
+  const seguimientoTag = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#3B82C4">📌 Seguimiento</span>' : '';
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${i.Categoria} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${urgentPrefix}${i.Categoria} <span class="folio-tag">${i.Folio}</span></div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
+        ${staleBadge}${seguimientoTag}
       </div>
       <div class="chev">›</div>
     </div>`;
@@ -577,7 +581,7 @@ const ALL_ESTADOS = Object.keys(ESTADO_COLORS);
 
 function ensureDashState(){
   if(!STATE.dash){
-    STATE.dash = { torres:[...TORRES_ALL], estados:[...ALL_ESTADOS], categoria:'', area:'', grupo:'' };
+    STATE.dash = { torres:[...TORRES_ALL], estados:[...ALL_ESTADOS], categoria:'', area:'', grupo:'', piso:'', soloSeguimiento:false };
   }
 }
 function dashFilteredItems(){
@@ -587,7 +591,9 @@ function dashFilteredItems(){
     d.estados.includes(i.Estado || 'Sin revisar') &&
     (!d.categoria || i.Categoria === d.categoria) &&
     (!d.area || i.Area_Derivacion === d.area) &&
-    (!d.grupo || (i.Grupo||'').toLowerCase().includes(d.grupo.toLowerCase()))
+    (!d.grupo || (i.Grupo||'').toLowerCase().includes(d.grupo.toLowerCase())) &&
+    (!d.piso || String(i.Piso) === String(d.piso)) &&
+    (!d.soloSeguimiento || esSeguimiento(i))
   );
 }
 function countBy(items, keyFn){
@@ -629,6 +635,13 @@ function renderDashboard(){
       <div class="field"><label>Grupo</label>
         <input type="text" value="${esc(d.grupo)}" oninput="setDashField('grupo', this.value)" placeholder="Ej: Ronda-12-08-2026">
       </div>
+      <div class="field"><label>Piso (opcional)</label>
+        <input type="number" value="${esc(d.piso)}" oninput="setDashField('piso', this.value)" placeholder="Ej: 12">
+      </div>
+      <div class="field" style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <input type="checkbox" id="dashSeguimiento" ${d.soloSeguimiento?'checked':''} onchange="setDashField('soloSeguimiento', this.checked)" style="width:auto;">
+        <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="dashSeguimiento">📌 Solo con seguimiento pendiente</label>
+      </div>
     </div>
     <div id="dashMetrics"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="buildPdfDashboard()">📄 Imprimir / PDF de este panel</button>
@@ -660,6 +673,7 @@ function renderDashMetrics(){
   const resueltos = items.filter(i=>i.Estado==='Resuelto');
   const diasArr = resueltos.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
   const promDias = diasArr.length ? (diasArr.reduce((s,x)=>s+x,0)/diasArr.length).toFixed(1) : '—';
+  const conSeguimiento = items.filter(i=>esSeguimiento(i)).length;
 
   const byEstado = countBy(items, i=>i.Estado||'Sin revisar');
   const byTorre = countBy(items, i=>i.Torre);
@@ -677,6 +691,7 @@ function renderDashMetrics(){
       <div class="tile"><div class="tile-num" style="color:#D6534A">${activos}</div><div class="tile-label">Activos</div></div>
       <div class="tile"><div class="tile-num" style="color:#3B82C4">${resueltos.length}</div><div class="tile-label">Resueltos</div></div>
       <div class="tile"><div class="tile-num" style="color:var(--accent)">${promDias}</div><div class="tile-label">Días prom. resolución</div></div>
+      <div class="tile"><div class="tile-num" style="color:#3B82C4">${conSeguimiento}</div><div class="tile-label">📌 Con seguimiento</div></div>
     </div>
     <div class="section-label">Por estado</div>
     ${byEstado.map(([k,v])=>barRow(k,v,maxE,ESTADO_COLORS[k])).join('') || '<div class="empty-note">Sin datos</div>'}
@@ -714,7 +729,8 @@ function buildPdfDashboard(){
     doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=14;
     const filtrosTxt = 'Torres: ' + (d.torres.length===TORRES_ALL.length?'Todas':d.torres.join(', ')) +
       ' · Estados: ' + (d.estados.length===ALL_ESTADOS.length?'Todos':d.estados.join(', ')) +
-      (d.categoria?(' · Falla: '+d.categoria):'') + (d.area?(' · Área: '+d.area):'') + (d.grupo?(' · Grupo: '+d.grupo):'');
+      (d.categoria?(' · Falla: '+d.categoria):'') + (d.area?(' · Área: '+d.area):'') + (d.grupo?(' · Grupo: '+d.grupo):'') +
+      (d.piso?(' · Piso: '+d.piso):'') + (d.soloSeguimiento?' · Solo con seguimiento pendiente':'');
     doc.splitTextToSize(filtrosTxt, pageW-marginX*2).forEach(l=>{ doc.text(l, marginX, y); y+=12; });
     doc.setDrawColor(200); y+=6; doc.line(marginX, y, pageW-marginX, y); y+=20;
     doc.setTextColor(0);
@@ -814,7 +830,7 @@ function renderFugasList(){
     if(!grp || grp.length===0) return;
     html += `<div class="floor-card">
       <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort((a,b)=>recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderFugaRow(i); });
+    grp.slice().sort((a,b)=>(esUrgente(b)-esUrgente(a)) || recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderFugaRow(i); });
     html += `</div>`;
   });
   wrap.innerHTML = html;
@@ -831,12 +847,14 @@ function renderFugaRow(i){
   const color = ESTADO_COLORS[est] || '#5B6675';
   const ubic = i.Origen || (i.Piso ? ('Piso '+i.Piso) : 'Sin ubicación');
   const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
-  return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
+  const urgentPrefix = esUrgente(i) ? '🚨 ' : '';
+  const seguimientoTag = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#3B82C4">📌 Seguimiento</span>' : '';
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${ubic} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${urgentPrefix}${ubic} <span class="folio-tag">${i.Folio}</span></div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
-        ${staleBadge}
+        ${staleBadge}${seguimientoTag}
       </div>
       <div class="chev">›</div>
     </div>`;
@@ -1094,7 +1112,7 @@ function renderDeptosList(){
     if(!grp || grp.length===0) return;
     html += `<div class="floor-card">
       <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort((a,b)=>recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderDeptoRow(i); });
+    grp.slice().sort((a,b)=>(esUrgente(b)-esUrgente(a)) || recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderDeptoRow(i); });
     html += `</div>`;
   });
   wrap.innerHTML = html;
@@ -1104,12 +1122,14 @@ function renderDeptoRow(i){
   const est = i.Estado || 'Sin revisar';
   const color = ESTADO_COLORS[est] || '#5B6675';
   const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
-  return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
+  const urgentPrefix = esUrgente(i) ? '🚨 ' : '';
+  const seguimientoTag = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#3B82C4">📌 Seguimiento</span>' : '';
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${urgentPrefix}${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
-        ${staleBadge}
+        ${staleBadge}${seguimientoTag}
       </div>
       <div class="chev">›</div>
     </div>`;
@@ -1310,12 +1330,24 @@ function openItemModal(folio){
   showModal(itemDetailHtml(item));
 }
 
+function esUrgente(item){ return item.Urgente === 'Sí' || item.Urgente === true; }
+function esSeguimiento(item){ return item.Seguimiento === 'Sí' || item.Seguimiento === true; }
+
+function ultimoMotivo(item){
+  const entries = STATE.bitacora.filter(b=>b.Folio===item.Folio).slice().sort((a,b)=>(b.Fecha_Hora||'').localeCompare(a.Fecha_Hora||''));
+  return entries.length ? entries[0].Motivo : '';
+}
+function fueRevertidoAutomatico(item){ return ultimoMotivo(item) === 'Reversión automática'; }
+function fueAutoMarcadoUrgente(item){ return ultimoMotivo(item) === 'Auto-marcado urgente'; }
+
 function itemDetailHtml(item){
   const est = item.Estado || 'Sin revisar';
   const color = ESTADO_COLORS[est] || '#5B6675';
   const transiciones = TRANSICIONES[est] || [];
   const diasDetTxt = item.Fecha_Deteccion ? (diasEntre(item.Fecha_Deteccion) + ' días desde detección') : '';
   const diasResTxt = (item.Fecha_Deteccion && item.Fecha_Resolucion) ? ('Resuelto en ' + diasEntre(item.Fecha_Deteccion, item.Fecha_Resolucion) + ' días') : '';
+  const urgente = esUrgente(item);
+  const seguimiento = esSeguimiento(item);
 
   let photos = '';
   if(item.Foto_Deteccion_URL || item.Foto_Resolucion_URL){
@@ -1326,13 +1358,30 @@ function itemDetailHtml(item){
   }
 
   const actions = transiciones.map(t=>
-    `<button class="btn btn-primary btn-sm" style="background:${ESTADO_COLORS[t.to]}" onclick="showTransitionForm('${item.Folio}','${esc(t.label)}','${t.to}','${t.code}',${t.needsArea?1:0},${t.needsDetalle?1:0})">${t.label}</button>`
+    `<button class="btn btn-primary btn-sm" style="background:${ESTADO_COLORS[t.to]}" onclick="showTransitionForm('${item.Folio}','${esc(t.label)}','${t.to}','${t.code}',${t.needsArea?1:0},${t.needsDetalle?1:0},${t.requiereMotivo?1:0})">${t.label}</button>`
   ).join('');
 
+  const notas = STATE.bitacora.filter(b=>b.Folio===item.Folio && b.Nota).slice().sort((a,b)=>(b.Fecha_Hora||'').localeCompare(a.Fecha_Hora||''));
+  const notasHtml = notas.length ? notas.map(n=>`
+      <div class="bit-entry">
+        <div class="bit-date">${n.Fecha_Hora} · ${n.Autor||'—'}</div>
+        <div>${n.Nota}</div>
+      </div>`).join('') : '<div class="empty-note" style="padding:10px 0">Sin notas o comentarios todavía.</div>';
+
+  let urgenteBadge = '';
+  if(urgente){
+    urgenteBadge = fueAutoMarcadoUrgente(item)
+      ? `<span class="badge" style="background:#D6534A22;color:#D6534A;border:1px solid #D6534A;margin-left:6px">⚠ Sin atención (2h)</span>`
+      : `<span class="badge" style="background:#D6534A22;color:#D6534A;border:1px solid #D6534A;margin-left:6px">🚨 Urgente</span>`;
+  }
+
   return `
-    <h2>${item.Categoria} <span class="folio-tag">${item.Folio}</span></h2>
+    <h2>${urgente?'🚨 ':''}${item.Categoria} <span class="folio-tag">${item.Folio}</span></h2>
     <div class="sub">${item.Torre} · ${item.Piso<=-1?'Subterráneo ':'Piso '}${item.Piso}</div>
     <span class="badge" style="background:${color}22;color:${color};border:1px solid ${color}">${est}</span>
+    ${urgenteBadge}
+    ${seguimiento ? `<span class="badge" style="background:#3B82C422;color:#3B82C4;border:1px solid #3B82C4;margin-left:6px">📌 Seguimiento</span>` : ''}
+    ${fueRevertidoAutomatico(item) ? `<span class="badge" style="background:#E8A33D22;color:#E8A33D;border:1px solid #E8A33D;margin-left:6px">🔁 Reabierto automático (3h sin gestión)</span>` : ''}
     <div style="margin-top:12px; font-size:.88rem; line-height:1.4;">${item.Detalle || '<span style="color:var(--text-dim)">Sin detalle registrado</span>'}</div>
     ${photos}
     <div class="kv"><div class="k">Origen</div><div>${item.Origen || '—'}</div></div>
@@ -1341,21 +1390,64 @@ function itemDetailHtml(item){
     <div class="kv"><div class="k">Detectado</div><div>${item.Fecha_Deteccion || '—'} ${diasDetTxt && est!=='Resuelto' ? '('+diasEntre(item.Fecha_Deteccion)+'d)' : ''}</div></div>
     ${diasResTxt ? `<div class="kv"><div class="k">Resolución</div><div>${diasResTxt}</div></div>` : ''}
     <div class="kv"><div class="k">Última actualización</div><div>${item.Fecha_Ultima_Actualizacion || '—'} · ${item.Actualizado_Por||'—'}</div></div>
-    ${item.Notas ? `<div class="kv"><div class="k">Notas</div><div>${item.Notas}</div></div>` : ''}
+
+    <div class="section-label">Notas y comentarios</div>
+    ${notasHtml}
 
     <div class="action-list">${actions}</div>
 
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn ${urgente?'btn-danger':'btn-ghost'} btn-sm" onclick="toggleUrgente('${item.Folio}')">${urgente ? '✓ Quitar urgencia' : '🚨 Urgente'}</button>
+      <button class="btn ${seguimiento?'btn-danger':'btn-ghost'} btn-sm" onclick="toggleSeguimiento('${item.Folio}')">${seguimiento ? '✓ Seguimiento hecho' : '📌 Seguimiento'}</button>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-ghost btn-sm" onclick="showEditFieldsForm('${item.Folio}')">Editar datos</button>
-      <button class="btn btn-ghost btn-sm" onclick="showBitacora('${item.Folio}')">Ver historial</button>
+      <button class="btn btn-ghost btn-sm" onclick="showBitacora('${item.Folio}')">Ver historial completo</button>
     </div>
     <button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="deleteItemUI('${item.Folio}')">Eliminar ítem</button>
     <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="closeModal()">Cerrar</button>
   `;
 }
 
+function toggleUrgente(folio){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  if(!item) return;
+  const nuevo = !esUrgente(item);
+  item.Urgente = nuevo ? 'Sí' : '';
+  item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
+
+  const payload = { action:'updateFields', folio, urgente: nuevo, soloUrgente:true, ...userTag() };
+  if(navigator.onLine){
+    apiPost(payload).then(res=>{ showToast(res.success ? (nuevo?'Marcado como urgente':'Urgencia quitada') : 'No se pudo guardar en el servidor'); });
+  } else {
+    queueAdd(payload); showToast('Sin conexión: guardado localmente');
+  }
+  openItemModal(folio);
+  renderAll();
+}
+
+function toggleSeguimiento(folio){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  if(!item) return;
+  const nuevo = !esSeguimiento(item);
+  item.Seguimiento = nuevo ? 'Sí' : '';
+  item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
+
+  const payload = { action:'updateFields', folio, seguimiento: nuevo, soloSeguimiento:true, ...userTag() };
+  if(navigator.onLine){
+    apiPost(payload).then(res=>{ showToast(res.success ? (nuevo?'Marcado para seguimiento':'Seguimiento quitado') : 'No se pudo guardar en el servidor'); });
+  } else {
+    queueAdd(payload); showToast('Sin conexión: guardado localmente');
+  }
+  openItemModal(folio);
+  renderAll();
+}
+
 /* ================= FORMULARIO DE TRANSICIÓN ================= */
-function showTransitionForm(folio, label, to, code, needsArea, needsDetalle){
+function showTransitionForm(folio, label, to, code, needsArea, needsDetalle, requiereMotivo){
   const item = STATE.items.find(x=>x.Folio===folio);
   const motivos = STATE.motivos.filter(m=>m.Transicion===code);
   pendingPhoto = { base64:null, mime:null };
@@ -1369,7 +1461,7 @@ function showTransitionForm(folio, label, to, code, needsArea, needsDetalle){
     ${needsArea ? `<div class="field"><label>Área de derivación</label><select id="tArea"><option value="">Selecciona...</option>${areaOptions}</select>
       <div class="hint" onclick="promptNewArea()" style="color:var(--accent);cursor:pointer;margin-top:6px;">+ Agregar nueva área</div></div>` : ''}
     <div class="field">
-      <label>Motivo</label>
+      <label>Motivo${requiereMotivo ? ' (obligatorio)' : ''}</label>
       <div class="chip-row" id="motivoChips">
         ${motivos.map(m=>`<div class="chip" onclick="selectMotivoChip(this,'${esc(m.Motivo)}')">${m.Motivo}</div>`).join('')}
         <div class="chip" onclick="selectMotivoChip(this,'__otro__')">Otro...</div>
@@ -1377,6 +1469,10 @@ function showTransitionForm(folio, label, to, code, needsArea, needsDetalle){
       <input type="text" id="tMotivoCustom" placeholder="Escribe el motivo" class="hidden">
     </div>
     <div class="field"><label>Nota (opcional)</label><textarea id="tNota"></textarea></div>
+    ${requiereMotivo ? `<div class="field" style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" id="tSeguimiento" style="width:auto;">
+      <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="tSeguimiento">📌 Requiere seguimiento (ej. verificar que el residente resuelva por su cuenta)</label>
+    </div>` : ''}
     <div class="field">
       <label>Foto (opcional)</label>
       <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
@@ -1384,7 +1480,7 @@ function showTransitionForm(folio, label, to, code, needsArea, needsDetalle){
     </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="openItemModal('${folio}')">Cancelar</button>
-      <button class="btn btn-primary" style="margin-top:0" onclick="confirmTransition('${folio}','${to}','${code}',${needsArea?1:0},${needsDetalle?1:0})">Confirmar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="confirmTransition('${folio}','${to}','${code}',${needsArea?1:0},${needsDetalle?1:0},${requiereMotivo?1:0})">Confirmar</button>
     </div>
   `);
 }
@@ -1432,7 +1528,7 @@ function handlePhotoSelect(ev){
   reader.readAsDataURL(file);
 }
 
-function confirmTransition(folio, to, code, needsArea, needsDetalle){
+function confirmTransition(folio, to, code, needsArea, needsDetalle, requiereMotivo){
   const item = STATE.items.find(x=>x.Folio===folio);
   let motivo = selectedMotivo === '__otro__' ? (document.getElementById('tMotivoCustom').value.trim()) : selectedMotivo;
   const nota = document.getElementById('tNota').value.trim();
@@ -1441,11 +1537,15 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle){
 
   if(needsDetalle && !detalle){ showToast('Escribe el detalle de la falla'); return; }
   if(needsArea && !area){ showToast('Selecciona un área de derivación'); return; }
+  if(requiereMotivo && !motivo){ showToast('Debes indicar un motivo para cerrar este reporte'); return; }
+  const seguimientoEl = document.getElementById('tSeguimiento');
+  const seguimiento = seguimientoEl ? seguimientoEl.checked : false;
 
   const ts = new Date().toISOString().slice(0,16).replace('T',' ');
   item.Estado = to;
   if(detalle) item.Detalle = detalle;
   if(area !== undefined) item.Area_Derivacion = area;
+  if(seguimiento) item.Seguimiento = 'Sí';
   item.Fecha_Ultima_Actualizacion = ts;
   item.Actualizado_Por = CURRENT_USER.nombre || item.Actualizado_Por;
   if(to === 'Resuelto') item.Fecha_Resolucion = ts;
@@ -1460,6 +1560,7 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle){
   const payload = { action:'transition', folio, estado_nuevo:to, motivo, nota, ...userTag() };
   if(area !== undefined) payload.area_derivacion = area;
   if(detalle) payload.detalle = detalle;
+  if(seguimiento) payload.seguimiento = true;
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
 
   if(navigator.onLine){
@@ -1627,8 +1728,14 @@ function openPdfActivasModal(){
       </div>
     </div>
     <div class="field"><label>Torre (opcional)</label><select id="pdfTorre"><option value="">Todas</option>${TORRES_ALL.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
+    <div class="field"><label>Piso (opcional)</label><input type="number" id="pdfPiso" placeholder="Ej: 12"></div>
+    <div class="field"><label>Tipo de falla (opcional)</label><select id="pdfCategoria"><option value="">Todas</option>${STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('')}</select></div>
     <div class="field"><label>Área (opcional)</label><select id="pdfArea"><option value="">Todas</option>${areaOptions}</select></div>
     <div class="field"><label>Grupo (opcional)</label><input type="text" id="pdfGrupo" placeholder="Ej: Ronda-12-08-2026"></div>
+    <div class="field" style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" id="pdfSeguimiento" style="width:auto;">
+      <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="pdfSeguimiento">📌 Solo con seguimiento pendiente</label>
+    </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" style="margin-top:0" onclick="generarPdfActivas()">Generar PDF</button>
@@ -1638,11 +1745,14 @@ function openPdfActivasModal(){
 function generarPdfActivas(){
   const estadosSel = Array.from(document.querySelectorAll('#pdfEstadoChips .chip.selected')).map(c=>c.dataset.estado);
   const torre = document.getElementById('pdfTorre').value;
+  const piso = document.getElementById('pdfPiso').value.trim();
+  const categoria = document.getElementById('pdfCategoria').value;
   const area = document.getElementById('pdfArea').value;
   const grupo = document.getElementById('pdfGrupo').value.trim().toLowerCase();
+  const soloSeguimiento = document.getElementById('pdfSeguimiento').checked;
   closeModal();
   showToast('Generando PDF...');
-  loadJsPdf(()=>buildPdfActivas(estadosSel, torre, area, grupo));
+  loadJsPdf(()=>buildPdfActivas(estadosSel, torre, area, grupo, piso, categoria, soloSeguimiento));
 }
 function loadJsPdf(cb){
   if(window.jspdf){ cb(); return; }
@@ -1653,7 +1763,7 @@ function loadJsPdf(cb){
   document.body.appendChild(s);
 }
 
-function buildPdfActivas(estadosSel, torre, area, grupo){
+function buildPdfActivas(estadosSel, torre, area, grupo, piso, categoria, soloSeguimiento){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'pt', format:'a4'});
   const marginX = 40; let y = 50;
@@ -1662,8 +1772,11 @@ function buildPdfActivas(estadosSel, torre, area, grupo){
 
   let items = STATE.items.filter(i=>estadosSel.includes(i.Estado));
   if(torre) items = items.filter(i=>i.Torre===torre);
+  if(piso) items = items.filter(i=>String(i.Piso)===String(piso));
+  if(categoria) items = items.filter(i=>i.Categoria===categoria);
   if(area) items = items.filter(i=>i.Area_Derivacion===area);
   if(grupo) items = items.filter(i=>(i.Grupo||'').toLowerCase().includes(grupo));
+  if(soloSeguimiento) items = items.filter(i=>esSeguimiento(i));
 
   doc.setFont('helvetica','bold'); doc.setFontSize(15);
   doc.text('Informe de Fallas Activas', marginX, y); y+=20;
@@ -1671,8 +1784,11 @@ function buildPdfActivas(estadosSel, torre, area, grupo){
   doc.text(COMUNIDAD, marginX, y); y+=14;
   doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
   if(torre) { y+=12; doc.text('Torre: ' + torre, marginX, y); }
+  if(piso) { y+=12; doc.text('Piso: ' + piso, marginX, y); }
+  if(categoria) { y+=12; doc.text('Tipo de falla: ' + categoria, marginX, y); }
   if(area) { y+=12; doc.text('Área: ' + area, marginX, y); }
   if(grupo) { y+=12; doc.text('Grupo: ' + grupo, marginX, y); }
+  if(soloSeguimiento) { y+=12; doc.text('Solo con seguimiento pendiente', marginX, y); }
   doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
   doc.setTextColor(0);
 
@@ -1736,6 +1852,13 @@ function openReportModal(){
     <div class="sub">Fallas resueltas y tiempos de respuesta por área</div>
     <div class="field"><label>Desde</label><input type="date" id="repDesde" value="${hace30}"></div>
     <div class="field"><label>Hasta</label><input type="date" id="repHasta" value="${hoy}"></div>
+    <div class="field"><label>Torre (opcional)</label><select id="repTorre"><option value="">Todas</option>${TORRES_ALL.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
+    <div class="field"><label>Piso (opcional)</label><input type="number" id="repPiso" placeholder="Ej: 12"></div>
+    <div class="field"><label>Tipo de falla (opcional)</label><select id="repCategoria"><option value="">Todas</option>${STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('')}</select></div>
+    <div class="field" style="display:flex;align-items:center;gap:8px;">
+      <input type="checkbox" id="repSeguimiento" style="width:auto;">
+      <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="repSeguimiento">📌 Solo con seguimiento pendiente</label>
+    </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" style="margin-top:0" onclick="generarReporteGestion()">Generar PDF</button>
@@ -1745,10 +1868,14 @@ function openReportModal(){
 function generarReporteGestion(){
   const desde = document.getElementById('repDesde').value;
   const hasta = document.getElementById('repHasta').value;
+  const torre = document.getElementById('repTorre').value;
+  const piso = document.getElementById('repPiso').value.trim();
+  const categoria = document.getElementById('repCategoria').value;
+  const soloSeguimiento = document.getElementById('repSeguimiento').checked;
   closeModal(); showToast('Generando reporte...');
-  loadJsPdf(()=>buildPdfGestion(desde, hasta));
+  loadJsPdf(()=>buildPdfGestion(desde, hasta, torre, piso, categoria, soloSeguimiento));
 }
-function buildPdfGestion(desde, hasta){
+function buildPdfGestion(desde, hasta, torre, piso, categoria, soloSeguimiento){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'pt', format:'a4'});
   const marginX = 40; let y = 50;
@@ -1756,23 +1883,31 @@ function buildPdfGestion(desde, hasta){
   function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
 
   const desdeD = new Date(desde+'T00:00:00'), hastaD = new Date(hasta+'T23:59:59');
-  const items = STATE.items.filter(i=>{
+  let items = STATE.items.filter(i=>{
     if(i.Estado !== 'Resuelto' || !i.Fecha_Resolucion) return false;
     const fr = parseFH(i.Fecha_Resolucion);
     return fr >= desdeD && fr <= hastaD;
   });
+  if(torre) items = items.filter(i=>i.Torre===torre);
+  if(piso) items = items.filter(i=>String(i.Piso)===String(piso));
+  if(categoria) items = items.filter(i=>i.Categoria===categoria);
+  if(soloSeguimiento) items = items.filter(i=>esSeguimiento(i));
 
   doc.setFont('helvetica','bold'); doc.setFontSize(15);
   doc.text('Reporte de Gestión de Mantención', marginX, y); y+=20;
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
   doc.text(COMUNIDAD, marginX, y); y+=14;
   doc.text('Período: ' + desde + ' a ' + hasta, marginX, y); y+=14;
+  if(torre) { doc.text('Torre: ' + torre, marginX, y); y+=14; }
+  if(piso) { doc.text('Piso: ' + piso, marginX, y); y+=14; }
+  if(categoria) { doc.text('Tipo de falla: ' + categoria, marginX, y); y+=14; }
+  if(soloSeguimiento) { doc.text('Solo con seguimiento pendiente', marginX, y); y+=14; }
   doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
   doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=20;
   doc.setTextColor(0);
 
   if(items.length===0){
-    doc.setFontSize(11); doc.text('No hay fallas resueltas en el período seleccionado.', marginX, y);
+    doc.setFontSize(11); doc.text('No hay fallas resueltas que coincidan con el período y los filtros seleccionados.', marginX, y);
     doc.save('Reporte_Gestion_'+desde+'_a_'+hasta+'.pdf'); showToast('PDF generado ✓'); return;
   }
 

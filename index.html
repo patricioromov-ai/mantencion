@@ -1368,11 +1368,12 @@ function itemDetailHtml(item){
     `<button class="btn btn-primary btn-sm" style="background:${ESTADO_COLORS[t.to]}" onclick="showTransitionForm('${item.Folio}','${esc(t.label)}','${t.to}','${t.code}',${t.needsArea?1:0},${t.needsDetalle?1:0},${t.requiereMotivo?1:0})">${t.label}</button>`
   ).join('');
 
-  const notas = STATE.bitacora.filter(b=>b.Folio===item.Folio && b.Nota).slice().sort((a,b)=>(b.Fecha_Hora||'').localeCompare(a.Fecha_Hora||''));
+  const notas = STATE.bitacora.filter(b=>b.Folio===item.Folio && (b.Nota || b.Foto_URL)).slice().sort((a,b)=>(b.Fecha_Hora||'').localeCompare(a.Fecha_Hora||''));
   const notasHtml = notas.length ? notas.map(n=>`
       <div class="bit-entry">
         <div class="bit-date">${n.Fecha_Hora} · ${n.Autor||'—'}</div>
-        <div>${n.Nota}</div>
+        ${n.Nota ? `<div>${n.Nota}</div>` : ''}
+        ${n.Foto_URL ? `<img class="photo-thumb" style="margin-top:6px" src="${n.Foto_URL}" onclick="window.open('${n.Foto_URL}','_blank')">` : ''}
       </div>`).join('') : '<div class="empty-note" style="padding:10px 0">Sin notas o comentarios todavía.</div>';
 
   let urgenteBadge = '';
@@ -1400,6 +1401,7 @@ function itemDetailHtml(item){
 
     <div class="section-label">Notas y comentarios</div>
     ${notasHtml}
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="openAddPhotoForm('${item.Folio}')">📷 Agregar foto</button>
 
     <div class="action-list">${actions}</div>
 
@@ -1451,6 +1453,42 @@ function toggleSeguimiento(folio){
   }
   openItemModal(folio);
   renderAll();
+}
+
+/* ================= AGREGAR FOTO POSTERIOR ================= */
+function openAddPhotoForm(folio){
+  pendingPhoto = { base64:null, mime:null };
+  showModal(`
+    <h2>📷 Agregar foto</h2>
+    <div class="sub">${folio}</div>
+    <div class="field">
+      <label>Foto (cámara o desde tus archivos)</label>
+      <input type="file" accept="image/*" onchange="handlePhotoSelect(event)">
+      <img id="photoPreview" class="photo-preview hidden">
+    </div>
+    <div class="field"><label>Comentario (opcional)</label><textarea id="pNota" placeholder="Ej: Así quedó después de la visita del contratista"></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="openItemModal('${folio}')">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="submitAddPhoto('${folio}')">Guardar</button>
+    </div>
+  `);
+}
+function submitAddPhoto(folio){
+  if(!pendingPhoto.base64){ showToast('Elige o toma una foto primero'); return; }
+  const nota = document.getElementById('pNota').value.trim();
+  const item = STATE.items.find(x=>x.Folio===folio);
+
+  const payload = { action:'addPhoto', folio, foto_base64: pendingPhoto.base64, foto_mime: pendingPhoto.mime, nota, ...userTag() };
+  if(navigator.onLine){
+    apiPost(payload).then(res=>{
+      if(res.success){ showToast('Foto agregada ✓'); loadData(); }
+      else { showToast('No se pudo subir la foto'); queueAdd(payload); }
+    }).catch(()=>{ queueAdd(payload); showToast('Guardado localmente, se enviará al recuperar señal'); });
+  } else {
+    queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal');
+  }
+  closeModal();
+  if(item) openItemModal(folio);
 }
 
 /* ================= FORMULARIO DE TRANSICIÓN ================= */
@@ -1583,9 +1621,13 @@ function confirmTransition(folio, to, code, needsArea, needsDetalle, requiereMot
 /* ================= EDITAR DATOS (sin cambio de estado) ================= */
 function showEditFieldsForm(folio){
   const item = STATE.items.find(x=>x.Folio===folio);
+  const catOptions = STATE.categorias.map(c=>`<option value="${esc(c)}" ${c===item.Categoria?'selected':''}>${c}</option>`).join('');
   showModal(`
     <h2>Editar datos</h2>
     <div class="sub">${item.Folio}</div>
+    <div class="field"><label>Tipo de falla</label><select id="eCat">${catOptions}</select>
+      <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewCategoria('eCat')">+ Agregar nuevo tipo de falla</div>
+    </div>
     <div class="field"><label>Detalle</label><textarea id="eDetalle">${item.Detalle||''}</textarea></div>
     <div class="field"><label>Origen (depto / área)</label><input type="text" id="eOrigen" value="${esc(item.Origen)}"></div>
     <div class="field"><label>Grupo</label><input type="text" id="eGrupo" value="${esc(item.Grupo)}"></div>
@@ -1598,15 +1640,17 @@ function showEditFieldsForm(folio){
 }
 function saveEditFields(folio){
   const item = STATE.items.find(x=>x.Folio===folio);
+  const categoria = document.getElementById('eCat').value;
   const detalle = document.getElementById('eDetalle').value;
   const origen = document.getElementById('eOrigen').value;
   const grupo = document.getElementById('eGrupo').value;
   const notas = document.getElementById('eNotas').value;
-  item.Detalle = detalle; item.Origen = origen; item.Grupo = grupo; item.Notas = notas;
+  const categoriaCambio = categoria !== item.Categoria;
+  item.Categoria = categoria; item.Detalle = detalle; item.Origen = origen; item.Grupo = grupo; item.Notas = notas;
   item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
-  const payload = { action:'updateFields', folio, detalle, origen, grupo, notas, ...userTag() };
+  const payload = { action:'updateFields', folio, categoria, detalle, origen, grupo, notas, categoriaCambio, ...userTag() };
   if(navigator.onLine){ apiPost(payload).then(()=>showToast('Guardado ✓')).catch(()=>{ queueAdd(payload); }); }
   else { queueAdd(payload); showToast('Sin conexión: guardado localmente'); }
   closeModal(); renderAll();

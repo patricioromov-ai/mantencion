@@ -651,7 +651,10 @@ function renderDashboard(){
       </div>
     </div>
     <div id="dashMetrics"></div>
-    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="buildPdfDashboard()">📄 Imprimir / PDF de este panel</button>
+    <div class="btn-row" style="margin-top:4px">
+      <button class="btn btn-primary" onclick="buildPdfDashboard()">📄 PDF</button>
+      <button class="btn btn-primary" style="background:#2FA86B" onclick="exportarExcelDashboard()">📥 Excel</button>
+    </div>
   `;
   renderDashMetrics();
 }
@@ -1812,6 +1815,56 @@ function loadJsPdf(cb){
   s.onload = cb;
   s.onerror = ()=> showToast('No se pudo cargar el generador de PDF (revisa tu conexión)');
   document.body.appendChild(s);
+}
+
+/* ================= EXPORTAR A EXCEL (Panel) ================= */
+function loadXlsxLib(cb){
+  if(window.XLSX){ cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload = cb;
+  s.onerror = ()=> showToast('No se pudo cargar el generador de Excel (revisa tu conexión)');
+  document.body.appendChild(s);
+}
+function exportarExcelDashboard(){
+  showToast('Generando Excel...');
+  loadXlsxLib(()=>buildExcelDashboard());
+}
+function buildExcelDashboard(){
+  const items = dashFilteredItems();
+  if(items.length===0){ showToast('No hay ítems que coincidan con los filtros para exportar'); return; }
+
+  const rows = items.map(i=>({
+    'Folio': i.Folio,
+    'Torre': i.Torre,
+    'Piso': i.Piso,
+    'Categoria': i.Categoria,
+    'Origen': i.Origen||'',
+    'Grupo': i.Grupo||'',
+    'Estado': i.Estado,
+    'Detalle': i.Detalle||'',
+    'Area Derivacion': i.Area_Derivacion||'',
+    'Urgente': i.Urgente||'',
+    'Seguimiento': i.Seguimiento||'',
+    'Fecha Deteccion': i.Fecha_Deteccion||'',
+    'Ultima Actualizacion': i.Fecha_Ultima_Actualizacion||'',
+    'Fecha Resolucion': i.Fecha_Resolucion||'',
+    'Dias hasta resolucion': diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion) ?? '',
+    'Actualizado Por': i.Actualizado_Por||'',
+    'Notas': i.Notas||'',
+    'Foto Deteccion': i.Foto_Deteccion_URL||'',
+    'Foto Resolucion': i.Foto_Resolucion_URL||''
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [
+    {wch:10},{wch:10},{wch:6},{wch:16},{wch:14},{wch:16},{wch:12},{wch:42},
+    {wch:18},{wch:8},{wch:11},{wch:16},{wch:17},{wch:16},{wch:12},{wch:14},{wch:30},{wch:22},{wch:22}
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Fallas');
+  XLSX.writeFile(wb, 'Fallas_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  showToast('Excel generado ✓');
 }
 
 function buildPdfActivas(estadosSel, torre, area, grupo, piso, categoria, soloSeguimiento){

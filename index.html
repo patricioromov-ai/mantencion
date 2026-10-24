@@ -174,6 +174,7 @@
   .wz-hint{font-size:.76rem; color:var(--text-dim); margin:-4px 0 10px;}
   .wz-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
   .wz-grid.four{grid-template-columns:repeat(4,1fr);}
+  .wz-grid.three{grid-template-columns:repeat(3,1fr);}
   .wz-btn{background:var(--panel-alt); border:1px solid var(--line); color:var(--text); border-radius:11px; padding:14px 8px; font-size:.88rem; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:58px;}
   .wz-btn.sm{padding:11px 6px; font-size:.8rem; min-height:52px;}
   .wz-btn .ico{font-size:1.3rem; line-height:1;}
@@ -252,6 +253,24 @@
   .fl-acts button{border-radius:9px; padding:9px 10px; font-size:.78rem; font-weight:700; cursor:pointer; border:1px solid;}
   .fl-ok{background:#2FA86B; border-color:#2FA86B; color:#06210f;}
   .fl-bad{background:transparent; border-color:#D6534A; color:#D6534A;}
+
+  /* ===== Semáforo ===== */
+  .sem-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .sem-card{display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,color-mix(in srgb,var(--sc) 16%,var(--panel)),var(--panel)); border:1px solid var(--sc); border-radius:14px; padding:11px 10px; cursor:pointer;}
+  .sem-card.wide{grid-column:span 2;}
+  .sem-card:active{transform:scale(.98);}
+  .sem-dot{font-size:1.9rem; line-height:1;}
+  .sem-main{flex:1; min-width:0;}
+  .sem-name{font-size:.88rem; font-weight:800;}
+  .sem-state{font-size:.72rem; font-weight:700; color:var(--sc);}
+  .sem-why{font-size:.66rem; color:var(--text-dim); margin-top:1px;}
+  .sem-meta{text-align:center; flex:0 0 auto;}
+  .sem-meta b{display:block; font-size:1.05rem; font-family:ui-monospace,"SF Mono",monospace;}
+  .sem-meta span{font-size:.56rem; color:var(--text-dim); line-height:1.1; display:block;}
+  .sem-help{margin-top:8px; font-size:.72rem; color:var(--text-dim);}
+  .sem-help summary{cursor:pointer;}
+  .sem-help div{margin-top:6px; line-height:1.6;}
+  .tw-light{display:inline-flex; align-items:center; gap:5px; margin-top:6px; font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:99px; border:1px solid var(--sc); color:var(--sc);}
 </style>
 </head>
 <body>
@@ -300,6 +319,11 @@ const TORRES = ['Torre A','Torre B','Torre C','Torre D'];
 const TORRES_ALL = [...TORRES, 'Común'];
 const CATEGORIA_FUGA = 'FILTRACIONES';
 const CATEGORIA_FUGA_LEGACY = 'FUGAS/FILTRACIONES'; // compatibilidad con reportes ya creados antes del cambio de nombre
+const CATEGORIAS_NUEVAS = ['FILTRACIÓN ESTACIONAMIENTO','FILTRACIÓN VERTICAL SUBTERRÁNEO','FILTRACIÓN HORIZONTAL SUBTERRÁNEO',
+  'BODEGA: PINTURA','BODEGA: FILTRACIÓN','BODEGA: OTRO DAÑO','CÁMARAS DE SEGURIDAD','MONITORES CONSERJERÍA',
+  'JARDINES','JUEGOS','QUINCHOS','PASTO','BASUREROS'];
+function esFiltracionCat(c){ return /filtraci|fuga/i.test(String(c||'')); }
+function mergeCategorias(list){ const out = [...(list||[])]; CATEGORIAS_NUEVAS.forEach(c=>{ if(!out.includes(c)) out.push(c); }); return out; }
 const ACTIVE_STATES = ['Nuevo','Pendiente','Derivado','En proceso'];
 const COMUNIDAD = 'Jardines de Vicuña Mackenna';
 
@@ -491,7 +515,7 @@ function loadData(){
       if(res.success){
         STATE.items = res.data.checklist.map(normalizeItem);
         STATE.bitacora = res.data.bitacora;
-        STATE.categorias = res.data.categorias;
+        STATE.categorias = mergeCategorias(res.data.categorias);
         STATE.derivaciones = res.data.derivaciones;
         STATE.motivos = res.data.motivos;
         STATE.ubicaciones = res.data.ubicaciones || [];
@@ -524,7 +548,7 @@ function loadFromCache(){
   if(c){
     const d = JSON.parse(c);
     STATE.items = d.checklist.map(normalizeItem);
-    STATE.bitacora = d.bitacora; STATE.categorias = d.categorias;
+    STATE.bitacora = d.bitacora; STATE.categorias = mergeCategorias(d.categorias);
     STATE.derivaciones = d.derivaciones; STATE.motivos = d.motivos;
     STATE.ubicaciones = d.ubicaciones || [];
   }
@@ -670,7 +694,8 @@ function renderDashboard(){
   const d = STATE.dash;
   const main = document.getElementById('mainList');
   main.innerHTML = `
-    <div class="dash-card">
+    ${semaforoSectionHtml()}
+    <div class="dash-card" style="margin-top:12px">
       <div class="section-label" style="margin-top:0">Torres</div>
       <div class="chip-row">${TORRES_ALL.map(t=>`<div class="chip ${d.torres.includes(t)?'selected':''}" onclick="toggleDashTorre('${t}',this)">${t.replace('Torre ','T. ')}</div>`).join('')}</div>
       <div class="section-label">Estados</div>
@@ -858,6 +883,11 @@ function sugerirNiveles(cat, origen, torre){
   else if(/emerg|cartel/.test(c))            { g = 1; imp = 2; u = 1; }
   else if(/c[aá]mar|seguridad|citof|port[oó]n/.test(c)) { g = 1; imp = 2; u = 1; }
   else if(/techo|cielo/.test(c))             { g = 1; imp = 1; u = 1; }
+  else if(/monitor/.test(c))                 { g = 1; imp = 2; u = 1; }
+  else if(/juego/.test(c))                   { g = 1; imp = 1; u = 1; }
+  else if(/basurero/.test(c))                { g = 1; imp = 1; u = 1; }
+  else if(/jard|pasto|quincho/.test(c))      { g = 0; imp = 0; u = 0; }
+  else if(/bodega/.test(c))                  { g = 0; imp = 0; u = 0; }
   else if(/luz|luces|ilumin/.test(c))        { g = 0; imp = 1; u = 0; }
   else if(/puert|manilla|cerradura|ventan|vidrio/.test(c)) { g = 1; imp = 1; u = 0; }
   else if(/pintur|sucied|limpi|aseo|piso|suelo|baldos/.test(c)) { g = 0; imp = 0; u = 0; }
@@ -1333,7 +1363,8 @@ function renderTorre(){
   main.innerHTML = `
     <div class="tw-hero">
       <div class="tw-top">
-        <div><div class="tw-name">🏢 ${t}</div><div class="tw-sub">${st.activas} falla${st.activas===1?'':'s'} activa${st.activas===1?'':'s'} · ${st.total} ítems</div></div>
+        <div><div class="tw-name">🏢 ${t}</div><div class="tw-sub">${st.activas} falla${st.activas===1?'':'s'} activa${st.activas===1?'':'s'} · ${st.total} ítems</div>
+          ${(()=>{ const sm = semaforoUnidad(t), S = SEMAFORO[sm.nivel]; return `<div class="tw-light" style="--sc:${S.color}">${S.ico} Semáforo ${S.label} · ${sm.motivo}</div>`; })()}</div>
         <div class="tw-pct"><b>${st.pct}%</b><span>revisado</span></div>
       </div>
       <div class="tw-bar"><i style="width:${st.pct}%"></i></div>
@@ -1421,6 +1452,68 @@ function markFloorOk(torre, piso){
   refreshFloorSheet(); renderAll();
 }
 
+/* ================= SEMÁFORO DE GESTIÓN (por torre y áreas comunes) ================= */
+const SEMAFORO = {
+  rojo:     { ico:'🔴', label:'Rojo',     color:'#D6534A' },
+  naranja:  { ico:'🟠', label:'Naranja',  color:'#E8803D' },
+  amarillo: { ico:'🟡', label:'Amarillo', color:'#D9B72E' },
+  verde:    { ico:'🟢', label:'Verde',    color:'#2FA86B' }
+};
+const SEMAFORO_UNIDADES = ['Torre A','Torre B','Torre C','Torre D','Común'];
+function semaforoDe(items){
+  const now = new Date();
+  const act = items.filter(i=>prioridadDe(i)!==null);
+  let crit = 0, alta = 0, atras = 0;
+  act.forEach(i=>{
+    const p = prioridadDe(i);
+    if(p==='critica') crit++;
+    if(p==='alta') alta++;
+    if(now > fechaObjetivo(i, p)) atras++;
+  });
+  const hace30 = new Date(now.getTime() - 30*86400000);
+  const resueltas30 = items.filter(i=>i.Estado==='Resuelto' && i.Fecha_Resolucion && parseFH(i.Fecha_Resolucion) >= hace30).length;
+  let nivel = 'verde';
+  if(crit > 0 || (atras >= 3 && act.length && atras/act.length >= 0.3)) nivel = 'rojo';
+  else if(alta > 0 || atras > 0) nivel = 'naranja';
+  else if(act.length > 0) nivel = 'amarillo';
+  const partes = [];
+  if(crit) partes.push(crit + ' crítica' + (crit===1?'':'s'));
+  if(alta) partes.push(alta + ' alta' + (alta===1?'':'s'));
+  if(atras) partes.push(atras + ' atrasada' + (atras===1?'':'s'));
+  let motivo = partes.join(' · ');
+  if(!motivo) motivo = act.length ? 'En gestión, a tiempo' : 'Al día, sin fallas activas';
+  return { nivel, activas: act.length, crit, alta, atras, resueltas30, motivo };
+}
+function semaforoUnidad(u){ return semaforoDe(STATE.items.filter(i=>i.Torre===u)); }
+function irAUnidad(u){
+  if(u === 'Común'){ ensureDeptosState(); STATE.deptos.torre = 'Común'; selectDeptos(); }
+  else { selectTorre(u); }
+}
+function semaforoGridHtml(){
+  const cards = SEMAFORO_UNIDADES.map((u,idx)=>{
+    const s = semaforoUnidad(u); const S = SEMAFORO[s.nivel];
+    return `<div class="sem-card ${idx===4?'wide':''}" style="--sc:${S.color}" onclick="irAUnidad('${u}')">
+      <div class="sem-dot">${S.ico}</div>
+      <div class="sem-main">
+        <div class="sem-name">${u==='Común' ? 'Áreas comunes' : u}</div>
+        <div class="sem-state">${S.label} · ${s.activas} activa${s.activas===1?'':'s'}</div>
+        <div class="sem-why">${s.motivo}</div>
+      </div>
+      <div class="sem-meta"><b>${s.resueltas30}</b><span>resueltas<br>30 días</span></div>
+    </div>`;
+  }).join('');
+  return `<div class="sem-grid">${cards}</div>
+    <details class="sem-help"><summary>¿Cómo se calcula el semáforo?</summary>
+      <div>🔴 <b>Rojo:</b> hay fallas críticas, o muchas atrasadas (3 o más y al menos el 30%).<br>
+      🟠 <b>Naranja:</b> hay fallas de prioridad alta o alguna atrasada.<br>
+      🟡 <b>Amarillo:</b> hay fallas activas pero en gestión y a tiempo.<br>
+      🟢 <b>Verde:</b> sin fallas activas.<br>
+      “Atrasada” = pasó el plazo de su prioridad (ver ⚙ Plazos en el Plan de trabajo).</div></details>`;
+}
+function semaforoSectionHtml(){
+  return `<div class="section-label">🚦 Semáforo de gestión <span style="text-transform:none;letter-spacing:0">· toca para entrar</span></div>${semaforoGridHtml()}`;
+}
+
 /* ================= PANTALLA DE INICIO ================= */
 const ALERTAS = {
   urgentes:    { icon:'🚨', label:'Urgentes',         hint:'Requieren atención ya',          color:'#D6534A', test:i=>esUrgente(i) && !['Resuelto','OK','Descartado'].includes(i.Estado) },
@@ -1485,6 +1578,7 @@ function renderHome(){
   main.innerHTML = `
     <div class="home-greet">${saludo()}</div>
     <div class="home-sub">${activos} falla${activos===1?'':'s'} activa${activos===1?'':'s'} en total</div>
+    ${isAdmin ? semaforoSectionHtml() : ''}
     <div class="section-label">Requiere atención</div>
     <div class="alert-grid">${alertCards}</div>
     <div class="section-label">Por prioridad</div>
@@ -1596,7 +1690,7 @@ function setSimpleSearch(val){ STATE.simple.search = val; renderSimple(); }
 function ensureFugasState(){
   if(!STATE.fugas){ STATE.fugas = { torre:'', estados:[...ACTIVE_STATES], search:'' }; }
 }
-function fugaItems(){ return STATE.items.filter(i=>i.Categoria === CATEGORIA_FUGA || i.Categoria === CATEGORIA_FUGA_LEGACY); }
+function fugaItems(){ return STATE.items.filter(i=>esFiltracionCat(i.Categoria)); }
 function fugaFilteredItems(){
   ensureFugasState();
   const f = STATE.fugas;
@@ -1682,6 +1776,7 @@ function renderFugaRow(i){
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
         <div class="item-cat">${urgentPrefix}${ubic} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
+        ${i.Categoria && i.Categoria!==CATEGORIA_FUGA ? `<div class="item-detalle" style="color:var(--accent)">💧 ${i.Categoria}</div>` : ''}
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
         ${staleBadge}${seguimientoTag}
       </div>
@@ -1697,9 +1792,11 @@ const UBIC_TIPOS = [
   {k:'acceso',  ico:'🚪', t:'Acceso torre'},
   {k:'comun',   ico:'🏊', t:'Área común'}
 ];
-const ZONAS_TORRE = ['Pasillo','Shaft','Escalera de emergencia']; // zonas que pertenecen a una torre (y piso)
+const ZONAS_TORRE = ['Pasillo','Shaft','Escalera de emergencia','Subterráneo','Bodega'];
+const ZONAS_NIVEL = ['Subterráneo','Bodega']; // piden nivel -1/-2/-3
+const ZONAS_EXTRA_COMUN = ['Estacionamiento','Jardines','Juegos infantiles','Quinchos','Basureros','Conserjería']; // zonas que pertenecen a una torre (y piso)
 function esZonaTorre(z){ return ZONAS_TORRE.includes(z); }
-const CAT_ICONS = [[/filtr|fuga|gotera/i,'💧'],[/luz|luces|ilumin/i,'💡'],[/el[eé]ctric|enchuf/i,'⚡'],[/puert/i,'🚪'],[/pintur/i,'🎨'],[/sucied|limpi|aseo/i,'🧹'],[/manilla|cerradura/i,'🔧'],[/emerg|cartel/i,'🪧'],[/c[aá]mar/i,'📷'],[/ascens/i,'🛗'],[/piso|suelo|baldos/i,'🧱'],[/cielo|techo/i,'🏚️'],[/ventan|vidrio/i,'🪟'],[/timbre|citof/i,'🔔']];
+const CAT_ICONS = [[/filtr|fuga|gotera/i,'💧'],[/monitor/i,'🖥️'],[/jard|pasto/i,'🌳'],[/juego/i,'🛝'],[/quincho/i,'🔥'],[/basurero/i,'🗑️'],[/bodega/i,'🧰'],[/luz|luces|ilumin/i,'💡'],[/el[eé]ctric|enchuf/i,'⚡'],[/puert/i,'🚪'],[/pintur/i,'🎨'],[/sucied|limpi|aseo/i,'🧹'],[/manilla|cerradura/i,'🔧'],[/emerg|cartel/i,'🪧'],[/c[aá]mar/i,'📷'],[/ascens/i,'🛗'],[/piso|suelo|baldos/i,'🧱'],[/cielo|techo/i,'🏚️'],[/ventan|vidrio/i,'🪟'],[/timbre|citof/i,'🔔']];
 function catIcon(c){ for(const [re,ic] of CAT_ICONS){ if(re.test(c)) return ic; } return '🔧'; }
 
 function openReportWizard(opts){
@@ -1707,15 +1804,15 @@ function openReportWizard(opts){
   pendingPhoto = { base64:null, mime:null };
   W = {
     opts, step:0, ubic:'', torre:'', depto:'', piso:'', pisoTouched:false,
-    zona:'', zonaOtra:false, zonaTxt:'', cat: opts.cat || '', catOtra:false, catTxt:'', catAll:false,
+    zona:'', zonaOtra:false, zonaTxt:'', bodega:'', cat: opts.cat || '', catOtra:false, catTxt:'', catAll:false,
     detalle:'', niv:null, nivTouched:{}, grupo:'', origenExtra:'',
-    fixedLoc: !!opts.torre, fixedCat: !!opts.cat, sending:false, done:null
+    fixedLoc: !!opts.torre, fixedCat: !!opts.cat && !opts.catGroup, sending:false, done:null
   };
   if(opts.torre){ W.ubic = 'piso'; W.torre = opts.torre; W.piso = opts.piso; }
   wizRender();
 }
 function openReportDeptoModal(){ openReportWizard({}); }
-function openReportFugaModal(){ openReportWizard({ cat: CATEGORIA_FUGA }); }
+function openReportFugaModal(){ openReportWizard({ cat: CATEGORIA_FUGA, catGroup:'filtracion' }); }
 function openAddReportModal(torre, piso){ openReportWizard({ torre, piso }); }
 
 function wizSteps(){
@@ -1731,14 +1828,20 @@ function wizSave(){
   if(g('wDepto')) W.depto = g('wDepto').value.trim();
   if(g('wPiso')) W.piso = g('wPiso').value;
   if(g('wZonaTxt')) W.zonaTxt = g('wZonaTxt').value.trim();
+  if(g('wBodega')) W.bodega = g('wBodega').value.trim();
   if(g('wCatTxt')) W.catTxt = g('wCatTxt').value.trim();
   if(g('wDetalle')) W.detalle = g('wDetalle').value;
   if(g('wGrupo')) W.grupo = g('wGrupo').value.trim();
   if(g('wOrigen')) W.origenExtra = g('wOrigen').value.trim();
 }
 function wizPick(key, val){ wizSave(); W[key] = val; wizRender(); }
-function wizPickZona(i){ wizSave(); W.zona = wizZonas()[i]; W.zonaOtra = false; wizRender(); }
-function wizPickCat(i){ wizSave(); W.cat = (W.catAll ? wizCatsAll() : wizCatsTop())[i]; W.catOtra = false; wizRender(); }
+function wizPickZona(i){ wizSave(); W.zona = wizZonas()[i]; W.zonaOtra = false; W.piso = ''; W.pisoTouched = false; wizRender(); }
+function wizPickNivel(v){ wizSave(); W.piso = (W.piso === String(v) && W.zona==='Estacionamiento') ? '' : String(v); wizRender(); }
+function wizCatList(){
+  if(W.opts && W.opts.catGroup === 'filtracion') return wizCatsAll().filter(esFiltracionCat).filter(c=>c!==CATEGORIA_FUGA_LEGACY);
+  return W.catAll ? wizCatsAll() : wizCatsTop();
+}
+function wizPickCat(i){ wizSave(); W.cat = wizCatList()[i]; W.catOtra = false; wizRender(); }
 function wizToggle(key){ wizSave(); W[key] = !W[key]; if(key==='zonaOtra' && W.zonaOtra) W.zona=''; if(key==='catOtra' && W.catOtra) W.cat=''; wizRender(); }
 function wizDeptoInput(v){
   W.depto = v.trim();
@@ -1776,10 +1879,14 @@ function wizZonas(){
   const base = z.length ? z : ['Salón de adultos','Salón de juegos','Salón de niños','Baños','Gimnasio','Lavandería','Piscina','Quincho','Conserjería'];
   const norm = t => String(t).toLowerCase().replace(/s$/,'');
   const resto = base.filter(u=>!ZONAS_TORRE.some(zt=>norm(zt)===norm(u) || norm(u).startsWith('escalera')));
-  return [...ZONAS_TORRE, ...resto];
+  const nn = t => norm(String(t).normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  const have = new Set(resto.map(nn));
+  const extras = ZONAS_EXTRA_COMUN.filter(z=>!have.has(nn(z)));
+  return [...ZONAS_TORRE, ...resto, ...extras];
 }
 function wizZonaIcon(z){
   const t = String(z).toLowerCase();
+  if(/subterr/.test(t)) return '⬇️'; if(/bodega/.test(t)) return '🧰'; if(/jard/.test(t)) return '🌳'; if(/juego/.test(t) && !/sal/.test(t)) return '🛝'; if(/basurero/.test(t)) return '🗑️';
   if(/pasillo/.test(t)) return '🚶'; if(/shaft/.test(t)) return '🕳️'; if(/escalera/.test(t)) return '🪜';
   if(/gimnas/.test(t)) return '🏋️'; if(/lavand/.test(t)) return '🧺'; if(/piscin/.test(t)) return '🏊';
   if(/quincho/.test(t)) return '🔥'; if(/conserj/.test(t)) return '🛎️'; if(/ba[ñn]o/.test(t)) return '🚻';
@@ -1793,8 +1900,14 @@ function wizResolve(){
   else if(W.ubic === 'depto'){ torre = W.torre; piso = parseInt(W.piso,10); origen = 'Depto ' + W.depto; }
   else if(W.ubic === 'ascensor'){ torre = W.torre; piso = 0; origen = 'Ascensor'; }
   else if(W.ubic === 'acceso'){ torre = W.torre; piso = 0; origen = 'Acceso Principal'; }
-  else if(!W.zonaOtra && esZonaTorre(W.zona)){ torre = W.torre; piso = parseInt(W.piso,10); if(isNaN(piso)) piso = 0; origen = W.zona; }
-  else { torre = 'Común'; piso = 0; origen = W.zonaOtra ? W.zonaTxt : W.zona; }
+  else if(!W.zonaOtra && esZonaTorre(W.zona)){
+    torre = W.torre; piso = parseInt(W.piso,10); if(isNaN(piso)) piso = 0;
+    origen = (W.zona === 'Bodega' && W.bodega) ? ('Bodega ' + W.bodega) : W.zona;
+  }
+  else {
+    torre = 'Común'; piso = 0; origen = W.zonaOtra ? W.zonaTxt : W.zona;
+    if(!W.zonaOtra && W.zona === 'Estacionamiento' && W.piso !== '' && !isNaN(parseInt(W.piso,10))) piso = parseInt(W.piso,10);
+  }
   const cat = W.catOtra ? W.catTxt : W.cat;
   return { torre, piso, origen, cat };
 }
@@ -1802,7 +1915,8 @@ function wizUbicLabel(){
   const r = wizResolve();
   if(W.ubic === 'piso') return `${r.torre} · Piso ${r.piso}` + (r.origen ? ' · '+r.origen : '');
   if(W.ubic === 'depto') return `${r.torre} · ${r.origen} (piso ${r.piso})`;
-  if(W.ubic === 'comun' && r.torre !== 'Común') return `${r.torre} · ${r.origen}` + (r.piso ? ` · piso ${r.piso}` : '');
+  if(W.ubic === 'comun' && r.torre !== 'Común') return `${r.torre} · ${r.origen}` + (r.piso ? (r.piso<0 ? ` · nivel ${r.piso}` : ` · piso ${r.piso}`) : '');
+  if(W.ubic === 'comun' && r.piso) return `Común · ${r.origen} · nivel ${r.piso}`;
   if(W.ubic === 'comun') return `Común · ${r.origen}`;
   return `${r.torre} · ${r.origen}`;
 }
@@ -1816,6 +1930,7 @@ function wizValidate(step){
     }
     if(W.ubic === 'comun' && !(W.zonaOtra ? W.zonaTxt : W.zona)) return 'Elige la zona';
     if(W.ubic === 'comun' && !W.zonaOtra && esZonaTorre(W.zona) && !W.torre) return 'Elige la torre';
+    if(W.ubic === 'comun' && !W.zonaOtra && ZONAS_NIVEL.includes(W.zona) && !['-1','-2','-3'].includes(String(W.piso))) return 'Elige el nivel (-1, -2 o -3)';
   }
   if(step === 'cat'){
     if(!(W.catOtra ? W.catTxt : W.cat)) return 'Elige el tipo de falla';
@@ -1849,6 +1964,7 @@ function wizRender(){
   const ctx = [];
   if(W.fixedLoc) ctx.push(`${W.torre} · Piso ${W.piso}`);
   if(W.fixedCat) ctx.push(`${catIcon(W.cat)} ${W.cat}`);
+  if(W.opts && W.opts.catGroup) ctx.push('💧 Filtración');
   const prog = steps.map((_,i)=>`<i class="${i<=W.step?'on':''}"></i>`).join('');
 
   let body = '';
@@ -1893,21 +2009,26 @@ function wizStepUbic(){
     extra = `<div class="wz-q2">Zona</div><div class="wz-grid">${zonas}
       <button class="wz-btn sm ${W.zonaOtra?'sel':''}" onclick="wizToggle('zonaOtra')"><span class="ico">✏️</span>Otra…</button></div>
       ${W.zonaOtra ? `<div class="field"><input type="text" id="wZonaTxt" placeholder="Nombre de la zona" value="${esc(W.zonaTxt)}"></div>` : ''}
-      ${(!W.zonaOtra && esZonaTorre(W.zona)) ? torres + `<div class="field"><label>Piso (opcional)</label><input type="number" id="wPiso" placeholder="Ej: 12" value="${esc(W.piso)}" oninput="W.pisoTouched=true"></div>` : ''}`;
+      ${(!W.zonaOtra && esZonaTorre(W.zona)) ? torres + (ZONAS_NIVEL.includes(W.zona) ? wizNivelChips(false) + (W.zona==='Bodega' ? `<div class="field"><label>N° de bodega (opcional)</label><input type="text" id="wBodega" placeholder="Ej: 124" value="${esc(W.bodega)}"></div>` : '') : `<div class="field"><label>Piso (opcional)</label><input type="number" id="wPiso" placeholder="Ej: 12" value="${esc(W.piso)}" oninput="W.pisoTouched=true"></div>`) : ''}
+      ${(!W.zonaOtra && W.zona==='Estacionamiento') ? wizNivelChips(true) : ''}`;
   }
   return `<div class="wz-q">¿Dónde está la falla?</div><div class="wz-grid">${tipos}</div>${extra}`;
 }
 
+function wizNivelChips(opcional){
+  return `<div class="wz-q2">Nivel ${opcional?'(opcional)':''}</div><div class="wz-grid three">${[-1,-2,-3].map(v=>`<button class="wz-btn ${String(W.piso)===String(v)?'sel':''}" onclick="wizPickNivel(${v})">${v}</button>`).join('')}</div>`;
+}
 function wizStepCat(){
-  const list = W.catAll ? wizCatsAll() : wizCatsTop();
+  const grupo = W.opts && W.opts.catGroup === 'filtracion';
+  const list = wizCatList();
   const chips = list.map((c,ci)=>`<button class="wz-btn sm ${(!W.catOtra && W.cat===c)?'sel':''}" onclick="wizPickCat(${ci})"><span class="ico">${catIcon(c)}</span>${c}</button>`).join('');
   return `<div class="wz-q">¿Qué tipo de falla es?</div>
-    <div class="wz-hint">${W.catAll ? 'Todos los tipos' : 'Más usadas'}</div>
+    <div class="wz-hint">${grupo ? 'Elige el tipo de filtración' : (W.catAll ? 'Todos los tipos' : 'Más usadas')}</div>
     <div class="wz-grid">${chips}
-      <button class="wz-btn sm ${W.catOtra?'sel':''}" onclick="wizToggle('catOtra')"><span class="ico">✏️</span>Otra…</button>
+      ${grupo ? '' : `<button class="wz-btn sm ${W.catOtra?'sel':''}" onclick="wizToggle('catOtra')"><span class="ico">✏️</span>Otra…</button>`}
     </div>
     ${W.catOtra ? `<div class="field"><input type="text" id="wCatTxt" placeholder="Nombre del nuevo tipo de falla" value="${esc(W.catTxt)}"></div>` : ''}
-    <button class="wz-link" onclick="wizToggle('catAll')">${W.catAll ? 'Ver menos ▴' : 'Ver todas ▾'}</button>`;
+    ${grupo ? '' : `<button class="wz-link" onclick="wizToggle('catAll')">${W.catAll ? 'Ver menos ▴' : 'Ver todas ▾'}</button>`}`;
 }
 
 function wizStepFoto(){
@@ -2095,13 +2216,13 @@ function ensureDeptosState(){
 }
 function deptoItems(){
   return STATE.items.filter(i=>{
-    const esFiltracion = i.Categoria===CATEGORIA_FUGA || i.Categoria===CATEGORIA_FUGA_LEGACY;
+    const esFiltracion = esFiltracionCat(i.Categoria);
     if(esFiltracion) return false; // esas viven en la pestaña Filtraciones
     const origen = String(i.Origen||'').trim().toLowerCase();
     const esDepto = origen.startsWith('depto');
     const esAscensorOAcceso = origen==='ascensor' || origen==='acceso principal';
     const esComun = i.Torre === 'Común';
-    const esZonaDeTorre = ZONAS_TORRE.some(z=>origen===z.toLowerCase());
+    const esZonaDeTorre = ZONAS_TORRE.some(z=>origen.startsWith(z.toLowerCase()));
     return esDepto || esAscensorOAcceso || esComun || esZonaDeTorre;
   });
 }

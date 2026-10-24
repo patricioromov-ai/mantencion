@@ -32,6 +32,7 @@
     width:100%; background:var(--panel-alt); border:1px solid var(--line); color:var(--text);
     border-radius:8px; padding:11px 12px; font-size:.95rem; outline:none;
   }
+  .field textarea{font-family:inherit; min-height:84px; resize:vertical;}
   .field input:focus, .field textarea:focus, .field select:focus{border-color:var(--accent);}
   .hint{font-size:.72rem; color:var(--text-dim); margin-top:4px;}
   .btn{border:none; border-radius:9px; padding:12px 16px; font-size:.92rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px;}
@@ -95,7 +96,7 @@
   .fab{width:52px; height:52px; border-radius:50%; background:var(--accent); color:#1a1206; border:none; box-shadow:0 6px 16px rgba(0,0,0,.4); font-size:1.25rem; display:flex; align-items:center; justify-content:center; cursor:pointer;}
   .fab.secondary{background:var(--panel-alt); color:var(--text); border:1px solid var(--line); width:44px; height:44px; font-size:1.05rem;}
 
-  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(24px + var(--safe-b)); background:#0D1218; color:var(--text); padding:10px 16px; border-radius:99px; font-size:.82rem; border:1px solid var(--line); z-index:70; opacity:0; transition:opacity .2s;}
+  .toast{position:fixed; left:50%; transform:translateX(-50%); top:calc(14px + env(safe-area-inset-top, 0px)); max-width:92vw; text-align:center; background:#0D1218; color:var(--text); padding:10px 16px; border-radius:99px; font-size:.82rem; border:1px solid var(--line); z-index:70; opacity:0; transition:opacity .2s;}
   .toast.show{opacity:1;}
 
   .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
@@ -163,6 +164,28 @@
   .alert-head .back{background:var(--panel-alt); border:1px solid var(--line); color:var(--text); border-radius:9px; padding:8px 12px; font-size:.82rem; cursor:pointer;}
   .alert-head .a-title{font-size:1rem; font-weight:800;}
   .alert-head .a-count{font-size:.72rem; color:var(--text-dim);}
+
+  /* ===== Asistente de reporte ===== */
+  .wz-prog{display:flex; gap:6px; margin:4px 0 14px;}
+  .wz-prog i{flex:1; height:4px; border-radius:2px; background:var(--line);}
+  .wz-prog i.on{background:var(--accent);}
+  .wz-q{font-size:1.05rem; font-weight:800; margin:2px 0 10px;}
+  .wz-q2{font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); margin:14px 0 6px;}
+  .wz-hint{font-size:.76rem; color:var(--text-dim); margin:-4px 0 10px;}
+  .wz-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
+  .wz-grid.four{grid-template-columns:repeat(4,1fr);}
+  .wz-btn{background:var(--panel-alt); border:1px solid var(--line); color:var(--text); border-radius:11px; padding:14px 8px; font-size:.88rem; font-weight:600; cursor:pointer; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; min-height:58px;}
+  .wz-btn.sm{padding:11px 6px; font-size:.8rem; min-height:52px;}
+  .wz-btn .ico{font-size:1.3rem; line-height:1;}
+  .wz-btn.sel{border-color:var(--accent); background:#3a2c111a; color:var(--accent);}
+  .wz-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .wz-link{background:none; border:none; color:var(--accent); font-size:.82rem; margin-top:10px; padding:6px 0; cursor:pointer;}
+  .wz-urg{display:flex; align-items:center; gap:10px; margin:12px 0 2px; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--panel-alt); font-size:.9rem; font-weight:600; cursor:pointer;}
+  .wz-urg input{width:20px; height:20px; accent-color:#D6534A;}
+  .wz-summary{margin-top:14px; padding:10px 12px; border-radius:10px; background:var(--panel-alt); border:1px dashed var(--line); font-size:.8rem; line-height:1.6;}
+  .wz-done{text-align:center; padding:8px 0 4px;}
+  .wz-check{width:58px; height:58px; margin:0 auto; border-radius:50%; background:#2FA86B22; color:#2FA86B; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:800;}
+  .wz-folio{font-family:ui-monospace,"SF Mono",monospace; font-size:1.3rem; font-weight:800; color:var(--accent);}
 </style>
 </head>
 <body>
@@ -1074,110 +1097,314 @@ function renderFugaRow(i){
     </div>`;
 }
 
-/* ================= REPORTAR FUGA ================= */
-function openReportFugaModal(){
+/* ================= REPORTAR FALLA (asistente por pasos) ================= */
+let W = null;
+const UBIC_TIPOS = [
+  {k:'depto',   ico:'🏠', t:'Departamento'},
+  {k:'ascensor',ico:'🛗', t:'Ascensor'},
+  {k:'acceso',  ico:'🚪', t:'Acceso torre'},
+  {k:'comun',   ico:'🏊', t:'Área común'}
+];
+const CAT_ICONS = [[/filtr|fuga|gotera/i,'💧'],[/luz|luces|ilumin/i,'💡'],[/el[eé]ctric|enchuf/i,'⚡'],[/puert/i,'🚪'],[/pintur/i,'🎨'],[/sucied|limpi|aseo/i,'🧹'],[/manilla|cerradura/i,'🔧'],[/emerg|cartel/i,'🪧'],[/c[aá]mar/i,'📷'],[/ascens/i,'🛗'],[/piso|suelo|baldos/i,'🧱'],[/cielo|techo/i,'🏚️'],[/ventan|vidrio/i,'🪟'],[/timbre|citof/i,'🔔']];
+function catIcon(c){ for(const [re,ic] of CAT_ICONS){ if(re.test(c)) return ic; } return '🔧'; }
+
+function openReportWizard(opts){
+  opts = opts || {};
   pendingPhoto = { base64:null, mime:null };
+  W = {
+    opts, step:0, ubic:'', torre:'', depto:'', piso:'', pisoTouched:false,
+    zona:'', zonaOtra:false, zonaTxt:'', cat: opts.cat || '', catOtra:false, catTxt:'', catAll:false,
+    detalle:'', urgente:false, grupo:'', origenExtra:'',
+    fixedLoc: !!opts.torre, fixedCat: !!opts.cat, sending:false, done:null
+  };
+  if(opts.torre){ W.ubic = 'piso'; W.torre = opts.torre; W.piso = opts.piso; }
+  wizRender();
+}
+function openReportDeptoModal(){ openReportWizard({}); }
+function openReportFugaModal(){ openReportWizard({ cat: CATEGORIA_FUGA }); }
+function openAddReportModal(torre, piso){ openReportWizard({ torre, piso }); }
+
+function wizSteps(){
+  const s = [];
+  if(!W.fixedLoc) s.push('ubic');
+  if(!W.fixedCat) s.push('cat');
+  s.push('foto','detalle');
+  return s;
+}
+function wizSave(){
+  if(!W) return;
+  const g = id => document.getElementById(id);
+  if(g('wDepto')) W.depto = g('wDepto').value.trim();
+  if(g('wPiso')) W.piso = g('wPiso').value;
+  if(g('wZonaTxt')) W.zonaTxt = g('wZonaTxt').value.trim();
+  if(g('wCatTxt')) W.catTxt = g('wCatTxt').value.trim();
+  if(g('wDetalle')) W.detalle = g('wDetalle').value;
+  if(g('wGrupo')) W.grupo = g('wGrupo').value.trim();
+  if(g('wOrigen')) W.origenExtra = g('wOrigen').value.trim();
+  if(g('wUrg')) W.urgente = g('wUrg').checked;
+}
+function wizPick(key, val){ wizSave(); W[key] = val; wizRender(); }
+function wizPickZona(i){ wizSave(); W.zona = wizZonas()[i]; W.zonaOtra = false; wizRender(); }
+function wizPickCat(i){ wizSave(); W.cat = (W.catAll ? wizCatsAll() : wizCatsTop())[i]; W.catOtra = false; wizRender(); }
+function wizToggle(key){ wizSave(); W[key] = !W[key]; if(key==='zonaOtra' && W.zonaOtra) W.zona=''; if(key==='catOtra' && W.catOtra) W.cat=''; wizRender(); }
+function wizDeptoInput(v){
+  W.depto = v.trim();
+  if(!W.pisoTouched){
+    const digits = v.replace(/\D/g,'');
+    const p = digits.length >= 3 ? digits.slice(0,-2) : '';
+    const el = document.getElementById('wPiso'); if(el) el.value = p;
+    W.piso = p;
+  }
+}
+function wizPhotoDone(){
+  if(!W || W.done) return;
+  const nx = document.getElementById('wzNext'); if(nx) nx.textContent = 'Siguiente ›';
+}
+
+function wizCatsTop(){
+  const cnt = {};
+  STATE.items.forEach(i=>{
+    if(!i.Categoria || i.Categoria===CATEGORIA_FUGA_LEGACY) return;
+    if(i.Estado==='OK' || i.Estado==='Sin revisar') return;
+    cnt[i.Categoria] = (cnt[i.Categoria]||0) + 1;
+  });
+  const all = wizCatsAll();
+  let top = Object.keys(cnt).filter(c=>all.includes(c)).sort((a,b)=>cnt[b]-cnt[a]).slice(0,6);
+  if(!top.includes(CATEGORIA_FUGA)){ if(top.length>=6) top[5] = CATEGORIA_FUGA; else top.push(CATEGORIA_FUGA); }
+  return top;
+}
+function wizCatsAll(){
+  const list = STATE.categorias.filter(c=>c && c!==CATEGORIA_FUGA_LEGACY);
+  if(!list.includes(CATEGORIA_FUGA)) list.unshift(CATEGORIA_FUGA);
+  return list;
+}
+function wizZonas(){
+  const z = STATE.ubicaciones.filter(u=>u && !String(u).startsWith('Ascensor') && !String(u).startsWith('Acceso Principal'));
+  return z.length ? z : ['Salón de adultos','Salón de juegos','Salón de niños','Baños','Gimnasio','Lavandería','Piscina','Quincho','Conserjería'];
+}
+function wizZonaIcon(z){
+  const t = String(z).toLowerCase();
+  if(/gimnas/.test(t)) return '🏋️'; if(/lavand/.test(t)) return '🧺'; if(/piscin/.test(t)) return '🏊';
+  if(/quincho/.test(t)) return '🔥'; if(/conserj/.test(t)) return '🛎️'; if(/ba[ñn]o/.test(t)) return '🚻';
+  if(/sal[oó]n|sala/.test(t)) return '🛋️'; if(/estacion/.test(t)) return '🅿️';
+  return '📍';
+}
+
+function wizResolve(){
+  let torre, piso, origen;
+  if(W.ubic === 'piso'){ torre = W.torre; piso = W.piso; origen = W.origenExtra; }
+  else if(W.ubic === 'depto'){ torre = W.torre; piso = parseInt(W.piso,10); origen = 'Depto ' + W.depto; }
+  else if(W.ubic === 'ascensor'){ torre = W.torre; piso = 0; origen = 'Ascensor'; }
+  else if(W.ubic === 'acceso'){ torre = W.torre; piso = 0; origen = 'Acceso Principal'; }
+  else { torre = 'Común'; piso = 0; origen = W.zonaOtra ? W.zonaTxt : W.zona; }
+  const cat = W.catOtra ? W.catTxt : W.cat;
+  return { torre, piso, origen, cat };
+}
+function wizUbicLabel(){
+  const r = wizResolve();
+  if(W.ubic === 'piso') return `${r.torre} · Piso ${r.piso}` + (r.origen ? ' · '+r.origen : '');
+  if(W.ubic === 'depto') return `${r.torre} · ${r.origen} (piso ${r.piso})`;
+  if(W.ubic === 'comun') return `Común · ${r.origen}`;
+  return `${r.torre} · ${r.origen}`;
+}
+function wizValidate(step){
+  if(step === 'ubic'){
+    if(!W.ubic) return 'Elige dónde está la falla';
+    if(['depto','ascensor','acceso'].includes(W.ubic) && !W.torre) return 'Elige la torre';
+    if(W.ubic === 'depto'){
+      if(!W.depto) return 'Ingresa el número de depto';
+      if(isNaN(parseInt(W.piso,10))) return 'Ingresa el piso';
+    }
+    if(W.ubic === 'comun' && !(W.zonaOtra ? W.zonaTxt : W.zona)) return 'Elige la zona';
+  }
+  if(step === 'cat'){
+    if(!(W.catOtra ? W.catTxt : W.cat)) return 'Elige el tipo de falla';
+  }
+  if(step === 'detalle'){
+    if(!W.detalle.trim() && !pendingPhoto.base64) return 'Agrega una foto o escribe un detalle';
+  }
+  return '';
+}
+
+function wizNext(){
+  wizSave();
+  const steps = wizSteps();
+  const step = steps[W.step];
+  const err = wizValidate(step);
+  if(err){ showToast(err); return; }
+  if(W.step >= steps.length - 1){ wizSubmit(); return; }
+  W.step++; wizRender();
+  const m = document.querySelector('.modal'); if(m) m.scrollTop = 0;
+}
+function wizBack(){
+  wizSave();
+  if(W.step > 0){ W.step--; wizRender(); }
+}
+
+function wizRender(){
+  if(W.done){ return wizRenderDone(); }
+  const steps = wizSteps();
+  const step = steps[W.step];
+  const n = steps.length;
+  const ctx = [];
+  if(W.fixedLoc) ctx.push(`${W.torre} · Piso ${W.piso}`);
+  if(W.fixedCat) ctx.push(`${catIcon(W.cat)} ${W.cat}`);
+  const prog = steps.map((_,i)=>`<i class="${i<=W.step?'on':''}"></i>`).join('');
+
+  let body = '';
+  if(step === 'ubic') body = wizStepUbic();
+  else if(step === 'cat') body = wizStepCat();
+  else if(step === 'foto') body = wizStepFoto();
+  else body = wizStepDetalle();
+
+  const isLast = W.step === n - 1;
+  let nextLabel = isLast ? '✅ Reportar' : 'Siguiente ›';
+  if(step === 'foto' && !pendingPhoto.base64) nextLabel = 'Omitir ›';
+  const leftBtn = W.step === 0
+    ? `<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>`
+    : `<button class="btn btn-ghost" onclick="wizBack()">‹ Atrás</button>`;
+
   showModal(`
-    <h2>💧 Reportar filtración</h2>
-    <div class="field"><label>Tipo de ubicación</label>
-      <select id="fTipo" onchange="renderFugaUbicacionFields()">
-        <option value="depto">Departamento</option>
-        <option value="ascensor">Ascensor</option>
-        <option value="acceso">Acceso principal</option>
-        <option value="comun">Área común (piscina, quincho, sala común, conserjería...)</option>
-      </select>
-    </div>
-    <div id="fUbicacionFields"></div>
-    <div class="field"><label>Detalle</label><textarea id="fDetalle" placeholder="Ej: Filtración en muro sobre ducha, gotea hacia el depto de abajo"></textarea></div>
-    <div class="field"><label>Grupo (opcional)</label><input type="text" id="fGrupo" placeholder="Ej: Reclamo-Depto1204"></div>
-    <div class="field">
-      <label>Foto (recomendada)</label>
-      <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
-      <img id="photoPreview" class="photo-preview hidden">
-    </div>
+    <h2>➕ Reportar falla</h2>
+    <div class="sub">${ctx.length ? ctx.join(' · ') + ' — ' : ''}Paso ${W.step+1} de ${n}</div>
+    <div class="wz-prog">${prog}</div>
+    ${body}
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" style="margin-top:0" onclick="submitFugaReport()">Reportar</button>
+      ${leftBtn}
+      <button class="btn btn-primary" id="wzNext" style="margin-top:0" onclick="wizNext()">${nextLabel}</button>
     </div>
   `);
-  renderFugaUbicacionFields();
 }
 
-function renderFugaUbicacionFields(){
-  const tipo = document.getElementById('fTipo').value;
-  const wrap = document.getElementById('fUbicacionFields');
-  const torreOptions = TORRES.map(t=>`<option value="${t}">${t}</option>`).join('');
-  if(tipo === 'depto'){
-    wrap.innerHTML = `
-      <div class="field"><label>Torre</label><select id="fTorre">${torreOptions}</select></div>
-      <div class="field"><label>Piso</label><input type="number" id="fPiso" placeholder="Ej: 12"></div>
-      <div class="field"><label>N° depto (opcional)</label><input type="text" id="fDepto" placeholder="Ej: 1204"></div>
-    `;
-  } else if(tipo === 'ascensor' || tipo === 'acceso'){
-    wrap.innerHTML = `<div class="field"><label>Torre</label><select id="fTorre">${torreOptions}</select></div>`;
-  } else {
-    const comunes = STATE.ubicaciones.filter(u=>!u.startsWith('Ascensor') && !u.startsWith('Acceso Principal'));
-    wrap.innerHTML = `
-      <div class="field"><label>Ubicación</label><select id="fUbicComun">${comunes.map(u=>`<option value="${esc(u)}">${u}</option>`).join('')}</select>
-        <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewUbicacion()">+ Agregar nueva ubicación</div>
+function wizStepUbic(){
+  const tipos = UBIC_TIPOS.map(u=>`<button class="wz-btn ${W.ubic===u.k?'sel':''}" onclick="wizPick('ubic','${u.k}')"><span class="ico">${u.ico}</span>${u.t}</button>`).join('');
+  let extra = '';
+  const torres = `<div class="wz-q2">Torre</div><div class="wz-grid four">${TORRES.map(t=>`<button class="wz-btn ${W.torre===t?'sel':''}" onclick="wizPick('torre','${t}')">${t.replace('Torre ','')}</button>`).join('')}</div>`;
+  if(W.ubic === 'depto'){
+    extra = torres + `
+      <div class="wz-two">
+        <div class="field"><label>N° depto</label><input type="text" id="wDepto" inputmode="numeric" placeholder="Ej: 1204" value="${esc(W.depto)}" oninput="wizDeptoInput(this.value)"></div>
+        <div class="field"><label>Piso</label><input type="number" id="wPiso" placeholder="Ej: 12" value="${esc(W.piso)}" oninput="W.pisoTouched=true"></div>
       </div>`;
+  } else if(W.ubic === 'ascensor' || W.ubic === 'acceso'){
+    extra = torres;
+  } else if(W.ubic === 'comun'){
+    const zonas = wizZonas().map((z,zi)=>`<button class="wz-btn sm ${(!W.zonaOtra && W.zona===z)?'sel':''}" onclick="wizPickZona(${zi})"><span class="ico">${wizZonaIcon(z)}</span>${z}</button>`).join('');
+    extra = `<div class="wz-q2">Zona</div><div class="wz-grid">${zonas}
+      <button class="wz-btn sm ${W.zonaOtra?'sel':''}" onclick="wizToggle('zonaOtra')"><span class="ico">✏️</span>Otra…</button></div>
+      ${W.zonaOtra ? `<div class="field"><input type="text" id="wZonaTxt" placeholder="Nombre de la zona" value="${esc(W.zonaTxt)}"></div>` : ''}`;
   }
+  return `<div class="wz-q">¿Dónde está la falla?</div><div class="wz-grid">${tipos}</div>${extra}`;
 }
 
-function promptNewUbicacion(){
-  const val = prompt('Nombre de la nueva ubicación común:');
-  if(!val) return;
-  STATE.ubicaciones.push(val);
-  const payload = { action:'addConfig', tipo:'ubicacion', valor: val, ...userTag() };
-  if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
-  const sel = document.getElementById('fUbicComun');
-  if(sel){ const opt=document.createElement('option'); opt.value=val; opt.textContent=val; sel.appendChild(opt); sel.value=val; }
+function wizStepCat(){
+  const list = W.catAll ? wizCatsAll() : wizCatsTop();
+  const chips = list.map((c,ci)=>`<button class="wz-btn sm ${(!W.catOtra && W.cat===c)?'sel':''}" onclick="wizPickCat(${ci})"><span class="ico">${catIcon(c)}</span>${c}</button>`).join('');
+  return `<div class="wz-q">¿Qué tipo de falla es?</div>
+    <div class="wz-hint">${W.catAll ? 'Todos los tipos' : 'Más usadas'}</div>
+    <div class="wz-grid">${chips}
+      <button class="wz-btn sm ${W.catOtra?'sel':''}" onclick="wizToggle('catOtra')"><span class="ico">✏️</span>Otra…</button>
+    </div>
+    ${W.catOtra ? `<div class="field"><input type="text" id="wCatTxt" placeholder="Nombre del nuevo tipo de falla" value="${esc(W.catTxt)}"></div>` : ''}
+    <button class="wz-link" onclick="wizToggle('catAll')">${W.catAll ? 'Ver menos ▴' : 'Ver todas ▾'}</button>`;
 }
 
-function submitFugaReport(){
-  const tipo = document.getElementById('fTipo').value;
-  const det = document.getElementById('fDetalle').value.trim();
-  const grupo = document.getElementById('fGrupo').value.trim();
-  if(!det){ showToast('Escribe el detalle de la falla'); return; }
+function wizStepFoto(){
+  const has = !!pendingPhoto.base64;
+  const src = has ? `data:${pendingPhoto.mime};base64,${pendingPhoto.base64}` : '';
+  return `<div class="wz-q">Foto de la falla</div>
+    <div class="wz-hint">Recomendada: ayuda a que mantención llegue directo al problema.</div>
+    <input type="file" id="wCam" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoSelect(event)">
+    <input type="file" id="wFile" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
+    <div class="wz-grid">
+      <button class="wz-btn" onclick="document.getElementById('wCam').click()"><span class="ico">📷</span>Tomar foto</button>
+      <button class="wz-btn" onclick="document.getElementById('wFile').click()"><span class="ico">🖼️</span>Elegir de archivos</button>
+    </div>
+    <img id="photoPreview" class="photo-preview ${has?'':'hidden'}" ${has?`src="${src}"`:''}>`;
+}
 
-  let torre, piso, origen;
-  if(tipo === 'depto'){
-    torre = document.getElementById('fTorre').value;
-    piso = parseInt(document.getElementById('fPiso').value, 10);
-    if(isNaN(piso)){ showToast('Ingresa el piso'); return; }
-    const depto = document.getElementById('fDepto').value.trim();
-    origen = depto ? ('Depto '+depto) : '';
-  } else if(tipo === 'ascensor'){
-    torre = document.getElementById('fTorre').value; piso = 0; origen = 'Ascensor';
-  } else if(tipo === 'acceso'){
-    torre = document.getElementById('fTorre').value; piso = 0; origen = 'Acceso Principal';
-  } else {
-    torre = 'Común'; piso = 0; origen = document.getElementById('fUbicComun').value;
+function wizStepDetalle(){
+  const r = wizResolve();
+  return `<div class="wz-q">Detalle <span style="font-weight:400;color:var(--text-dim);font-size:.8rem">(opcional si hay foto)</span></div>
+    <div class="field" style="margin-top:0"><textarea id="wDetalle" placeholder="Ej: Gotea sobre la ducha, se moja el piso">${W.detalle.replace(/</g,'&lt;')}</textarea></div>
+    <label class="wz-urg"><input type="checkbox" id="wUrg" ${W.urgente?'checked':''}> 🚨 Marcar como urgente</label>
+    ${W.ubic==='piso' ? `<div class="field"><label>Origen (depto / área, opcional)</label><input type="text" id="wOrigen" placeholder="Ej: Depto 1204" value="${esc(W.origenExtra)}"></div>` : ''}
+    <div class="field"><label>Grupo (opcional)</label><input type="text" id="wGrupo" placeholder="Ej: Reclamo-Depto1204" value="${esc(W.grupo)}"></div>
+    <div class="wz-summary">
+      <div><b>Lugar:</b> ${wizUbicLabel()}</div>
+      <div><b>Tipo:</b> ${catIcon(r.cat)} ${r.cat}</div>
+      <div><b>Foto:</b> ${pendingPhoto.base64 ? 'sí ✓' : 'sin foto'}</div>
+    </div>`;
+}
+
+function wizSubmit(){
+  const r = wizResolve();
+  const btn = document.getElementById('wzNext');
+  if(btn){ btn.disabled = true; btn.textContent = 'Enviando…'; }
+
+  if(W.catOtra && r.cat && !STATE.categorias.includes(r.cat)){
+    STATE.categorias.push(r.cat);
+    const pl = { action:'addConfig', tipo:'categoria', valor:r.cat, ...userTag() };
+    if(navigator.onLine){ apiPost(pl); } else { queueAdd(pl); }
+  }
+  if(W.ubic === 'comun' && W.zonaOtra && r.origen && !STATE.ubicaciones.includes(r.origen)){
+    STATE.ubicaciones.push(r.origen);
+    const pl = { action:'addConfig', tipo:'ubicacion', valor:r.origen, ...userTag() };
+    if(navigator.onLine){ apiPost(pl); } else { queueAdd(pl); }
   }
 
-  const tempFolio = 'TEMP-'+Date.now();
+  const det = W.detalle.trim();
+  const tempFolio = 'TEMP-' + Date.now();
   const ts = new Date().toISOString().slice(0,16).replace('T',' ');
-  const newItem = {
-    Folio: tempFolio, Torre: torre, Piso: piso, Categoria: CATEGORIA_FUGA, Origen: origen, Grupo: grupo,
+  STATE.items.push({
+    Folio: tempFolio, Torre: r.torre, Piso: r.piso, Categoria: r.cat, Origen: r.origen, Grupo: W.grupo,
     Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
     Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
     Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
-    Actualizado_Por: CURRENT_USER.nombre||'', Notas:''
-  };
-  STATE.items.push(newItem);
+    Actualizado_Por: CURRENT_USER.nombre||'', Notas:'', Urgente: W.urgente ? 'Sí' : ''
+  });
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
-  const payload = { action:'add', torre, piso, categoria:CATEGORIA_FUGA, detalle:det, origen, grupo, ...userTag() };
+  const payload = { action:'add', torre:r.torre, piso:r.piso, categoria:r.cat, detalle:det, origen:r.origen, grupo:W.grupo, urgente:W.urgente, ...userTag() };
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
 
+  const label = wizUbicLabel();
+  const finish = (folio, queued)=>{
+    W.done = { folio, queued, label, cat:r.cat, urgente:W.urgente };
+    wizRender(); renderAll();
+  };
   if(navigator.onLine){
     apiPost(payload).then(res=>{
-      if(res.success){ showToast('Filtración reportada ✓'); loadData(); }
-      else { showToast('No se pudo agregar en el servidor'); queueAdd(payload); }
-    }).catch(()=>{ queueAdd(payload); });
-  } else { queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal'); }
-  closeModal();
-  renderAll();
+      if(res.success){ finish(res.folio, false); loadData(); }
+      else { queueAdd(payload); finish(null, true); }
+    }).catch(()=>{ queueAdd(payload); finish(null, true); });
+  } else { queueAdd(payload); finish(null, true); }
+}
+
+function wizRenderDone(){
+  const d = W.done;
+  showModal(`
+    <div class="wz-done">
+      <div class="wz-check">${d.queued ? '🕓' : '✓'}</div>
+      <h2 style="margin:6px 0 2px">${d.queued ? 'Guardada en este equipo' : 'Falla reportada'}</h2>
+      ${d.folio ? `<div class="wz-folio">${d.folio}</div>` : ''}
+      <div class="wz-hint" style="margin-top:6px">${d.urgente?'🚨 ':''}${d.cat} · ${d.label}</div>
+      ${d.queued ? '<div class="wz-hint">Sin señal o sin respuesta del servidor: se enviará sola al recuperar conexión.</div>' : '<div class="wz-hint">Quedó en estado <b>Nuevo</b>.</div>'}
+    </div>
+    <div class="action-list">
+      <button class="btn btn-primary" style="margin-top:0" onclick="wizAnother()">➕ Otra falla en el mismo lugar</button>
+      <button class="btn btn-ghost" onclick="openReportWizard(W.opts)">📍 Reportar en otro lugar</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
+    </div>
+  `);
+}
+function wizAnother(){
+  pendingPhoto = { base64:null, mime:null };
+  W.done = null; W.sending = false;
+  W.detalle = ''; W.urgente = false; W.grupo = ''; W.origenExtra = '';
+  if(!W.fixedCat){ W.cat = ''; W.catOtra = false; W.catTxt = ''; }
+  W.step = W.fixedLoc ? 0 : 1;
+  wizRender();
 }
 
 /* ================= PDF: SOLO FILTRACIONES ================= */
@@ -1350,117 +1577,6 @@ function renderDeptoRow(i){
 }
 
 /* ================= REPORTAR FALLA (DEPTO / ASCENSOR / ACCESO / COMÚN) ================= */
-function openReportDeptoModal(){
-  pendingPhoto = { base64:null, mime:null };
-  const catOptions = STATE.categorias.filter(c=>c!==CATEGORIA_FUGA && c!==CATEGORIA_FUGA_LEGACY).map(c=>`<option value="${esc(c)}">${c}</option>`).join('');
-  showModal(`
-    <h2>🔧 Reportar falla</h2>
-    <div class="field"><label>Tipo de ubicación</label>
-      <select id="dTipo" onchange="renderDeptoUbicacionFields()">
-        <option value="depto">Departamento</option>
-        <option value="ascensor">Ascensor</option>
-        <option value="acceso">Acceso principal</option>
-        <option value="comun">Área común (piscina, quincho, sala común, conserjería...)</option>
-      </select>
-    </div>
-    <div id="dUbicacionFields"></div>
-    <div class="field"><label>Tipo de falla</label><select id="dCat">${catOptions}</select>
-      <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewCategoria('dCat')">+ Agregar nuevo tipo de falla</div>
-    </div>
-    <div class="field"><label>Detalle</label><textarea id="dDetalle" placeholder="Ej: Timbre de conserjería no suena"></textarea></div>
-    <div class="field"><label>Grupo (opcional)</label><input type="text" id="dGrupo" placeholder="Ej: Reclamo-Depto1204"></div>
-    <div class="field">
-      <label>Foto (recomendada)</label>
-      <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
-      <img id="photoPreview" class="photo-preview hidden">
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" style="margin-top:0" onclick="submitDeptoReport()">Reportar</button>
-    </div>
-  `);
-  renderDeptoUbicacionFields();
-}
-
-function renderDeptoUbicacionFields(){
-  const tipo = document.getElementById('dTipo').value;
-  const wrap = document.getElementById('dUbicacionFields');
-  const torreOptions = TORRES.map(t=>`<option value="${t}">${t}</option>`).join('');
-  if(tipo === 'depto'){
-    wrap.innerHTML = `
-      <div class="field"><label>Torre</label><select id="dTorre">${torreOptions}</select></div>
-      <div class="field"><label>Piso</label><input type="number" id="dPiso" placeholder="Ej: 12"></div>
-      <div class="field"><label>N° depto</label><input type="text" id="dDepto" placeholder="Ej: 1204"></div>
-    `;
-  } else if(tipo === 'ascensor' || tipo === 'acceso'){
-    wrap.innerHTML = `<div class="field"><label>Torre</label><select id="dTorre">${torreOptions}</select></div>`;
-  } else {
-    const comunes = STATE.ubicaciones.filter(u=>!u.startsWith('Ascensor') && !u.startsWith('Acceso Principal'));
-    wrap.innerHTML = `
-      <div class="field"><label>Ubicación</label><select id="dUbicComun">${comunes.map(u=>`<option value="${esc(u)}">${u}</option>`).join('')}</select>
-        <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewUbicacionDepto()">+ Agregar nueva ubicación</div>
-      </div>`;
-  }
-}
-
-function promptNewUbicacionDepto(){
-  const val = prompt('Nombre de la nueva ubicación común:');
-  if(!val) return;
-  STATE.ubicaciones.push(val);
-  const payload = { action:'addConfig', tipo:'ubicacion', valor: val, ...userTag() };
-  if(navigator.onLine){ apiPost(payload); } else { queueAdd(payload); }
-  const sel = document.getElementById('dUbicComun');
-  if(sel){ const opt=document.createElement('option'); opt.value=val; opt.textContent=val; sel.appendChild(opt); sel.value=val; }
-}
-
-function submitDeptoReport(){
-  const tipo = document.getElementById('dTipo').value;
-  const cat = document.getElementById('dCat').value;
-  const det = document.getElementById('dDetalle').value.trim();
-  const grupo = document.getElementById('dGrupo').value.trim();
-  if(!det){ showToast('Escribe el detalle de la falla'); return; }
-
-  let torre, piso, origen;
-  if(tipo === 'depto'){
-    torre = document.getElementById('dTorre').value;
-    piso = parseInt(document.getElementById('dPiso').value, 10);
-    if(isNaN(piso)){ showToast('Ingresa el piso'); return; }
-    const depto = document.getElementById('dDepto').value.trim();
-    if(!depto){ showToast('Ingresa el número de depto'); return; }
-    origen = 'Depto ' + depto;
-  } else if(tipo === 'ascensor'){
-    torre = document.getElementById('dTorre').value; piso = 0; origen = 'Ascensor';
-  } else if(tipo === 'acceso'){
-    torre = document.getElementById('dTorre').value; piso = 0; origen = 'Acceso Principal';
-  } else {
-    torre = 'Común'; piso = 0; origen = document.getElementById('dUbicComun').value;
-  }
-
-  const tempFolio = 'TEMP-'+Date.now();
-  const ts = new Date().toISOString().slice(0,16).replace('T',' ');
-  const newItem = {
-    Folio: tempFolio, Torre: torre, Piso: piso, Categoria: cat, Origen: origen, Grupo: grupo,
-    Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
-    Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
-    Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
-    Actualizado_Por: CURRENT_USER.nombre||'', Notas:''
-  };
-  STATE.items.push(newItem);
-  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
-
-  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, ...userTag() };
-  if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
-
-  if(navigator.onLine){
-    apiPost(payload).then(res=>{
-      if(res.success){ showToast('Falla reportada ✓'); loadData(); }
-      else { showToast('No se pudo agregar en el servidor'); queueAdd(payload); }
-    }).catch(()=>{ queueAdd(payload); });
-  } else { queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal'); }
-  closeModal();
-  renderAll();
-}
-
 /* ================= PDF: SOLO FALLAS DE DEPTO ================= */
 function generarPdfDeptos(){
   showToast('Generando PDF...');
@@ -1774,6 +1890,7 @@ function handlePhotoSelect(ev){
       pendingPhoto.mime = 'image/jpeg';
       const prev = document.getElementById('photoPreview');
       if(prev){ prev.src = dataUrl; prev.classList.remove('hidden'); }
+      if(typeof wizPhotoDone==='function') wizPhotoDone();
     };
     img.src = e.target.result;
   };
@@ -1896,29 +2013,6 @@ function showBitacora(folio){
 }
 
 /* ================= AGREGAR NUEVO REPORTE ================= */
-function openAddReportModal(torre, piso){
-  pendingPhoto = { base64:null, mime:null };
-  const catOptions = STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('');
-  showModal(`
-    <h2>Reportar falla</h2>
-    <div class="sub">${torre} · Piso ${piso}</div>
-    <div class="field"><label>Categoría</label><select id="nCat">${catOptions}</select>
-      <div class="hint" style="color:var(--accent);cursor:pointer;margin-top:6px" onclick="promptNewCategoria()">+ Agregar nueva categoría</div>
-    </div>
-    <div class="field"><label>Detalle de la falla</label><textarea id="nDetalle" placeholder="Ej: Ventana quebrada en pasillo"></textarea></div>
-    <div class="field"><label>Origen (depto / área, opcional)</label><input type="text" id="nOrigen" placeholder="Ej: Depto 1204"></div>
-    <div class="field"><label>Grupo (opcional)</label><input type="text" id="nGrupo" placeholder="Ej: Ronda-12-08-2026"></div>
-    <div class="field">
-      <label>Foto (recomendada)</label>
-      <input type="file" accept="image/*" capture="environment" onchange="handlePhotoSelect(event)">
-      <img id="photoPreview" class="photo-preview hidden">
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" style="margin-top:0" onclick="submitAddReport('${torre}', ${piso})">Reportar</button>
-    </div>
-  `);
-}
 function promptNewCategoria(targetSelectId){
   const val = prompt('Nombre de la nueva categoría:');
   if(!val) return;
@@ -1929,37 +2023,6 @@ function promptNewCategoria(targetSelectId){
   const opt = document.createElement('option'); opt.value = val; opt.textContent = val;
   sel.appendChild(opt); sel.value = val;
 }
-function submitAddReport(torre, piso){
-  const cat = document.getElementById('nCat').value;
-  const det = document.getElementById('nDetalle').value.trim();
-  const origen = document.getElementById('nOrigen').value.trim();
-  const grupo = document.getElementById('nGrupo').value.trim();
-  if(!det){ showToast('Escribe el detalle de la falla'); return; }
-
-  const tempFolio = 'TEMP-'+Date.now();
-  const ts = new Date().toISOString().slice(0,16).replace('T',' ');
-  const newItem = {
-    Folio: tempFolio, Torre: torre, Piso: piso, Categoria: cat, Origen: origen, Grupo: grupo,
-    Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
-    Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
-    Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
-    Actualizado_Por: CURRENT_USER.nombre||'', Notas:''
-  };
-  STATE.items.push(newItem);
-  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
-
-  const payload = { action:'add', torre, piso, categoria:cat, detalle:det, origen, grupo, ...userTag() };
-  if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
-
-  if(navigator.onLine){
-    apiPost(payload).then(res=>{
-      if(res.success){ showToast('Falla reportada ✓'); loadData(); }
-      else { showToast('No se pudo agregar en el servidor'); queueAdd(payload); }
-    }).catch(()=>{ queueAdd(payload); });
-  } else { queueAdd(payload); showToast('Sin conexión: se enviará al recuperar señal'); }
-  closeModal(); renderAll();
-}
-
 /* ================= CONFIGURACIÓN ================= */
 function confirmLogout(){
   if(confirm('¿Cerrar sesión?')) logout();

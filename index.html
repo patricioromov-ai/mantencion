@@ -271,6 +271,98 @@
   .sem-help summary{cursor:pointer;}
   .sem-help div{margin-top:6px; line-height:1.6;}
   .tw-light{display:inline-flex; align-items:center; gap:5px; margin-top:6px; font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:99px; border:1px solid var(--sc); color:var(--sc);}
+  /* ===== Tarjetas de módulos (Filtraciones / Deptos) ===== */
+  .fx-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 12px;}
+  .fx-h1{font-size:1.2rem; font-weight:800;}
+  .fx-h2{font-size:.74rem; color:var(--text-dim); margin-top:2px;}
+  .fx-tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:7px;}
+  .fx-tile{background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:9px 4px 8px; text-align:center; cursor:pointer;}
+  .fx-tile b{display:block; font-size:1.35rem; font-family:ui-monospace,"SF Mono",monospace; color:var(--tc); line-height:1.1;}
+  .fx-tile span{font-size:.6rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.03em;}
+  .fx-tile.on{border-color:var(--tc); background:color-mix(in srgb, var(--tc) 12%, var(--panel));}
+  .fx-tile.zero{opacity:.55;}
+  .fx-pills{display:flex; gap:6px; margin:12px 0 10px; overflow-x:auto; scrollbar-width:none;}
+  .fx-pills::-webkit-scrollbar{display:none;}
+  .fx-pill{flex:0 0 auto; display:inline-flex; align-items:center; gap:5px; padding:8px 14px; border-radius:99px; border:1px solid var(--line); background:var(--panel); color:var(--text-dim); font-size:.84rem; font-weight:700; cursor:pointer;}
+  .fx-pill i{font-style:normal; font-size:.66rem; background:var(--panel-alt); border-radius:99px; padding:1px 6px; color:var(--text);}
+  .fx-pill.on{background:var(--accent); border-color:var(--accent); color:#1a1206;}
+  .fx-pill.on i{background:#00000026; color:#1a1206;}
+  .fx-ver{margin-bottom:10px;}
+  .fx-sel{width:100%; margin-bottom:10px; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:10px 12px; font-size:.88rem;}
+  .fx-search input{width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px 12px; font-size:.9rem; outline:none; margin-bottom:6px;}
+  .fx-search input:focus{border-color:var(--accent);}
+  .fx-gh{display:flex; align-items:center; justify-content:space-between; margin:16px 2px 8px; font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim);}
+  .fx-gh i{font-style:normal; background:var(--panel-alt); color:var(--text); border-radius:99px; padding:1px 9px; font-size:.7rem;}
+  .fx-card{display:flex; gap:11px; background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--pc,#5B6675); border-radius:13px; padding:10px; margin-bottom:9px; cursor:pointer;}
+  .fx-card:active{transform:scale(.99);}
+  .fx-card.urg{background:linear-gradient(90deg,#D6534A1c,var(--panel) 60%);}
+  .fx-card.done{opacity:.72;}
+  .fx-thumb{position:relative; width:62px; height:62px; flex:0 0 auto; border-radius:10px; overflow:hidden; background:var(--panel-alt); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
+  .fx-thumb span{font-size:1.7rem;}
+  .fx-thumb img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .fx-main{flex:1; min-width:0;}
+  .fx-l1{display:flex; align-items:center; gap:5px; flex-wrap:wrap;}
+  .fx-torre{font-size:.66rem; font-weight:800; background:var(--panel-alt); border:1px solid var(--line); border-radius:6px; padding:1px 7px;}
+  .fx-urg{font-size:.8rem;}
+  .fx-title{font-size:.92rem; font-weight:700; margin-top:3px; line-height:1.25;}
+  .fx-sub{font-size:.72rem; color:var(--accent); margin-top:1px;}
+  .fx-detalle{font-size:.76rem; color:var(--text-dim); margin-top:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
+  .fx-l3{display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; align-items:center;}
+  .fx-est{font-size:.66rem; font-weight:800; color:var(--ec); border:1px solid var(--ec); border-radius:99px; padding:1px 8px;}
+  .fx-flag{font-size:.66rem; color:var(--text-dim);}
+  .fx-flag.warn{color:#E8A33D;}
+  .fx-flag.late{color:#E8803D; font-weight:700;}
+  .fx-flag.seg{color:#3B82C4;}
+  .fx-days{text-align:center; flex:0 0 auto; align-self:center; min-width:34px;}
+  .fx-days b{display:block; font-size:1.15rem; font-family:ui-monospace,"SF Mono",monospace;}
+  .fx-days span{font-size:.56rem; color:var(--text-dim); text-transform:uppercase;}
+  .fx-empty{text-align:center; padding:36px 16px;}
+  .fx-empty .e-ico{font-size:2.4rem;}
+  .fx-empty .e-t{font-weight:800; margin-top:6px;}
+  .fx-empty .e-s{font-size:.78rem; color:var(--text-dim); margin-top:4px;}
+  .fx-addbar{position:fixed; left:0; right:0; bottom:0; z-index:25; padding:22px 14px calc(12px + var(--safe-b)); background:linear-gradient(180deg,transparent,var(--bg) 40%); pointer-events:none;}
+  .fx-addbar .btn{pointer-events:auto; margin-top:0; padding:14px; font-size:.98rem; box-shadow:0 6px 18px rgba(0,0,0,.4);}
+  .fx-addbar .btn-row{max-width:520px; margin:0 auto;}
+
+  /* ===== Panel ===== */
+  .dash-tiles.three{grid-template-columns:repeat(3,1fr);}
+  .dash-tiles.three .tile{padding:10px 4px;}
+  .dash-tiles.three .tile-num{font-size:1.3rem;}
+  .dash-tiles.three .tile-label{font-size:.58rem;}
+  .dash-active{margin:0 0 4px;}
+  .sl-hint{text-transform:none; letter-spacing:0; font-size:.68rem;}
+  .bar-row.drill{cursor:pointer; padding:7px 4px; border-radius:8px;}
+  .bar-row.drill .bar-label{width:150px;}
+  .bar-row.drill:active{background:var(--panel-alt);}
+  .bar-go{color:var(--text-dim); width:10px;}
+  .dash-more{margin-top:6px; font-size:.78rem; color:var(--text-dim);}
+  .dash-more summary{cursor:pointer; padding:6px 0;}
+  .dt-legend{display:flex; gap:16px; font-size:.72rem; color:var(--text-dim); margin-top:4px;}
+  .dt-legend i{display:inline-block; width:9px; height:9px; border-radius:3px; margin-right:5px;}
+  .dt-legend b{color:var(--text);}
+  .dt-note{font-size:.74rem; margin-top:6px;}
+
+  /* ===== Centro de informes ===== */
+  .inf-types{display:grid; grid-template-columns:repeat(2,1fr); gap:9px;}
+  .inf-type{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:11px 10px; cursor:pointer;}
+  .inf-type.on{border-color:var(--accent); background:#3a2c111a;}
+  .inf-type .it-ico{font-size:1.3rem;}
+  .inf-type .it-n{font-size:.86rem; font-weight:800; margin-top:3px;}
+  .inf-type .it-d{font-size:.68rem; color:var(--text-dim); margin-top:2px; line-height:1.3;}
+  .inf-seg button{font-size:.72rem; padding:9px 2px;}
+  .inf-n{font-size:.95rem;}
+  .inf-n b{font-size:1.5rem; font-family:ui-monospace,"SF Mono",monospace; color:var(--accent);}
+  .inf-desc{font-size:.7rem; color:var(--text-dim); margin:2px 0 10px; line-height:1.4;}
+  .inf-kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; text-align:center;}
+  .inf-kpis div{background:var(--panel-alt); border-radius:9px; padding:7px 2px;}
+  .inf-kpis b{display:block; font-size:1.05rem; font-family:ui-monospace,"SF Mono",monospace;}
+  .inf-kpis span{font-size:.58rem; color:var(--text-dim); text-transform:uppercase;}
+
+  /* ===== Guía ===== */
+  .gd-ico{font-size:3rem; text-align:center; margin:6px 0 4px;}
+  .gd-t{font-size:1.1rem; font-weight:800; text-align:center;}
+  .gd-x{font-size:.88rem; color:var(--text-dim); line-height:1.6; margin-top:10px; text-align:center;}
+  .gd-x b{color:var(--text);}
 </style>
 </head>
 <body>
@@ -296,8 +388,8 @@
     <div class="h-top">
       <div><div class="h-title">Checklist de Mantención</div><div class="h-sub">Jardines de Vicuña Mackenna</div></div>
       <div class="h-actions">
-        <button class="icon-btn" id="btnGestion" onclick="openReportModal()" title="Reporte de gestión">📊</button>
-        <button class="icon-btn" id="btnImprimir" onclick="openPdfActivasModal()" title="Imprimir fallas">🖨️</button>
+        <button class="icon-btn" id="btnAyuda" onclick="openGuia()" title="Cómo usar la app">❓</button>
+        <button class="icon-btn" id="btnImprimir" onclick="selectInformes()" title="Informes">🖨️</button>
         <button class="icon-btn" onclick="manualSync()" title="Sincronizar"><span id="syncIcon">⟳</span></button>
         <button class="icon-btn" onclick="confirmLogout()" title="Cerrar sesión">🚪</button>
       </div>
@@ -482,10 +574,10 @@ function logout(){
 function startApp(){
   document.getElementById('app').classList.remove('hidden');
   STATE.view = 'home';
-  document.getElementById('btnGestion').style.display = (CURRENT_USER.rol === 'Admin') ? 'flex' : 'none';
   document.getElementById('btnImprimir').style.display = (CURRENT_USER.rol === 'Admin') ? 'flex' : 'none';
   renderTabs(); loadData(); setInterval(flushQueue, 25000);
   setInterval(loadData, 90000); // auto-refresh cada 90s para detectar registros nuevos
+  setTimeout(()=>{ if(!guiaVista() && !activeModalBg) openGuia(); }, 900);
 }
 
 /* ================= CARGA / SYNC ================= */
@@ -590,7 +682,8 @@ function renderTabs(){
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
   const planTab = `<div class="tab ${STATE.view==='plan'?'active':''}" onclick="selectPlan()">📅 Plan</div>`;
-  document.getElementById('tabsRow').innerHTML = homeTab + torreTabs + dashTab + planTab + fugasTab + deptosTab;
+  const infTab = `<div class="tab ${STATE.view==='informes'?'active':''}" onclick="selectInformes()">🖨️ Informes</div>`;
+  document.getElementById('tabsRow').innerHTML = homeTab + torreTabs + dashTab + planTab + fugasTab + deptosTab + infTab;
 }
 function selectHome(){ STATE.view='home'; if(STATE.home) STATE.home.alerta=null; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 function selectAlerta(key){ ensureHomeState(); STATE.home.alerta=key; STATE.view='alerta'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -617,12 +710,14 @@ function renderSummary(){
 /* ================= RENDER PRINCIPAL ================= */
 function renderAll(){
   renderSummary();
-  const onHome = (STATE.view === 'home' || STATE.view === 'alerta');
+  const onHome = (STATE.view === 'home' || STATE.view === 'alerta' || STATE.view === 'informes');
   document.getElementById('summaryRow').style.display = onHome ? 'none' : 'flex';
   if(STATE.view === 'home'){
     renderHome();
   } else if(STATE.view === 'alerta'){
     renderAlerta();
+  } else if(STATE.view === 'informes'){
+    renderInformes();
   } else if(STATE.view === 'plan'){
     renderPlan();
   } else if(STATE.view === 'dashboard'){
@@ -658,11 +753,6 @@ function renderItemRow(i){
 /* ================= PANEL / DASHBOARD ================= */
 const ALL_ESTADOS = Object.keys(ESTADO_COLORS);
 
-function ensureDashState(){
-  if(!STATE.dash){
-    STATE.dash = { torres:[...TORRES_ALL], estados:[...ALL_ESTADOS], categoria:'', area:'', grupo:'', piso:'', soloSeguimiento:false };
-  }
-}
 function dashFilteredItems(){
   const d = STATE.dash;
   return STATE.items.filter(i=>
@@ -689,166 +779,210 @@ function barRow(label, count, max, color){
   </div>`;
 }
 
+
+
+
+
+const DASH_EST_DEF = ALL_ESTADOS.filter(e=>e!=='Sin revisar');
+function ensureDashState(){
+  if(!STATE.dash){
+    STATE.dash = { torres:[...TORRES_ALL], estados:[...DASH_EST_DEF], categoria:'', area:'', grupo:'', piso:'', soloSeguimiento:false };
+  }
+}
+function sameSet(a, b){ return a.length===b.length && a.every(x=>b.includes(x)); }
+function dashFiltrosActivos(){
+  const d = STATE.dash, chips = [];
+  if(d.torres.length < TORRES_ALL.length) chips.push({ k:'torres', t:'Torres: ' + d.torres.map(x=>x.replace('Torre ','')).join(', ') });
+  if(!sameSet(d.estados, DASH_EST_DEF)) chips.push({ k:'estados', t: d.estados.length===1 ? ('Estado: '+d.estados[0]) : (d.estados.length+' estados') });
+  if(d.categoria) chips.push({ k:'categoria', t:d.categoria });
+  if(d.area) chips.push({ k:'area', t:'Área: '+d.area });
+  if(d.grupo) chips.push({ k:'grupo', t:'Grupo: '+d.grupo });
+  if(d.piso) chips.push({ k:'piso', t:'Piso '+d.piso });
+  if(d.soloSeguimiento) chips.push({ k:'soloSeguimiento', t:'📌 Seguimiento' });
+  return chips;
+}
+function dashQuitar(k){
+  const d = STATE.dash;
+  if(k==='torres') d.torres = [...TORRES_ALL];
+  else if(k==='estados') d.estados = [...DASH_EST_DEF];
+  else if(k==='soloSeguimiento') d.soloSeguimiento = false;
+  else d[k] = '';
+  renderDashboard();
+}
+function dashLimpiar(){ STATE.dash = null; ensureDashState(); renderDashboard(); }
+
+// últimos 14 días: reportadas vs resueltas
+function dashTrend(items){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = [];
+  for(let k=13;k>=0;k--) days.push({ d:new Date(today.getTime()-k*86400000), rep:0, res:0 });
+  const idx = dt => {
+    if(!dt || isNaN(dt)) return -1;
+    const x = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    const diff = Math.round((today - x)/86400000);
+    return (diff>=0 && diff<14) ? 13-diff : -1;
+  };
+  items.forEach(i=>{
+    const a = idx(parseFH(i.Fecha_Deteccion)); if(a>=0) days[a].rep++;
+    if(i.Estado==='Resuelto' && i.Fecha_Resolucion){ const b = idx(parseFH(i.Fecha_Resolucion)); if(b>=0) days[b].res++; }
+  });
+  return days;
+}
+function dashTrendHtml(items){
+  const days = dashTrend(items);
+  const rep = days.reduce((s,x)=>s+x.rep,0), res = days.reduce((s,x)=>s+x.res,0);
+  const max = Math.max(1, ...days.map(x=>Math.max(x.rep,x.res)));
+  const W = 300, H = 74, slot = W/14, bw = 8;
+  let bars = '';
+  days.forEach((x,k)=>{
+    const cx = k*slot + slot/2;
+    const h1 = Math.round(x.rep/max*54), h2 = Math.round(x.res/max*54);
+    if(h1) bars += `<rect x="${(cx-bw-1).toFixed(1)}" y="${60-h1}" width="${bw}" height="${h1}" rx="2" fill="#E8A33D"/>`;
+    if(h2) bars += `<rect x="${(cx+1).toFixed(1)}" y="${60-h2}" width="${bw}" height="${h2}" rx="2" fill="#2FA86B"/>`;
+    if(k===0 || k===13 || k===7) bars += `<text x="${cx.toFixed(1)}" y="72" text-anchor="middle" font-size="8" fill="#8B98A8">${fmtDM(x.d)}</text>`;
+  });
+  const trend = res >= rep ? '👍 Se está resolviendo al ritmo en que se reporta' : '⚠️ Se reporta más de lo que se resuelve';
+  return `<div class="dash-card">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Fallas reportadas y resueltas, últimos 14 días"><line x1="0" y1="60.5" x2="${W}" y2="60.5" stroke="#2C3947"/>${bars}</svg>
+    <div class="dt-legend"><span><i style="background:#E8A33D"></i>Reportadas <b>${rep}</b></span><span><i style="background:#2FA86B"></i>Resueltas <b>${res}</b></span></div>
+    <div class="dt-note">${trend}</div>
+  </div>`;
+}
+
+let DASH_DRILL = { torre:[], cat:[], est:[], area:[] };
+function drillRow(label, count, max, color, kind, idx){
+  const pct = max>0 ? Math.round(count/max*100) : 0;
+  return `<div class="bar-row drill" onclick="dashDrill('${kind}',${idx})">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color||'var(--accent)'}"></div></div>
+    <div class="bar-count">${count}</div><div class="bar-go">›</div>
+  </div>`;
+}
+function dashDrill(kind, idx){
+  const d = STATE.dash, v = DASH_DRILL[kind][idx];
+  if(v===undefined) return;
+  if(kind==='torre'){ d.torres = (d.torres.length===1 && d.torres[0]===v) ? [...TORRES_ALL] : [v]; }
+  else if(kind==='cat'){ d.categoria = (d.categoria===v) ? '' : v; }
+  else if(kind==='est'){ d.estados = (d.estados.length===1 && d.estados[0]===v) ? [...DASH_EST_DEF] : [v]; }
+  else if(kind==='area'){ d.area = (d.area===v) ? '' : v; }
+  renderDashboard();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function drillSection(titulo, entries, kind, colorFn, labelFn, maxShow){
+  DASH_DRILL[kind] = entries.map(e=>e[0]);
+  if(!entries.length) return `<div class="section-label">${titulo}</div><div class="empty-note" style="padding:12px">Sin datos</div>`;
+  const max = Math.max(1, ...entries.map(e=>e[1]));
+  const row = (e,k)=>drillRow(labelFn ? labelFn(e[0]) : e[0], e[1], max, colorFn ? colorFn(e[0]) : null, kind, k);
+  const head = entries.slice(0, maxShow||entries.length).map((e,k)=>row(e,k)).join('');
+  const rest = (maxShow && entries.length>maxShow)
+    ? `<details class="dash-more"><summary>Ver los ${entries.length-maxShow} restantes</summary>${entries.slice(maxShow).map((e,k)=>row(e,k+maxShow)).join('')}</details>` : '';
+  return `<div class="section-label">${titulo} <span class="sl-hint">· toca para filtrar</span></div>${head}${rest}`;
+}
+
 function renderDashboard(){
   ensureDashState();
   const d = STATE.dash;
-  const main = document.getElementById('mainList');
-  main.innerHTML = `
+  const items = dashFilteredItems();
+  const act = items.filter(i=>prioridadDe(i)!==null);
+  const soloActivas = sameSet(d.estados, DASH_EST_DEF);
+  const base = soloActivas ? act : items.filter(i=>i.Estado!=='Sin revisar');
+  const hace30 = new Date(Date.now() - 30*86400000);
+  const res30 = items.filter(i=>i.Estado==='Resuelto' && i.Fecha_Resolucion && parseFH(i.Fecha_Resolucion) >= hace30);
+  const diasArr = items.filter(i=>i.Estado==='Resuelto').map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
+  const promDias = diasArr.length ? (diasArr.reduce((s,x)=>s+x,0)/diasArr.length).toFixed(1) : '—';
+  const chips = dashFiltrosActivos();
+  const nF = chips.length;
+  const tile = (n,l,c,ico) => `<div class="tile"><div class="tile-num" style="color:${c}">${n}</div><div class="tile-label">${ico?ico+' ':''}${l}</div></div>`;
+  const sub = soloActivas ? 'Resumen de fallas activas' : 'Resumen según tus filtros';
+
+  const urgTop = act.filter(i=>['critica','alta'].includes(prioridadDe(i))).sort(cmpPrioridad).slice(0,6);
+  const byTorre = countBy(base, i=>i.Torre);
+  const byCat = countBy(base, i=>i.Categoria);
+  const byEst = countBy(items.filter(i=>i.Estado!=='Sin revisar'), i=>i.Estado||'Sin revisar');
+  const byArea = countBy(base.filter(i=>i.Area_Derivacion), i=>i.Area_Derivacion);
+
+  document.getElementById('mainList').innerHTML = `
+    <div class="fx-head">
+      <div><div class="fx-h1">📊 Panel</div><div class="fx-h2">${sub} · ${items.length} ítems</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="openDashFiltros()">🔍 Filtros${nF?` (${nF})`:''}</button>
+      </div>
+    </div>
+    ${nF ? `<div class="chip-row dash-active">${chips.map(c=>`<div class="chip selected" onclick="dashQuitar('${c.k}')">${c.t} ✕</div>`).join('')}<div class="chip" onclick="dashLimpiar()">Limpiar todo</div></div>` : ''}
     ${semaforoSectionHtml()}
-    <div class="dash-card" style="margin-top:12px">
-      <div class="section-label" style="margin-top:0">Torres</div>
-      <div class="chip-row">${TORRES_ALL.map(t=>`<div class="chip ${d.torres.includes(t)?'selected':''}" onclick="toggleDashTorre('${t}',this)">${t.replace('Torre ','T. ')}</div>`).join('')}</div>
-      <div class="section-label">Estados</div>
-      <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${d.estados.includes(e)?'selected':''}" onclick="toggleDashEstado('${e}',this)">${e}</div>`).join('')}</div>
-      <div class="field"><label>Tipo de falla</label>
-        <select onchange="setDashField('categoria', this.value)">
-          <option value="">Todas</option>
-          ${STATE.categorias.map(c=>`<option value="${esc(c)}" ${d.categoria===c?'selected':''}>${c}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>Área de derivación</label>
-        <select onchange="setDashField('area', this.value)">
-          <option value="">Todas</option>
-          ${STATE.derivaciones.map(a=>`<option value="${esc(a)}" ${d.area===a?'selected':''}>${a}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>Grupo</label>
-        <input type="text" value="${esc(d.grupo)}" oninput="setDashField('grupo', this.value)" placeholder="Ej: Ronda-12-08-2026">
-      </div>
-      <div class="field"><label>Piso (opcional)</label>
-        <input type="number" value="${esc(d.piso)}" oninput="setDashField('piso', this.value)" placeholder="Ej: 12">
-      </div>
-      <div class="field" style="display:flex;align-items:center;gap:8px;margin-top:10px;">
-        <input type="checkbox" id="dashSeguimiento" ${d.soloSeguimiento?'checked':''} onchange="setDashField('soloSeguimiento', this.checked)" style="width:auto;">
-        <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="dashSeguimiento">📌 Solo con seguimiento pendiente</label>
-      </div>
+    <div class="section-label">Cifras clave</div>
+    <div class="dash-tiles three">
+      ${tile(act.length,'Activas','var(--text)','')}
+      ${tile(act.filter(esUrgente).length,'Urgentes','#D6534A','🚨')}
+      ${tile(act.filter(isAtrasada).length,'Atrasadas','#E8803D','⌛')}
+      ${tile(act.filter(isStale).length,'Sin mov.','#E8A33D','⏰')}
+      ${tile(res30.length,'Resueltas 30d','#2FA86B','✅')}
+      ${tile(promDias,'Días prom.','#3B82C4','⏱')}
     </div>
-    <div id="dashMetrics"></div>
-    <div class="btn-row" style="margin-top:4px">
-      <button class="btn btn-primary" onclick="buildPdfDashboard()">📄 PDF</button>
-      <button class="btn btn-primary" style="background:#2FA86B" onclick="exportarExcelDashboard()">📥 Excel</button>
+    <div class="section-label">Por prioridad</div>
+    <div class="prio-strip">${Object.keys(PRIORIDADES).map(k=>`<div class="prio-tile" style="--pc:${PRIORIDADES[k].color}" onclick="selectAlerta('prio_${k}')"><div class="n">${act.filter(i=>prioridadDe(i)===k).length}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('')}</div>
+    <div class="section-label">Últimos 14 días</div>
+    ${dashTrendHtml(items)}
+    <div class="section-label">🔥 Lo más urgente</div>
+    <div class="floor-card">${urgTop.length ? urgTop.map(renderAlertaRow).join('') : '<div class="empty-note">Nada crítico ni de prioridad alta con estos filtros. ✅</div>'}</div>
+    <button class="btn btn-ghost" style="width:100%" onclick="selectPlan()">📅 Ver el plan de trabajo completo</button>
+    ${drillSection('Por torre / área común', byTorre, 'torre', null, t=>t==='Común'?'Áreas comunes':t.replace('Torre ','Torre '))}
+    ${drillSection('Por tipo de falla', byCat, 'cat', null, null, 8)}
+    ${drillSection('Por estado', byEst, 'est', e=>ESTADO_COLORS[e])}
+    ${drillSection('Por área responsable', byArea, 'area')}
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn btn-primary" style="margin-top:0" onclick="informeDesdePanel()">🖨️ Informe de esta vista (PDF / Excel)</button>
     </div>
-  `;
-  renderDashMetrics();
+    <div style="height:10px"></div>`;
 }
 
-function toggleDashTorre(t, el){
+function openDashFiltros(){
+  ensureDashState();
   const d = STATE.dash;
-  const idx = d.torres.indexOf(t);
+  showModal(`
+    <h2>🔍 Filtros del panel</h2>
+    <div class="sub">Los cambios se ven al instante detrás. Toca “Ver resultados” al terminar.</div>
+    <div class="section-label" style="margin-top:6px">Torres</div>
+    <div class="chip-row">${TORRES_ALL.map(t=>`<div class="chip ${d.torres.includes(t)?'selected':''}" onclick="toggleDashTorre('${t}',this)">${t.replace('Torre ','T. ')}</div>`).join('')}</div>
+    <div class="section-label">Estados</div>
+    <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${d.estados.includes(e)?'selected':''}" onclick="toggleDashEstado('${e}',this)">${e}</div>`).join('')}</div>
+    <div class="field"><label>Tipo de falla</label>
+      <select onchange="setDashField('categoria', this.value)">
+        <option value="">Todas</option>
+        ${STATE.categorias.map(c=>`<option value="${esc(c)}" ${d.categoria===c?'selected':''}>${c}</option>`).join('')}
+      </select></div>
+    <div class="field"><label>Área responsable</label>
+      <select onchange="setDashField('area', this.value)">
+        <option value="">Todas</option>
+        ${STATE.derivaciones.map(a=>`<option value="${esc(a)}" ${d.area===a?'selected':''}>${a}</option>`).join('')}
+      </select></div>
+    <div class="wz-two">
+      <div class="field"><label>Grupo / ronda</label><input type="text" value="${esc(d.grupo)}" oninput="setDashField('grupo', this.value)" placeholder="Ej: Ronda-12-08"></div>
+      <div class="field"><label>Piso</label><input type="number" value="${esc(d.piso)}" oninput="setDashField('piso', this.value)" placeholder="Ej: 12"></div>
+    </div>
+    <div class="field" style="display:flex;align-items:center;gap:8px;margin-top:12px;">
+      <input type="checkbox" id="dashSeguimiento" ${d.soloSeguimiento?'checked':''} onchange="setDashField('soloSeguimiento', this.checked)" style="width:auto;">
+      <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="dashSeguimiento">📌 Solo con seguimiento pendiente</label>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="dashLimpiar(); closeModal()">Limpiar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="closeModal()">Ver resultados</button>
+    </div>`);
+}
+function toggleDashTorre(t, el){
+  const d = STATE.dash, idx = d.torres.indexOf(t);
   if(idx>=0){ if(d.torres.length>1){ d.torres.splice(idx,1); el.classList.remove('selected'); } }
   else { d.torres.push(t); el.classList.add('selected'); }
-  renderDashMetrics();
+  renderDashboard();
 }
 function toggleDashEstado(e, el){
-  const d = STATE.dash;
-  const idx = d.estados.indexOf(e);
+  const d = STATE.dash, idx = d.estados.indexOf(e);
   if(idx>=0){ if(d.estados.length>1){ d.estados.splice(idx,1); el.classList.remove('selected'); } }
   else { d.estados.push(e); el.classList.add('selected'); }
-  renderDashMetrics();
+  renderDashboard();
 }
-function setDashField(field, val){ STATE.dash[field] = val; renderDashMetrics(); }
+function setDashField(field, val){ STATE.dash[field] = val; renderDashboard(); }
 
-function renderDashMetrics(){
-  const wrap = document.getElementById('dashMetrics');
-  if(!wrap) return;
-  const items = dashFilteredItems();
-  const activos = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
-  const resueltos = items.filter(i=>i.Estado==='Resuelto');
-  const diasArr = resueltos.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
-  const promDias = diasArr.length ? (diasArr.reduce((s,x)=>s+x,0)/diasArr.length).toFixed(1) : '—';
-  const conSeguimiento = items.filter(i=>esSeguimiento(i)).length;
-
-  const byEstado = countBy(items, i=>i.Estado||'Sin revisar');
-  const byTorre = countBy(items, i=>i.Torre);
-  const byCategoria = countBy(items, i=>i.Categoria);
-  const byArea = countBy(items.filter(i=>i.Area_Derivacion), i=>i.Area_Derivacion);
-
-  const maxE = Math.max(1, ...byEstado.map(x=>x[1]));
-  const maxT = Math.max(1, ...byTorre.map(x=>x[1]));
-  const maxC = Math.max(1, ...byCategoria.map(x=>x[1]));
-  const maxA = Math.max(1, ...byArea.map(x=>x[1]));
-
-  wrap.innerHTML = `
-    <div class="dash-tiles">
-      <div class="tile"><div class="tile-num">${items.length}</div><div class="tile-label">Total ítems</div></div>
-      <div class="tile"><div class="tile-num" style="color:#D6534A">${activos}</div><div class="tile-label">Activos</div></div>
-      <div class="tile"><div class="tile-num" style="color:#3B82C4">${resueltos.length}</div><div class="tile-label">Resueltos</div></div>
-      <div class="tile"><div class="tile-num" style="color:var(--accent)">${promDias}</div><div class="tile-label">Días prom. resolución</div></div>
-      <div class="tile"><div class="tile-num" style="color:#3B82C4">${conSeguimiento}</div><div class="tile-label">📌 Con seguimiento</div></div>
-    </div>
-    <div class="section-label">Por prioridad (fallas activas)</div>
-    <div class="prio-strip">${Object.keys(PRIORIDADES).map(k=>`<div class="prio-tile" style="--pc:${PRIORIDADES[k].color}"><div class="n">${items.filter(i=>prioridadDe(i)===k).length}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('')}</div>
-    <div class="section-label">🔥 Lo más urgente</div>
-    <div class="floor-card">${(()=>{ const top = items.filter(i=>['critica','alta'].includes(prioridadDe(i))).sort(cmpPrioridad).slice(0,8); return top.length ? top.map(renderAlertaRow).join('') : '<div class="empty-note">Nada crítico ni de prioridad alta en este filtro. ✅</div>'; })()}</div>
-    <div class="section-label">Por estado</div>
-    ${byEstado.map(([k,v])=>barRow(k,v,maxE,ESTADO_COLORS[k])).join('') || '<div class="empty-note">Sin datos</div>'}
-    <div class="section-label">Por torre</div>
-    ${byTorre.map(([k,v])=>barRow(k.replace('Torre ','T. '),v,maxT)).join('') || '<div class="empty-note">Sin datos</div>'}
-    <div class="section-label">Por tipo de falla</div>
-    ${byCategoria.map(([k,v])=>barRow(k,v,maxC)).join('') || '<div class="empty-note">Sin datos</div>'}
-    <div class="section-label">Por área de derivación</div>
-    ${byArea.length ? byArea.map(([k,v])=>barRow(k,v,maxA)).join('') : '<div class="empty-note">Sin fallas derivadas en este filtro.</div>'}
-  `;
-}
-
-function buildPdfDashboard(){
-  loadJsPdf(()=>{
-    const d = STATE.dash;
-    const items = dashFilteredItems();
-    const byEstado = countBy(items, i=>i.Estado||'Sin revisar');
-    const byTorre = countBy(items, i=>i.Torre);
-    const byCategoria = countBy(items, i=>i.Categoria);
-    const byArea = countBy(items.filter(i=>i.Area_Derivacion), i=>i.Area_Derivacion);
-    const resueltos = items.filter(i=>i.Estado==='Resuelto');
-    const diasArr = resueltos.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
-    const promDias = diasArr.length ? (diasArr.reduce((s,x)=>s+x,0)/diasArr.length).toFixed(1) : '—';
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({unit:'pt', format:'a4'});
-    const marginX = 40; let y = 50;
-    const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
-    function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
-
-    doc.setFont('helvetica','bold'); doc.setFontSize(15);
-    doc.text('Panel de Mantención — Resumen', marginX, y); y+=20;
-    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
-    doc.text(COMUNIDAD, marginX, y); y+=14;
-    doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=14;
-    const filtrosTxt = 'Torres: ' + (d.torres.length===TORRES_ALL.length?'Todas':d.torres.join(', ')) +
-      ' · Estados: ' + (d.estados.length===ALL_ESTADOS.length?'Todos':d.estados.join(', ')) +
-      (d.categoria?(' · Falla: '+d.categoria):'') + (d.area?(' · Área: '+d.area):'') + (d.grupo?(' · Grupo: '+d.grupo):'') +
-      (d.piso?(' · Piso: '+d.piso):'') + (d.soloSeguimiento?' · Solo con seguimiento pendiente':'');
-    doc.splitTextToSize(filtrosTxt, pageW-marginX*2).forEach(l=>{ doc.text(l, marginX, y); y+=12; });
-    doc.setDrawColor(200); y+=6; doc.line(marginX, y, pageW-marginX, y); y+=20;
-    doc.setTextColor(0);
-
-    doc.setFont('helvetica','bold'); doc.setFontSize(11);
-    doc.text('Total: ' + items.length + '   ·   Activos: ' + items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length +
-      '   ·   Resueltos: ' + resueltos.length + '   ·   Prom. días resolución: ' + promDias, marginX, y);
-    y += 26;
-
-    function table(titulo, rows){
-      ensure(24);
-      doc.setFont('helvetica','bold'); doc.setFontSize(12);
-      doc.text(titulo, marginX, y); y+=16;
-      doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
-      rows.forEach(([k,v])=>{
-        ensure(13);
-        doc.text(String(k), marginX+8, y);
-        doc.text(String(v), marginX+320, y);
-        y+=13;
-      });
-      y+=12;
-    }
-    table('Por estado', byEstado);
-    table('Por torre', byTorre.map(([k,v])=>[k,v]));
-    table('Por tipo de falla', byCategoria);
-    table('Por área de derivación', byArea.length ? byArea : [['Sin fallas derivadas en este filtro','']]);
-
-    doc.save('Panel_Mantencion_' + new Date().toISOString().slice(0,10) + '.pdf');
-    showToast('PDF generado ✓');
-  });
-}
 
 /* ================= NIVELES: GRAVEDAD / IMPORTANCIA / URGENCIA → PRIORIDAD ================= */
 const NIV_OPTS = {
@@ -1571,7 +1705,7 @@ function renderHome(){
     mods += modCard('📊', 'Panel', 'Mediciones y filtros', 'selectDashboard()');
     const planAtr = planEntries().filter(e=>e.atraso).length;
     mods += modCard('📅', 'Plan de trabajo', planAtr ? `<b>${planAtr}</b> atrasada${planAtr===1?'':'s'}` : 'Al día', 'selectPlan()');
-    mods += modCard('🖨️', 'Informes', 'PDF y reportes', 'openInformesMenu()');
+    mods += modCard('🖨️', 'Informes', 'PDF y Excel', 'selectInformes()');
     mods += modCard('📱', 'Modo rápido', 'Revisar · Agregar · Editar', 'selectSimple()');
   }
 
@@ -1620,19 +1754,6 @@ function renderAlertaRow(i){
       </div>
       <div class="chev">›</div>
     </div>`;
-}
-function openInformesMenu(){
-  showModal(`
-    <h2>🖨️ Informes</h2>
-    <div class="sub">Elige qué informe generar.</div>
-    <div class="action-list">
-      <button class="btn btn-primary" style="margin-top:0" onclick="closeModal(); openPdfActivasModal()">📄 Fallas activas (PDF)</button>
-      <button class="btn btn-ghost" onclick="closeModal(); openReportModal()">📊 Reporte de gestión (PDF)</button>
-      <button class="btn btn-ghost" onclick="closeModal(); selectPlan()">📅 Plan de trabajo (PDF y Excel)</button>
-      <button class="btn btn-ghost" onclick="closeModal(); selectDashboard()">📈 Panel con Excel y PDF por filtros</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
-    </div>
-  `);
 }
 
 /* ================= MODO SIMPLE (celular) ================= */
@@ -1686,78 +1807,176 @@ function renderSimple(){
 function simpleGo(subview){ ensureSimpleState(); STATE.simple.subview = subview; STATE.simple.search=''; renderSimple(); }
 function setSimpleSearch(val){ STATE.simple.search = val; renderSimple(); }
 
-/* ================= FUGAS Y FILTRACIONES ================= */
+/* ================= FILTRACIONES Y DEPTOS/COMUNES: TARJETAS ================= */
+const CERRADOS_MOD = ['Resuelto','OK','Descartado'];
+const VER_OPTS = [['activas','Activas'],['resueltas','Resueltas'],['todas','Todas']];
 function ensureFugasState(){
-  if(!STATE.fugas){ STATE.fugas = { torre:'', estados:[...ACTIVE_STATES], search:'' }; }
+  if(!STATE.fugas){ STATE.fugas = { torre:'', ver:'activas', filtro:'', search:'', lim:40 }; }
 }
-function fugaItems(){ return STATE.items.filter(i=>esFiltracionCat(i.Categoria)); }
-function fugaFilteredItems(){
-  ensureFugasState();
-  const f = STATE.fugas;
-  return fugaItems().filter(i=>
-    (!f.torre || i.Torre===f.torre) &&
-    f.estados.includes(i.Estado||'Sin revisar') &&
-    (!f.search || (i.Folio+' '+i.Detalle+' '+(i.Origen||'')+' '+(i.Grupo||'')).toLowerCase().includes(f.search.toLowerCase()))
-  );
+function ensureDeptosState(){
+  if(!STATE.deptos){ STATE.deptos = { torre:'', categoria:'', ver:'activas', filtro:'', search:'', lim:40 }; }
 }
-function toggleFugaEstado(e, el){
-  const f = STATE.fugas;
-  const idx = f.estados.indexOf(e);
-  if(idx>=0){ if(f.estados.length>1){ f.estados.splice(idx,1); el.classList.remove('selected'); } }
-  else { f.estados.push(e); el.classList.add('selected'); }
-  renderFugasList();
-}
-function setFugaTorre(val){ STATE.fugas.torre = val; renderFugasList(); }
-function setFugaSearch(val){ STATE.fugas.search = val; renderFugasList(); }
+const MOD_CFG = {
+  fugas: {
+    ico:'💧', titulo:'Filtraciones', sub:'Atención prioritaria · protocolo propio',
+    items:()=>fugaItems(), st:()=>{ ensureFugasState(); return STATE.fugas; },
+    add:'openReportFugaModal()', addTxt:'＋ Reportar filtración', inf:'filtraciones', cats:false
+  },
+  deptos: {
+    ico:'🔧', titulo:'Deptos y Comunes', sub:'Deptos, ascensores, accesos y áreas comunes',
+    items:()=>deptoItems(), st:()=>{ ensureDeptosState(); return STATE.deptos; },
+    add:'openReportDeptoModal()', addTxt:'＋ Reportar una falla', inf:'deptos', cats:true
+  }
+};
+function esActivaMod(i){ const e = i.Estado || 'Sin revisar'; return ACTIVE_STATES.includes(e) || (e==='Sin revisar' && esUrgente(i)); }
+function esCerradaMod(i){ return CERRADOS_MOD.includes(i.Estado); }
+function isAtrasada(i){ const p = prioridadDe(i); return !!p && new Date() > fechaObjetivo(i, p); }
 
-function renderFugas(){
-  ensureFugasState();
-  const f = STATE.fugas;
-  const main = document.getElementById('mainList');
-  main.innerHTML = `
-    <div class="dash-card">
-      <div class="section-label" style="margin-top:0">Torre / área</div>
-      <select onchange="setFugaTorre(this.value)">
-        <option value="">Todas</option>
-        ${TORRES_ALL.map(t=>`<option value="${esc(t)}" ${f.torre===t?'selected':''}>${t}</option>`).join('')}
-      </select>
-      <div class="section-label">Estados</div>
-      <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${f.estados.includes(e)?'selected':''}" onclick="toggleFugaEstado('${e}',this)">${e}</div>`).join('')}</div>
-      <div class="field"><label>Buscar</label><input type="text" placeholder="Folio, depto, detalle..." value="${esc(f.search)}" oninput="setFugaSearch(this.value)"></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="openReportFugaModal()">+ Reportar filtración</button>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:10px" onclick="generarPdfFiltraciones()">📄 Imprimir filtraciones (PDF)</button>
-    <div id="fugasList"></div>
-  `;
-  renderFugasList();
+// Ítems del módulo según torre (y tipo en Deptos), sin mirar el estado
+function modScope(kind){
+  const c = MOD_CFG[kind], f = c.st();
+  return c.items().filter(i=> (!f.torre || i.Torre===f.torre) && (!c.cats || !f.categoria || i.Categoria===f.categoria));
 }
+function modFiltered(kind){
+  const f = MOD_CFG[kind].st();
+  const q = (f.search||'').toLowerCase().trim();
+  return modScope(kind).filter(i=>{
+    if(f.ver==='activas' && !esActivaMod(i)) return false;
+    if(f.ver==='resueltas' && !esCerradaMod(i)) return false;
+    if(f.ver==='todas' && !(esActivaMod(i) || esCerradaMod(i))) return false;
+    if(f.filtro==='urg' && !esUrgente(i)) return false;
+    if(f.filtro==='stale' && !isStale(i)) return false;
+    if(f.filtro==='atras' && !isAtrasada(i)) return false;
+    if(q && !(i.Folio+' '+(i.Categoria||'')+' '+(i.Detalle||'')+' '+(i.Origen||'')+' '+(i.Grupo||'')+' '+(i.Torre||'')).toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function modTilesHtml(kind){
+  const f = MOD_CFG[kind].st();
+  const act = modScope(kind).filter(esActivaMod);
+  const tiles = [
+    { k:'',      n:act.length,                      l:'Activas',        c:'var(--text)' },
+    { k:'urg',   n:act.filter(esUrgente).length,    l:'🚨 Urgentes',    c:'#D6534A' },
+    { k:'stale', n:act.filter(isStale).length,      l:'⏰ Sin mov.',    c:'#E8A33D' },
+    { k:'atras', n:act.filter(isAtrasada).length,   l:'⌛ Atrasadas',   c:'#E8803D' }
+  ];
+  return `<div class="fx-tiles">${tiles.map(t=>`<div class="fx-tile ${(f.filtro||'')===t.k?'on':''} ${t.n===0&&t.k?'zero':''}" style="--tc:${t.c}" onclick="modTile('${kind}','${t.k}')"><b>${t.n}</b><span>${t.l}</span></div>`).join('')}</div>`;
+}
+function modPillsHtml(kind){
+  const c = MOD_CFG[kind], f = c.st();
+  const base = c.items().filter(esActivaMod);
+  const opts = [['','Todas']].concat(TORRES_ALL.map(t=>[t, t.replace('Torre ','')]));
+  return `<div class="fx-pills">${opts.map(([v,l])=>{
+    const n = v ? base.filter(i=>i.Torre===v).length : base.length;
+    return `<button class="fx-pill ${f.torre===v?'on':''}" onclick="modTorre('${kind}','${v}')">${l}${n?`<i>${n}</i>`:''}</button>`;
+  }).join('')}</div>`;
+}
+function modCardHtml(i, kind){
+  const est = i.Estado || 'Sin revisar';
+  const ec = ESTADO_COLORS[est] || '#5B6675';
+  const p = prioridadDe(i);
+  const pc = p ? PRIORIDADES[p].color : ec;
+  const cerrada = esCerradaMod(i);
+  const dd = cerrada ? diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion) : diasEntre(i.Fecha_Deteccion);
+  const urg = esUrgente(i) && !cerrada;
+  const ico = catIcon(i.Categoria || '');
+  const title = kind==='fugas'
+    ? (i.Origen || (i.Piso ? ('Piso '+i.Piso) : 'Sin ubicación'))
+    : ((i.Categoria||'Falla') + (i.Origen ? ' · '+i.Origen : ''));
+  const sub = (kind==='fugas' && i.Categoria && i.Categoria!==CATEGORIA_FUGA) ? `<div class="fx-sub">${ico} ${i.Categoria}</div>` : '';
+  const stale = isStale(i) ? `<span class="fx-flag warn">⏰ ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d sin mov.</span>` : '';
+  const atr = (!cerrada && isAtrasada(i)) ? `<span class="fx-flag late">⌛ atrasada</span>` : '';
+  const seg = esSeguimiento(i) ? `<span class="fx-flag seg">📌</span>` : '';
+  const area = i.Area_Derivacion ? `<span class="fx-flag">→ ${i.Area_Derivacion}</span>` : '';
+  const img = i.Foto_Deteccion_URL ? `<img src="${esc(i.Foto_Deteccion_URL)}" loading="lazy" alt="" onerror="this.remove()">` : '';
+  return `<div class="fx-card ${urg?'urg':''} ${cerrada?'done':''}" style="--pc:${pc}" onclick="openItemModal('${i.Folio}')">
+    <div class="fx-thumb"><span>${ico}</span>${img}</div>
+    <div class="fx-main">
+      <div class="fx-l1"><span class="fx-torre">${(i.Torre||'Común').replace('Torre ','')}</span>${prioChip(i)}${urg?'<span class="fx-urg">🚨</span>':''}<span class="folio-tag">${i.Folio}</span></div>
+      <div class="fx-title">${title}</div>
+      ${sub}
+      <div class="fx-detalle">${i.Detalle ? i.Detalle : '<i>Sin detalle</i>'}</div>
+      <div class="fx-l3"><span class="fx-est" style="--ec:${ec}">${est}</span>${stale}${atr}${seg}${area}</div>
+    </div>
+    <div class="fx-days"><b>${dd===null?'—':dd}</b><span>días</span></div>
+  </div>`;
+}
+
+function modDyn(kind){
+  const c = MOD_CFG[kind], f = c.st();
+  const top = document.getElementById('modTop');
+  const list = document.getElementById('modList');
+  if(!top || !list) return;
+  const catSel = c.cats ? `<select class="fx-sel" onchange="modCategoria('${kind}',this.value)">
+      <option value="">Todos los tipos de falla</option>
+      ${STATE.categorias.filter(x=>!esFiltracionCat(x)).map(x=>`<option value="${esc(x)}" ${f.categoria===x?'selected':''}>${x}</option>`).join('')}
+    </select>` : '';
+  top.innerHTML = `
+    ${modTilesHtml(kind)}
+    ${modPillsHtml(kind)}
+    <div class="fx-ver"><div class="seg">${VER_OPTS.map(([v,l])=>`<button class="${f.ver===v?'on':''}" onclick="modVer('${kind}','${v}')">${l}</button>`).join('')}</div></div>
+    ${catSel}`;
+
+  const items = modFiltered(kind);
+  if(items.length===0){
+    const limpio = f.ver==='activas' && !f.filtro && !f.search;
+    list.innerHTML = limpio
+      ? `<div class="fx-empty"><div class="e-ico">🎉</div><div class="e-t">Todo al día</div><div class="e-s">No hay fallas activas aquí. Si ves algo, toca “${c.addTxt.replace('＋ ','')}”.</div></div>`
+      : `<div class="fx-empty"><div class="e-ico">🔎</div><div class="e-t">Nada con este filtro</div><div class="e-s">Prueba con otra torre, otra vista o borra la búsqueda.</div></div>`;
+    return;
+  }
+  const grupos = {};
+  items.forEach(i=>{ const k = i.Torre || 'Común'; (grupos[k] = grupos[k] || []).push(i); });
+  let html = '', shown = 0;
+  TORRES_ALL.forEach(t=>{
+    const grp = grupos[t];
+    if(!grp || !grp.length) return;
+    grp.sort(f.ver==='resueltas'
+      ? (a,b)=>(b.Fecha_Resolucion||'').localeCompare(a.Fecha_Resolucion||'')
+      : cmpPrioridad);
+    html += `<div class="fx-gh"><span>${t==='Común'?'Áreas comunes':t}</span><i>${grp.length}</i></div>`;
+    for(const i of grp){
+      if(shown >= (f.lim||40)) break;
+      html += modCardHtml(i, kind); shown++;
+    }
+  });
+  if(items.length > shown){
+    html += `<button class="btn btn-ghost" style="width:100%;margin-top:6px" onclick="modMas('${kind}')">Mostrar más (${items.length-shown} restantes)</button>`;
+  }
+  list.innerHTML = html;
+}
+function modTile(kind, k){ const f = MOD_CFG[kind].st(); f.filtro = (k && f.filtro===k) ? '' : k; if(k) f.ver='activas'; f.lim=40; modDyn(kind); }
+function modTorre(kind, v){ const f = MOD_CFG[kind].st(); f.torre = v; f.lim=40; modDyn(kind); }
+function modVer(kind, v){ const f = MOD_CFG[kind].st(); f.ver = v; f.filtro=''; f.lim=40; modDyn(kind); }
+function modCategoria(kind, v){ const f = MOD_CFG[kind].st(); f.categoria = v; f.lim=40; modDyn(kind); }
+function modSearch(kind, v){ const f = MOD_CFG[kind].st(); f.search = v; f.lim=40; modDyn(kind); }
+function modMas(kind){ const f = MOD_CFG[kind].st(); f.lim = (f.lim||40) + 40; modDyn(kind); }
+
+function renderModulo(kind){
+  const c = MOD_CFG[kind], f = c.st();
+  const isAdmin = CURRENT_USER && CURRENT_USER.rol === 'Admin';
+  document.getElementById('mainList').innerHTML = `
+    <div class="fx-head">
+      <div><div class="fx-h1">${c.ico} ${c.titulo}</div><div class="fx-h2">${c.sub}</div></div>
+      ${isAdmin ? `<button class="btn btn-ghost btn-sm" onclick="informeDesdeModulo('${kind}')">🖨️ Informe</button>` : ''}
+    </div>
+    <div id="modTop"></div>
+    <div class="fx-search"><input type="text" placeholder="🔎 Buscar por folio, depto o detalle…" value="${esc(f.search)}" oninput="modSearch('${kind}',this.value)"></div>
+    <div id="modList"></div>
+    <div style="height:74px"></div>
+    <div class="fx-addbar"><button class="btn btn-primary" onclick="${c.add}">${c.addTxt}</button></div>`;
+  modDyn(kind);
+}
+function renderFugas(){ ensureFugasState(); renderModulo('fugas'); }
+function renderDeptos(){ ensureDeptosState(); renderModulo('deptos'); }
+
+/* ================= FUGAS Y FILTRACIONES (datos) ================= */
+function fugaItems(){ return STATE.items.filter(i=>esFiltracionCat(i.Categoria)); }
+
 
 function recencyStr(i){ return i.Fecha_Ultima_Actualizacion || i.Fecha_Deteccion || ''; }
 
-function renderFugasList(){
-  const wrap = document.getElementById('fugasList');
-  if(!wrap) return;
-  const items = fugaFilteredItems();
-  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay filtraciones que coincidan con el filtro.</div>'; return; }
-
-  const grupos = {};
-  items.forEach(i=>{
-    const key = i.Torre || 'Común';
-    if(!grupos[key]) grupos[key] = [];
-    grupos[key].push(i);
-  });
-
-  let html = '';
-  TORRES_ALL.forEach(t=>{
-    const grp = grupos[t];
-    if(!grp || grp.length===0) return;
-    html += `<div class="floor-card">
-      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort(cmpPrioridad).forEach(i=>{ html += renderFugaRow(i); });
-    html += `</div>`;
-  });
-  wrap.innerHTML = html;
-}
 
 function isStale(i){
   if(!ACTIVE_STATES.includes(i.Estado)) return false;
@@ -1765,24 +1984,6 @@ function isStale(i){
   return dias !== null && dias >= 2;
 }
 
-function renderFugaRow(i){
-  const est = i.Estado || 'Sin revisar';
-  const color = ESTADO_COLORS[est] || '#5B6675';
-  const ubic = i.Origen || (i.Piso ? ('Piso '+i.Piso) : 'Sin ubicación');
-  const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
-  const urgentPrefix = esUrgente(i) ? '🚨 ' : '';
-  const seguimientoTag = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#3B82C4">📌 Seguimiento</span>' : '';
-  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
-      <div class="dot" style="background:${color}"></div>
-      <div class="item-main">
-        <div class="item-cat">${urgentPrefix}${ubic} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
-        ${i.Categoria && i.Categoria!==CATEGORIA_FUGA ? `<div class="item-detalle" style="color:var(--accent)">💧 ${i.Categoria}</div>` : ''}
-        <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
-        ${staleBadge}${seguimientoTag}
-      </div>
-      <div class="chev">›</div>
-    </div>`;
-}
 
 /* ================= REPORTAR FALLA (asistente por pasos) ================= */
 let W = null;
@@ -2147,73 +2348,8 @@ function wizAnother(){
 }
 
 /* ================= PDF: SOLO FILTRACIONES ================= */
-function generarPdfFiltraciones(){
-  showToast('Generando PDF...');
-  loadJsPdf(()=>buildPdfFiltraciones());
-}
-function buildPdfFiltraciones(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'pt', format:'a4'});
-  const marginX = 40; let y = 50;
-  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
-  function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
-
-  const items = fugaFilteredItems();
-
-  doc.setFont('helvetica','bold'); doc.setFontSize(15);
-  doc.text('Informe de Filtraciones', marginX, y); y+=20;
-  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
-  doc.text(COMUNIDAD, marginX, y); y+=14;
-  doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=16;
-  doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(214,83,74);
-  doc.text('Atención prioritaria — protocolo de respuesta distinto al resto de fallas.', marginX, y); y+=10;
-  doc.setTextColor(0); doc.setFont('helvetica','normal');
-  doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
-
-  if(items.length===0){ doc.setFontSize(11); doc.text('No hay filtraciones que coincidan con el filtro actual.', marginX, y); }
-
-  const grupos = {};
-  items.forEach(i=>{ const key = i.Torre || 'Común'; if(!grupos[key]) grupos[key]=[]; grupos[key].push(i); });
-
-  let total = 0;
-  TORRES_ALL.forEach(t=>{
-    const grp = grupos[t];
-    if(!grp || grp.length===0) return;
-    ensure(18);
-    doc.setFont('helvetica','bold'); doc.setFontSize(12);
-    doc.text(t + ' — ' + grp.length + ' ítem(s)', marginX, y); y+=16;
-    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0)).forEach(i=>{
-      total++;
-      const ubic = i.Origen || (i.Piso ? ('Piso '+i.Piso) : '');
-      const dias = diasEntre(i.Fecha_Deteccion);
-      const text = '[' + i.Folio + '] ' + ubic + ' (' + i.Estado + ')' +
-        (i.Area_Derivacion ? (' · Derivado a: '+i.Area_Derivacion) : '') +
-        ': ' + (i.Detalle||'—') + (dias!==null ? (' — '+dias+'d') : '');
-      const lines = doc.splitTextToSize(text, pageW-marginX*2-20);
-      ensure(lines.length*11+4);
-      doc.setFont('helvetica','normal'); doc.setFontSize(9);
-      doc.text('• '+lines[0], marginX+10, y);
-      for(let k=1;k<lines.length;k++){ y+=11; doc.text('   '+lines[k], marginX+10, y); }
-      y+=12;
-    });
-    y+=6;
-  });
-
-  ensure(90); y = Math.max(y, pageH-140);
-  doc.setDrawColor(200); doc.line(marginX, y, pageW-marginX, y); y+=24;
-  doc.setFontSize(9.5); doc.setFont('helvetica','normal');
-  doc.text('Total de filtraciones: ' + total, marginX, y); y+=30;
-  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y+=34;
-  doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
-
-  doc.save('Filtraciones_' + new Date().toISOString().slice(0,10) + '.pdf');
-  showToast('PDF generado ✓');
-}
 
 /* ================= DEPTOS Y COMUNES (genérico: cualquier tipo de falla, cualquier ubicación) ================= */
-function ensureDeptosState(){
-  if(!STATE.deptos){ STATE.deptos = { torre:'', categoria:'', estados:[...ACTIVE_STATES], search:'' }; }
-}
 function deptoItems(){
   return STATE.items.filter(i=>{
     const esFiltracion = esFiltracionCat(i.Categoria);
@@ -2226,157 +2362,12 @@ function deptoItems(){
     return esDepto || esAscensorOAcceso || esComun || esZonaDeTorre;
   });
 }
-function deptoFilteredItems(){
-  ensureDeptosState();
-  const f = STATE.deptos;
-  return deptoItems().filter(i=>
-    (!f.torre || i.Torre===f.torre) &&
-    (!f.categoria || i.Categoria===f.categoria) &&
-    f.estados.includes(i.Estado||'Sin revisar') &&
-    (!f.search || (i.Folio+' '+i.Categoria+' '+i.Detalle+' '+(i.Origen||'')+' '+(i.Grupo||'')).toLowerCase().includes(f.search.toLowerCase()))
-  );
-}
-function toggleDeptoEstado(e, el){
-  const f = STATE.deptos;
-  const idx = f.estados.indexOf(e);
-  if(idx>=0){ if(f.estados.length>1){ f.estados.splice(idx,1); el.classList.remove('selected'); } }
-  else { f.estados.push(e); el.classList.add('selected'); }
-  renderDeptosList();
-}
-function setDeptoTorre(val){ STATE.deptos.torre = val; renderDeptosList(); }
-function setDeptoCategoria(val){ STATE.deptos.categoria = val; renderDeptosList(); }
-function setDeptoSearch(val){ STATE.deptos.search = val; renderDeptosList(); }
 
-function renderDeptos(){
-  ensureDeptosState();
-  const f = STATE.deptos;
-  const main = document.getElementById('mainList');
-  main.innerHTML = `
-    <div class="dash-card">
-      <div class="section-label" style="margin-top:0">Torre / área</div>
-      <select onchange="setDeptoTorre(this.value)">
-        <option value="">Todas</option>
-        ${TORRES_ALL.map(t=>`<option value="${esc(t)}" ${f.torre===t?'selected':''}>${t}</option>`).join('')}
-      </select>
-      <div class="section-label">Tipo de falla</div>
-      <select onchange="setDeptoCategoria(this.value)">
-        <option value="">Todas</option>
-        ${STATE.categorias.map(c=>`<option value="${esc(c)}" ${f.categoria===c?'selected':''}>${c}</option>`).join('')}
-      </select>
-      <div class="section-label">Estados</div>
-      <div class="chip-row">${ALL_ESTADOS.map(e=>`<div class="chip ${f.estados.includes(e)?'selected':''}" onclick="toggleDeptoEstado('${e}',this)">${e}</div>`).join('')}</div>
-      <div class="field"><label>Buscar</label><input type="text" placeholder="Folio, depto, detalle..." value="${esc(f.search)}" oninput="setDeptoSearch(this.value)"></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="openReportDeptoModal()">+ Reportar falla (depto, ascensor, acceso o área común)</button>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:10px" onclick="generarPdfDeptos()">📄 Imprimir (PDF)</button>
-    <div id="deptosList"></div>
-  `;
-  renderDeptosList();
-}
 
-function renderDeptosList(){
-  const wrap = document.getElementById('deptosList');
-  if(!wrap) return;
-  const items = deptoFilteredItems();
-  if(items.length===0){ wrap.innerHTML = '<div class="empty-note">No hay fallas que coincidan con el filtro. Usa el botón de arriba para reportar una en un depto, ascensor, acceso o área común.</div>'; return; }
 
-  const grupos = {};
-  items.forEach(i=>{
-    const key = i.Torre || 'Sin torre';
-    if(!grupos[key]) grupos[key] = [];
-    grupos[key].push(i);
-  });
-
-  let html = '';
-  TORRES_ALL.forEach(t=>{
-    const grp = grupos[t];
-    if(!grp || grp.length===0) return;
-    html += `<div class="floor-card">
-      <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort(cmpPrioridad).forEach(i=>{ html += renderDeptoRow(i); });
-    html += `</div>`;
-  });
-  wrap.innerHTML = html;
-}
-
-function renderDeptoRow(i){
-  const est = i.Estado || 'Sin revisar';
-  const color = ESTADO_COLORS[est] || '#5B6675';
-  const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
-  const urgentPrefix = esUrgente(i) ? '🚨 ' : '';
-  const seguimientoTag = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#3B82C4">📌 Seguimiento</span>' : '';
-  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
-      <div class="dot" style="background:${color}"></div>
-      <div class="item-main">
-        <div class="item-cat">${urgentPrefix}${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
-        <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
-        ${staleBadge}${seguimientoTag}
-      </div>
-      <div class="chev">›</div>
-    </div>`;
-}
 
 /* ================= REPORTAR FALLA (DEPTO / ASCENSOR / ACCESO / COMÚN) ================= */
 /* ================= PDF: SOLO FALLAS DE DEPTO ================= */
-function generarPdfDeptos(){
-  showToast('Generando PDF...');
-  loadJsPdf(()=>buildPdfDeptos());
-}
-function buildPdfDeptos(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'pt', format:'a4'});
-  const marginX = 40; let y = 50;
-  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
-  function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
-
-  const items = deptoFilteredItems();
-
-  doc.setFont('helvetica','bold'); doc.setFontSize(15);
-  doc.text('Informe de Fallas — Deptos y Espacios Comunes', marginX, y); y+=20;
-  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
-  doc.text(COMUNIDAD, marginX, y); y+=14;
-  doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
-  doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=18;
-  doc.setTextColor(0);
-
-  if(items.length===0){ doc.setFontSize(11); doc.text('No hay fallas que coincidan con el filtro actual.', marginX, y); }
-
-  const grupos = {};
-  items.forEach(i=>{ const key = i.Torre || 'Sin torre'; if(!grupos[key]) grupos[key]=[]; grupos[key].push(i); });
-
-  let total = 0;
-  TORRES_ALL.forEach(t=>{
-    const grp = grupos[t];
-    if(!grp || grp.length===0) return;
-    ensure(18);
-    doc.setFont('helvetica','bold'); doc.setFontSize(12);
-    doc.text(t + ' — ' + grp.length + ' ítem(s)', marginX, y); y+=16;
-    grp.slice().sort((a,b)=>(a.Piso||0)-(b.Piso||0)).forEach(i=>{
-      total++;
-      const dias = diasEntre(i.Fecha_Deteccion);
-      const text = '[' + i.Folio + '] ' + (i.Origen||'') + ' · ' + i.Categoria + ' (' + i.Estado + ')' +
-        (i.Area_Derivacion ? (' · Derivado a: '+i.Area_Derivacion) : '') +
-        ': ' + (i.Detalle||'—') + (dias!==null ? (' — '+dias+'d') : '');
-      const lines = doc.splitTextToSize(text, pageW-marginX*2-20);
-      ensure(lines.length*11+4);
-      doc.setFont('helvetica','normal'); doc.setFontSize(9);
-      doc.text('• '+lines[0], marginX+10, y);
-      for(let k=1;k<lines.length;k++){ y+=11; doc.text('   '+lines[k], marginX+10, y); }
-      y+=12;
-    });
-    y+=6;
-  });
-
-  ensure(90); y = Math.max(y, pageH-140);
-  doc.setDrawColor(200); doc.line(marginX, y, pageW-marginX, y); y+=24;
-  doc.setFontSize(9.5); doc.setFont('helvetica','normal');
-  doc.text('Total de fallas: ' + total, marginX, y); y+=30;
-  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y+=34;
-  doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
-
-  doc.save('Fallas_Deptos_Comunes_' + new Date().toISOString().slice(0,10) + '.pdf');
-  showToast('PDF generado ✓');
-}
 
 /* ================= MODAL GENÉRICO ================= */
 function showModal(innerHtml){
@@ -2780,44 +2771,6 @@ function showToast(msg){
 }
 
 /* ================= PDF: FALLAS ACTIVAS ================= */
-function openPdfActivasModal(){
-  const estadosDefault = ['Nuevo','Pendiente','Derivado','En proceso'];
-  const estadosTodos = ['Sin revisar','Nuevo','Pendiente','Derivado','En proceso'];
-  const areaOptions = STATE.derivaciones.map(d=>`<option value="${esc(d)}">${d}</option>`).join('');
-  showModal(`
-    <h2>📄 PDF · Fallas activas</h2>
-    <div class="field"><label>Estados a incluir</label>
-      <div class="chip-row" id="pdfEstadoChips">
-        ${estadosTodos.map(e=>`<div class="chip ${estadosDefault.includes(e)?'selected':''}" data-estado="${e}" onclick="this.classList.toggle('selected')">${e}</div>`).join('')}
-      </div>
-    </div>
-    <div class="field"><label>Torre (opcional)</label><select id="pdfTorre"><option value="">Todas</option>${TORRES_ALL.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
-    <div class="field"><label>Piso (opcional)</label><input type="number" id="pdfPiso" placeholder="Ej: 12"></div>
-    <div class="field"><label>Tipo de falla (opcional)</label><select id="pdfCategoria"><option value="">Todas</option>${STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('')}</select></div>
-    <div class="field"><label>Área (opcional)</label><select id="pdfArea"><option value="">Todas</option>${areaOptions}</select></div>
-    <div class="field"><label>Grupo (opcional)</label><input type="text" id="pdfGrupo" placeholder="Ej: Ronda-12-08-2026"></div>
-    <div class="field" style="display:flex;align-items:center;gap:8px;">
-      <input type="checkbox" id="pdfSeguimiento" style="width:auto;">
-      <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="pdfSeguimiento">📌 Solo con seguimiento pendiente</label>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" style="margin-top:0" onclick="generarPdfActivas()">Generar PDF</button>
-    </div>
-  `);
-}
-function generarPdfActivas(){
-  const estadosSel = Array.from(document.querySelectorAll('#pdfEstadoChips .chip.selected')).map(c=>c.dataset.estado);
-  const torre = document.getElementById('pdfTorre').value;
-  const piso = document.getElementById('pdfPiso').value.trim();
-  const categoria = document.getElementById('pdfCategoria').value;
-  const area = document.getElementById('pdfArea').value;
-  const grupo = document.getElementById('pdfGrupo').value.trim().toLowerCase();
-  const soloSeguimiento = document.getElementById('pdfSeguimiento').checked;
-  closeModal();
-  showToast('Generando PDF...');
-  loadJsPdf(()=>buildPdfActivas(estadosSel, torre, area, grupo, piso, categoria, soloSeguimiento));
-}
 function loadJsPdf(cb){
   if(window.jspdf && window.jspdf.jsPDF.API.autoTable){ cb(); return; }
   const s = document.createElement('script');
@@ -2896,244 +2849,568 @@ function loadXlsxLib(cb){
   s.onerror = ()=> showToast('No se pudo cargar el generador de Excel (revisa tu conexión)');
   document.body.appendChild(s);
 }
-function exportarExcelDashboard(){
+
+
+/* ================= PDF: REPORTE DE GESTIÓN ================= */
+
+/* ================= CENTRO DE INFORMES ================= */
+const INF_TIPOS = {
+  activas:      { ico:'📄', nombre:'Fallas activas',     titulo:'Informe de Fallas Activas',       desc:'Lo pendiente hoy, ordenado por área responsable', group:'area' },
+  tipo:         { ico:'🧮', nombre:'Por tipo de falla',  titulo:'Informe por Tipo de Falla',       desc:'Cuántas luces, puertas, etc. hay por torre y piso', group:'tipo' },
+  filtraciones: { ico:'💧', nombre:'Filtraciones',       titulo:'Informe de Filtraciones',         desc:'Solo filtraciones y fugas, por torre', group:'torre' },
+  deptos:       { ico:'🔧', nombre:'Deptos y Comunes',   titulo:'Informe de Deptos y Espacios Comunes', desc:'Deptos, ascensores, accesos y áreas comunes', group:'torre' },
+  gestion:      { ico:'📊', nombre:'Gestión del período', titulo:'Informe de Gestión',              desc:'Fallas resueltas y tiempos de respuesta por área', group:'area' },
+  resumen:      { ico:'📈', nombre:'Resumen ejecutivo',  titulo:'Resumen Ejecutivo de Mantención', desc:'Cifras clave y semáforo, sin listado largo', group:'none' },
+  plan:         { ico:'📅', nombre:'Plan de trabajo',    titulo:'Plan de Trabajo',                 desc:'Qué atender hoy, esta semana y después', group:'plan' }
+};
+function infBase(tipo){
+  if(tipo==='filtraciones') return fugaItems();
+  if(tipo==='deptos') return deptoItems();
+  return STATE.items;
+}
+function infDefaults(tipo){
+  const hoy = new Date().toISOString().slice(0,10);
+  const hace30 = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+  return {
+    tipo, torres:[...TORRES_ALL],
+    estados: tipo==='resumen' ? ALL_ESTADOS.filter(e=>e!=='Sin revisar') : [...ACTIVE_STATES],
+    categoria:'', area:'', grupo:'', piso:'', prios:[], solo:'', desde:hace30, hasta:hoy
+  };
+}
+function ensureInfState(){ if(!STATE.inf) STATE.inf = infDefaults('activas'); }
+function goInformes(){ STATE.view='informes'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function selectInformes(tipo){
+  if(!(CURRENT_USER && CURRENT_USER.rol==='Admin')) return;
+  if(tipo==='plan'){ selectPlan(); return; }
+  ensureInfState();
+  if(tipo && tipo!==STATE.inf.tipo) STATE.inf = infDefaults(tipo);
+  goInformes();
+}
+function infSetTipo(t){
+  if(t==='plan'){ selectPlan(); return; }
+  STATE.inf = infDefaults(t); renderInformes();
+}
+function informeDesdeModulo(kind){
+  const c = MOD_CFG[kind], f = c.st();
+  STATE.inf = infDefaults(c.inf);
+  if(f.torre) STATE.inf.torres = [f.torre];
+  if(c.cats && f.categoria) STATE.inf.categoria = f.categoria;
+  STATE.inf.estados = f.ver==='resueltas' ? [...CERRADOS_MOD] : (f.ver==='todas' ? [...ACTIVE_STATES, ...CERRADOS_MOD] : [...ACTIVE_STATES]);
+  if(f.filtro==='urg') STATE.inf.solo = 'urg';
+  if(f.filtro==='stale') STATE.inf.solo = 'stale';
+  goInformes();
+}
+function informeDesdePanel(){
+  ensureDashState();
+  const d = STATE.dash;
+  STATE.inf = infDefaults('resumen');
+  Object.assign(STATE.inf, { torres:[...d.torres], estados:[...d.estados], categoria:d.categoria, area:d.area, grupo:d.grupo, piso:d.piso, solo:d.soloSeguimiento?'seg':'' });
+  goInformes();
+}
+
+function infItems(){
+  const f = STATE.inf;
+  let from = null, to = null;
+  if(f.tipo==='gestion'){ from = new Date(f.desde+'T00:00:00'); to = new Date(f.hasta+'T23:59:59'); }
+  const g = (f.grupo||'').toLowerCase();
+  return infBase(f.tipo).filter(i=>{
+    if(!f.torres.includes(i.Torre || 'Común')) return false;
+    if(f.tipo==='gestion'){
+      if(i.Estado!=='Resuelto' || !i.Fecha_Resolucion) return false;
+      const fr = parseFH(i.Fecha_Resolucion);
+      if(!fr || fr < from || fr > to) return false;
+    } else if(!f.estados.includes(i.Estado || 'Sin revisar')) return false;
+    if(f.categoria && i.Categoria!==f.categoria) return false;
+    if(f.area && i.Area_Derivacion!==f.area) return false;
+    if(g && !String(i.Grupo||'').toLowerCase().includes(g)) return false;
+    if(f.piso!=='' && f.piso!==undefined && String(i.Piso)!==String(f.piso)) return false;
+    if(f.prios.length){ const p = prioridadDe(i); if(!p || !f.prios.includes(p)) return false; }
+    if(f.solo==='urg' && !esUrgente(i)) return false;
+    if(f.solo==='seg' && !esSeguimiento(i)) return false;
+    if(f.solo==='stale' && !isStale(i)) return false;
+    return true;
+  });
+}
+function infFiltroLineas(){
+  const f = STATE.inf, out = [];
+  out.push('Torres: ' + (f.torres.length===TORRES_ALL.length ? 'todas' : f.torres.join(', ')));
+  if(f.tipo==='gestion') out.push('Período: ' + f.desde + ' a ' + f.hasta + ' (fallas resueltas)');
+  else out.push('Estados: ' + (f.estados.length===ALL_ESTADOS.length ? 'todos' : f.estados.join(', ')));
+  const extra = [];
+  if(f.categoria) extra.push('Tipo: ' + f.categoria);
+  if(f.area) extra.push('Área: ' + f.area);
+  if(f.grupo) extra.push('Grupo: ' + f.grupo);
+  if(f.piso!=='' && f.piso!==undefined) extra.push('Piso: ' + f.piso);
+  if(f.prios.length) extra.push('Prioridad: ' + f.prios.map(k=>PRIORIDADES[k].label).join(', '));
+  if(f.solo==='urg') extra.push('Solo urgentes');
+  if(f.solo==='seg') extra.push('Solo con seguimiento');
+  if(f.solo==='stale') extra.push('Solo sin movimiento (2 días o más)');
+  if(extra.length) out.push(extra.join(' · '));
+  return out;
+}
+
+function renderInformes(){
+  ensureInfState();
+  const f = STATE.inf, T = INF_TIPOS[f.tipo];
+  const tChip = (t) => `<div class="chip ${f.torres.includes(t)?'selected':''}" onclick="infToggle('torres','${t}',this)">${t.replace('Torre ','T. ')}</div>`;
+  const eChip = (e) => `<div class="chip ${f.estados.includes(e)?'selected':''}" onclick="infToggle('estados','${e}',this)">${e}</div>`;
+  const pChip = (k) => `<div class="chip ${f.prios.includes(k)?'selected':''}" onclick="infTogglePrio('${k}',this)">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div>`;
+  const soloOpts = [['','Todo'],['urg','🚨 Urgentes'],['seg','📌 Seguim.'],['stale','⏰ Sin mov.']];
+  document.getElementById('mainList').innerHTML = `
+    <div class="fx-head"><div><div class="fx-h1">🖨️ Centro de informes</div><div class="fx-h2">Elige el informe, ajusta los filtros y descárgalo.</div></div></div>
+    <div class="section-label">1 · ¿Qué informe necesitas?</div>
+    <div class="inf-types">${Object.keys(INF_TIPOS).map(k=>{ const t = INF_TIPOS[k]; return `<div class="inf-type ${f.tipo===k?'on':''}" onclick="infSetTipo('${k}')"><div class="it-ico">${t.ico}</div><div class="it-n">${t.nombre}</div><div class="it-d">${t.desc}</div></div>`; }).join('')}</div>
+    <div class="section-label">2 · Filtros <span class="sl-hint">· ${T.nombre}</span></div>
+    <div class="dash-card">
+      <div class="section-label" style="margin-top:0">Torres y áreas</div>
+      <div class="chip-row">${TORRES_ALL.map(tChip).join('')}</div>
+      ${f.tipo==='gestion' ? `
+        <div class="wz-two">
+          <div class="field"><label>Desde</label><input type="date" value="${f.desde}" onchange="infSet('desde',this.value)"></div>
+          <div class="field"><label>Hasta</label><input type="date" value="${f.hasta}" onchange="infSet('hasta',this.value)"></div>
+        </div>` : `
+        <div class="section-label">Estados</div>
+        <div class="chip-row">${ALL_ESTADOS.map(eChip).join('')}</div>`}
+      <div class="field"><label>Tipo de falla</label>
+        <select onchange="infSet('categoria',this.value)">
+          <option value="">Todos</option>
+          ${STATE.categorias.filter(c=>f.tipo==='filtraciones' ? esFiltracionCat(c) : (f.tipo==='deptos' ? !esFiltracionCat(c) : true)).map(c=>`<option value="${esc(c)}" ${f.categoria===c?'selected':''}>${c}</option>`).join('')}
+        </select></div>
+      <div class="section-label">Prioridad <span class="sl-hint">· sin marcar = todas</span></div>
+      <div class="chip-row">${Object.keys(PRIORIDADES).map(pChip).join('')}</div>
+      <div class="section-label">Mostrar solo</div>
+      <div class="seg inf-seg">${soloOpts.map(([v,l])=>`<button class="${f.solo===v?'on':''}" onclick="infSet('solo','${v}')">${l}</button>`).join('')}</div>
+      <details class="dash-more" style="margin-top:12px"><summary>Más filtros (área, grupo, piso)</summary>
+        <div class="field"><label>Área responsable</label>
+          <select onchange="infSet('area',this.value)"><option value="">Todas</option>${STATE.derivaciones.map(a=>`<option value="${esc(a)}" ${f.area===a?'selected':''}>${a}</option>`).join('')}</select></div>
+        <div class="wz-two">
+          <div class="field"><label>Grupo / ronda</label><input type="text" value="${esc(f.grupo)}" oninput="infSet('grupo',this.value,true)" placeholder="Ej: Ronda-12-08"></div>
+          <div class="field"><label>Piso</label><input type="number" value="${esc(f.piso)}" oninput="infSet('piso',this.value,true)" placeholder="Ej: 12"></div>
+        </div>
+      </details>
+      <button class="wz-link" onclick="infReset()">↺ Restablecer filtros</button>
+    </div>
+    <div class="section-label">3 · Vista previa</div>
+    <div id="infPreview"></div>
+    <div style="height:84px"></div>
+    <div class="fx-addbar"><div class="btn-row">
+      <button class="btn btn-primary" onclick="infPdf()">📄 PDF</button>
+      <button class="btn btn-primary" style="background:#2FA86B;color:#06210f" onclick="infExcel()">📥 Excel</button>
+    </div></div>`;
+  infPreview();
+}
+function infToggle(key, val, el){
+  const arr = STATE.inf[key], idx = arr.indexOf(val);
+  if(idx>=0){ if(arr.length>1){ arr.splice(idx,1); el.classList.remove('selected'); } }
+  else { arr.push(val); el.classList.add('selected'); }
+  infPreview();
+}
+function infTogglePrio(k, el){
+  const arr = STATE.inf.prios, idx = arr.indexOf(k);
+  if(idx>=0){ arr.splice(idx,1); el.classList.remove('selected'); } else { arr.push(k); el.classList.add('selected'); }
+  infPreview();
+}
+function infSet(key, val, noRender){
+  STATE.inf[key] = val;
+  if(noRender){ infPreview(); return; }
+  const y = window.scrollY; renderInformes(); window.scrollTo(0, y);
+}
+function infReset(){
+  const t = STATE.inf.tipo; const keep = { desde:STATE.inf.desde, hasta:STATE.inf.hasta };
+  STATE.inf = infDefaults(t); Object.assign(STATE.inf, keep); renderInformes();
+}
+function infPreview(){
+  const wrap = document.getElementById('infPreview');
+  if(!wrap) return;
+  const f = STATE.inf;
+  const items = infItems();
+  if(!items.length){
+    wrap.innerHTML = `<div class="dash-card"><div class="fx-empty" style="padding:14px 6px"><div class="e-ico">🔎</div><div class="e-t">No hay ítems con estos filtros</div><div class="e-s">Amplía las torres o los estados para poder generar el informe.</div></div></div>`;
+    return;
+  }
+  const urg = items.filter(i=>esUrgente(i) && !esCerradaMod(i)).length;
+  const torresN = new Set(items.map(i=>i.Torre||'Común')).size;
+  let extra;
+  if(f.tipo==='gestion'){
+    const dias = items.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
+    const prom = dias.length ? (dias.reduce((s,x)=>s+x,0)/dias.length).toFixed(1) : '—';
+    extra = `<div class="inf-kpis"><div><b>${items.length}</b><span>Resueltas</span></div><div><b>${prom}</b><span>Días prom.</span></div><div><b>${new Set(items.map(i=>i.Area_Derivacion||'Sin área')).size}</b><span>Áreas</span></div><div><b>${torresN}</b><span>Torres/áreas</span></div></div>`;
+  } else {
+    extra = `<div class="prio-strip" style="margin-top:4px">${Object.keys(PRIORIDADES).map(k=>`<div class="prio-tile" style="--pc:${PRIORIDADES[k].color};cursor:default"><div class="n">${items.filter(i=>prioridadDe(i)===k).length}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('')}</div>
+      <div class="inf-kpis" style="margin-top:10px"><div><b>${urg}</b><span>🚨 Urgentes</span></div><div><b>${items.filter(isAtrasada).length}</b><span>⌛ Atrasadas</span></div><div><b>${items.filter(esSeguimiento).length}</b><span>📌 Seguim.</span></div><div><b>${torresN}</b><span>Torres/áreas</span></div></div>`;
+  }
+  const top = countBy(items, i=>i.Categoria).slice(0,5);
+  const maxT = Math.max(1, ...top.map(x=>x[1]));
+  wrap.innerHTML = `<div class="dash-card">
+    <div class="inf-n"><b>${items.length}</b> ${items.length===1?'ítem':'ítems'} en el informe</div>
+    <div class="inf-desc">${infFiltroLineas().join(' · ')}</div>
+    ${extra}
+    <div class="section-label">Tipos más frecuentes</div>
+    ${top.map(([k,v])=>barRow(k,v,maxT)).join('')}
+  </div>`;
+}
+function infPdf(){
+  const items = infItems();
+  if(!items.length){ showToast('No hay ítems con estos filtros'); return; }
+  showToast('Generando PDF...');
+  loadJsPdf(()=>buildPdfInforme(items));
+}
+function infExcel(){
+  const items = infItems();
+  if(!items.length){ showToast('No hay ítems con estos filtros'); return; }
   showToast('Generando Excel...');
-  loadXlsxLib(()=>buildExcelDashboard());
-}
-function buildExcelDashboard(){
-  const items = dashFilteredItems();
-  if(items.length===0){ showToast('No hay ítems que coincidan con los filtros para exportar'); return; }
-
-  const rows = items.map(i=>({
-    'Folio': i.Folio,
-    'Torre': i.Torre,
-    'Piso': i.Piso,
-    'Categoria': i.Categoria,
-    'Origen': i.Origen||'',
-    'Grupo': i.Grupo||'',
-    'Estado': i.Estado,
-    'Detalle': i.Detalle||'',
-    'Area Derivacion': i.Area_Derivacion||'',
-    'Urgente': i.Urgente||'',
-    'Seguimiento': i.Seguimiento||'',
-    'Fecha Deteccion': i.Fecha_Deteccion||'',
-    'Ultima Actualizacion': i.Fecha_Ultima_Actualizacion||'',
-    'Fecha Resolucion': i.Fecha_Resolucion||'',
-    'Dias hasta resolucion': diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion) ?? '',
-    'Actualizado Por': i.Actualizado_Por||'',
-    'Notas': i.Notas||'',
-    'Foto Deteccion': i.Foto_Deteccion_URL||'',
-    'Foto Resolucion': i.Foto_Resolucion_URL||''
-  }));
-
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [
-    {wch:10},{wch:10},{wch:6},{wch:16},{wch:14},{wch:16},{wch:12},{wch:42},
-    {wch:18},{wch:8},{wch:11},{wch:16},{wch:17},{wch:16},{wch:12},{wch:14},{wch:30},{wch:22},{wch:22}
-  ];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Fallas');
-  XLSX.writeFile(wb, 'Fallas_' + new Date().toISOString().slice(0,10) + '.xlsx');
-  showToast('Excel generado ✓');
+  loadXlsxLib(()=>buildExcelInforme(items));
 }
 
-function buildPdfActivas(estadosSel, torre, area, grupo, piso, categoria, soloSeguimiento){
+/* ---- Utilidades de informes ---- */
+function infCantidades(items){
+  const map = {};
+  items.forEach(i=>{
+    const c = i.Categoria || 'OTROS', t = i.Torre || 'Común';
+    if(!map[c]) map[c] = { total:0, por:{} };
+    map[c].total++; map[c].por[t] = (map[c].por[t]||0) + 1;
+  });
+  return Object.entries(map).sort((a,b)=>b[1].total-a[1].total);
+}
+function lugarCorto(i){
+  const p = i.Piso;
+  const hayPiso = !(p===0 || p===undefined || p==='' || isNaN(p));
+  if(hayPiso) return p<=-1 ? 'Subt. '+p : 'P'+p;
+  return i.Origen || 'Sin piso';
+}
+function lugarLargo(i, conTorre){
+  const p = i.Piso;
+  const pisoTxt = (p===0 || p===undefined || p==='' || isNaN(p)) ? '' : (p<=-1 ? 'Subt. '+p : 'P'+p);
+  return [conTorre ? i.Torre : '', pisoTxt, i.Origen].filter(Boolean).join(' · ');
+}
+// "P3 (2), P7, P12 (3)" ordenado de piso alto a bajo
+function pisosResumen(list){
+  const m = {};
+  list.forEach(i=>{ const k = lugarCorto(i); if(!m[k]) m[k] = { n:0, ord: (typeof i.Piso==='number' && !isNaN(i.Piso)) ? i.Piso : -99 }; m[k].n++; });
+  return Object.entries(m).sort((a,b)=>b[1].ord-a[1].ord || a[0].localeCompare(b[0]))
+    .map(([k,v])=>k + (v.n>1 ? ' ('+v.n+')' : '')).join(', ');
+}
+function prioTxt(i){ const p = prioridadDe(i); return p ? PRIORIDADES[p].label : '—'; }
+function infSlug(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+function infGroupKey(i, mode){
+  if(mode==='area') return i.Area_Derivacion || 'Sin área asignada';
+  if(mode==='tipo') return i.Categoria || 'OTROS';
+  return i.Torre || 'Común';
+}
+function infGroupSort(keys, mode){
+  if(mode==='torre') return keys.sort((a,b)=>{ const f = t=>{ const x = TORRES_ALL.indexOf(t); return x===-1?99:x; }; return f(a)-f(b); });
+  return keys.sort((a,b)=> (a==='Sin área asignada') - (b==='Sin área asignada') || a.localeCompare(b));
+}
+
+/* ================= PDF EJECUTIVO UNIFICADO ================= */
+function buildPdfInforme(items){
+  const f = STATE.inf, T = INF_TIPOS[f.tipo];
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:'pt', format:'a4'});
-  const marginX = 40;
+  const marginX = 36;
   const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
+  const hexRgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+  const torresVis = TORRES_ALL.filter(t=>items.some(i=>(i.Torre||'Común')===t));
 
-  let items = STATE.items.filter(i=>estadosSel.includes(i.Estado));
-  if(torre) items = items.filter(i=>i.Torre===torre);
-  if(piso) items = items.filter(i=>String(i.Piso)===String(piso));
-  if(categoria) items = items.filter(i=>i.Categoria===categoria);
-  if(area) items = items.filter(i=>i.Area_Derivacion===area);
-  if(grupo) items = items.filter(i=>String(i.Grupo||'').toLowerCase().includes(grupo));
-  if(soloSeguimiento) items = items.filter(i=>esSeguimiento(i));
+  pdfHeaderBand(doc, T.titulo, marginX, pageW);
+  let y = pdfMeta(doc, marginX, 78, pageW, infFiltroLineas());
 
-  pdfHeaderBand(doc, 'Informe de Fallas Activas', marginX, pageW);
-  const filtroLines = [];
-  if(torre) filtroLines.push('Torre: ' + torre);
-  if(piso) filtroLines.push('Piso: ' + piso);
-  if(categoria) filtroLines.push('Tipo de falla: ' + categoria);
-  if(area) filtroLines.push('Área: ' + area);
-  if(grupo) filtroLines.push('Grupo: ' + grupo);
-  if(soloSeguimiento) filtroLines.push('Solo con seguimiento pendiente');
-  if(filtroLines.length===0) filtroLines.push('Sin filtros adicionales — todas las torres y áreas');
-  let y = pdfMeta(doc, marginX, 78, pageW, filtroLines);
-
-  const torresAfectadas = new Set(items.map(i=>i.Torre)).size;
-  const urgentes = items.filter(i=>esUrgente(i)).length;
-  const conSeguimiento = items.filter(i=>esSeguimiento(i)).length;
-  y = pdfKpiRow(doc, marginX, y+4, pageW, [
-    { label:'Total ítems', value: items.length },
-    { label:'Urgentes', value: urgentes, color:[214,83,74] },
-    { label:'Con seguimiento', value: conSeguimiento, color:[59,130,196] },
-    { label:'Torres/áreas afectadas', value: torresAfectadas }
-  ]);
-
-  if(items.length===0){
-    doc.setFontSize(11); doc.text('No hay ítems que coincidan con los filtros seleccionados.', marginX, y+10);
+  // ---- KPIs
+  const act = items.filter(i=>prioridadDe(i)!==null);
+  if(f.tipo==='gestion'){
+    const dias = items.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
+    const prom = dias.length ? (dias.reduce((s,x)=>s+x,0)/dias.length).toFixed(1) : '—';
+    y = pdfKpiRow(doc, marginX, y+4, pageW, [
+      { label:'Fallas resueltas', value: items.length, color:[47,168,107] },
+      { label:'Días promedio', value: prom },
+      { label:'Áreas', value: new Set(items.map(i=>i.Area_Derivacion||'Sin área')).size },
+      { label:'Torres / áreas', value: torresVis.length }
+    ]);
   } else {
-    const groupKey = it => it.Area_Derivacion || 'Sin área asignada';
-    const torreOrder = t => { const idx = TORRES_ALL.indexOf(t); return idx===-1?99:idx; };
-    const sorted = items.slice().sort((a,b)=>
-      groupKey(a).localeCompare(groupKey(b)) ||
-      (torreOrder(a.Torre)-torreOrder(b.Torre)) ||
-      ((b.Piso||0)-(a.Piso||0))
-    );
-    const rows = sorted.map(i=>{
-      const dias = diasEntre(i.Fecha_Deteccion);
-      const pisoLabel = i.Piso<=-1 ? ('Subt. '+i.Piso) : (i.Piso===0 ? '—' : String(i.Piso));
-      return [
-        (esUrgente(i)?'🚨 ':'') + i.Folio, groupKey(i), i.Torre, pisoLabel, i.Categoria,
-        i.Detalle||'—', i.Estado, dias!==null?(dias+'d'):'—'
-      ];
-    });
+    y = pdfKpiRow(doc, marginX, y+4, pageW, [
+      { label:'Total ítems', value: items.length },
+      { label:'Urgentes', value: items.filter(i=>esUrgente(i) && !esCerradaMod(i)).length, color:[214,83,74] },
+      { label:'Críticas + altas', value: act.filter(i=>['critica','alta'].includes(prioridadDe(i))).length, color:hexRgb(PRIORIDADES.alta.color) },
+      { label:'Atrasadas', value: act.filter(isAtrasada).length, color:[232,128,61] },
+      { label:'Con seguimiento', value: items.filter(esSeguimiento).length, color:[59,130,196] }
+    ]);
+  }
 
+  const secTitle = (txt) => {
+    if(y > pageH - 110){ doc.addPage(); y = 50; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(...PDF_NAVY);
+    doc.text(txt, marginX, y); doc.setTextColor(0); y += 6;
+  };
+  const headStyles = { fillColor:PDF_NAVY, textColor:255, fontStyle:'bold', fontSize:8 };
+  const baseStyles = { font:'helvetica', fontSize:8, cellPadding:4, overflow:'linebreak', valign:'middle', lineColor:PDF_LINE, lineWidth:0.3 };
+  const estadoColor = (data, col) => {
+    if(data.section==='body' && data.column.index===col && typeof data.cell.raw==='string'){
+      data.cell.styles.textColor = ESTADO_RGB[data.cell.raw] || [0,0,0]; data.cell.styles.fontStyle = 'bold';
+    }
+  };
+  const countTable = (titulo, entries, total) => {
+    if(!entries.length) return;
+    secTitle(titulo);
     doc.autoTable({
-      startY: y,
-      margin: { left: marginX, right: marginX, bottom: 40 },
-      head: [['Folio','Área','Torre','Piso','Tipo de falla','Detalle','Estado','Días']],
-      body: rows,
-      theme: 'striped',
-      styles: { font:'helvetica', fontSize: 8, cellPadding: 5, overflow:'linebreak', valign:'middle' },
-      headStyles: { fillColor: PDF_NAVY, textColor: 255, fontStyle:'bold', fontSize: 8.5 },
-      alternateRowStyles: { fillColor: [246,247,248] },
-      columnStyles: {
-        0:{cellWidth:58}, 1:{cellWidth:66}, 2:{cellWidth:48}, 3:{cellWidth:34,halign:'center'},
-        4:{cellWidth:70}, 5:{cellWidth:'auto'}, 6:{cellWidth:56}, 7:{cellWidth:30,halign:'center'}
-      },
-      didParseCell: function(data){
-        if(data.section==='body' && data.column.index===6){
-          const rgb = ESTADO_RGB[data.cell.raw] || [0,0,0];
-          data.cell.styles.textColor = rgb;
-          data.cell.styles.fontStyle = 'bold';
+      startY: y, margin:{ left:marginX, right:marginX, bottom:40 }, tableWidth: 300,
+      head:[['','Cantidad','%']],
+      body: entries.map(([k,v])=>[k, v, total ? Math.round(v/total*100)+'%' : '']),
+      theme:'grid', styles:{ ...baseStyles, halign:'center' }, headStyles,
+      columnStyles:{ 0:{halign:'left', cellWidth:170} }
+    });
+    y = doc.lastAutoTable.finalY + 16;
+  };
+
+  // ---- Semáforo (resumen)
+  if(f.tipo==='resumen'){
+    secTitle('Semáforo de gestión por torre y áreas comunes');
+    doc.autoTable({
+      startY: y, margin:{ left:marginX, right:marginX, bottom:40 },
+      head:[['Unidad','Nivel','Activas','Críticas','Altas','Atrasadas','Resueltas 30 días']],
+      body: SEMAFORO_UNIDADES.map(u=>{ const s = semaforoUnidad(u); return [u==='Común'?'Áreas comunes':u, SEMAFORO[s.nivel].label, s.activas, s.crit, s.alta, s.atras, s.resueltas30]; }),
+      theme:'grid', styles:{ ...baseStyles, halign:'center' }, headStyles, columnStyles:{ 0:{halign:'left', cellWidth:110} },
+      didParseCell:(data)=>{
+        if(data.section==='body' && data.column.index===1){
+          const k = String(data.cell.raw).toLowerCase();
+          const col = (SEMAFORO[k] && SEMAFORO[k].color) ? hexRgb(SEMAFORO[k].color) : null;
+          if(col){ data.cell.styles.fillColor = col; data.cell.styles.textColor = 255; data.cell.styles.fontStyle = 'bold'; }
         }
       }
     });
-    y = doc.lastAutoTable.finalY + 26;
+    y = doc.lastAutoTable.finalY + 6;
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...PDF_GRAY);
+    doc.text('El semáforo considera todas las fallas activas de cada unidad, sin los filtros del informe.', marginX, y + 8);
+    doc.setTextColor(0); y += 24;
   }
 
-  if(y > pageH - 90){ doc.addPage(); y = 60; }
-  doc.setDrawColor(...PDF_LINE); doc.line(marginX, y, pageW-marginX, y); y+=24;
-  doc.setFontSize(9.5); doc.setFont('helvetica','normal');
-  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y+=30;
+  // ---- Cantidad por tipo de falla y torre (todos menos gestión)
+  if(f.tipo!=='gestion'){
+    secTitle('Cantidad por tipo de falla y torre');
+    const cant = infCantidades(items);
+    const body = cant.map(([c,v])=>[c, v.total, ...torresVis.map(t=>v.por[t]||'')]);
+    body.push([{ content:'TOTAL', styles:{ fontStyle:'bold' } }, { content:items.length, styles:{ fontStyle:'bold' } }, ...torresVis.map(t=>({ content: items.filter(i=>(i.Torre||'Común')===t).length, styles:{ fontStyle:'bold' } }))]);
+    doc.autoTable({
+      startY: y, margin:{ left:marginX, right:marginX, bottom:40 },
+      head:[['Tipo de falla','Total', ...torresVis.map(t=>t==='Común'?'Comunes':t.replace('Torre ','T. '))]],
+      body, theme:'grid', styles:{ ...baseStyles, halign:'center' }, headStyles,
+      columnStyles:{ 0:{halign:'left', cellWidth:170}, 1:{fontStyle:'bold'} }
+    });
+    y = doc.lastAutoTable.finalY + 18;
+  }
+
+  // ---- POR TIPO DE FALLA: dónde está cada una
+  if(f.tipo==='tipo'){
+    secTitle('Detalle por tipo de falla: en qué torre y piso está');
+    const body = [];
+    infCantidades(items).forEach(([cat, v])=>{
+      body.push([{ content: cat + '  —  ' + v.total + (v.total===1?' falla':' fallas'), colSpan:4, styles:{ fillColor:PDF_NAVY, textColor:255, fontStyle:'bold', fontSize:8.5 } }]);
+      torresVis.forEach(t=>{
+        const lst = items.filter(i=>(i.Categoria||'OTROS')===cat && (i.Torre||'Común')===t);
+        if(!lst.length) return;
+        lst.sort((a,b)=>(b.Piso||0)-(a.Piso||0));
+        body.push([t==='Común'?'Comunes':t, lst.length, pisosResumen(lst), lst.map(i=>(esUrgente(i)?'URG ':'')+i.Folio).join(', ')]);
+      });
+    });
+    doc.autoTable({
+      startY: y, margin:{ left:marginX, right:marginX, bottom:40 },
+      head:[['Torre','Cant.','Pisos / lugares','Folios']],
+      body, theme:'plain', styles:{ ...baseStyles, fontSize:7.5 }, headStyles,
+      columnStyles:{ 0:{cellWidth:62, fontStyle:'bold'}, 1:{cellWidth:32, halign:'center'}, 2:{cellWidth:'auto'}, 3:{cellWidth:150, textColor:PDF_GRAY} }
+    });
+    y = doc.lastAutoTable.finalY + 20;
+  }
+
+  // ---- GESTIÓN: resumen por área
+  if(f.tipo==='gestion'){
+    secTitle('Resumen por área responsable');
+    const areas = [...new Set(items.map(i=>i.Area_Derivacion || 'Sin área asignada'))];
+    let tD = 0, tN = 0;
+    const rows = areas.map(a=>{
+      const lst = items.filter(i=>(i.Area_Derivacion||'Sin área asignada')===a);
+      const d = lst.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
+      tD += d.reduce((s,x)=>s+x,0); tN += d.length;
+      return [a, lst.length, d.length ? (d.reduce((s,x)=>s+x,0)/d.length).toFixed(1) : '—', d.length ? Math.max(...d) : '—'];
+    }).sort((a,b)=>b[1]-a[1]);
+    rows.push([{ content:'GENERAL', styles:{ fontStyle:'bold' } }, { content:items.length, styles:{ fontStyle:'bold' } }, { content: tN ? (tD/tN).toFixed(1) : '—', styles:{ fontStyle:'bold' } }, '']);
+    doc.autoTable({
+      startY: y, margin:{ left:marginX, right:marginX, bottom:40 }, tableWidth: 360,
+      head:[['Área','Resueltas','Prom. días','Más lenta (días)']],
+      body: rows, theme:'grid', styles:{ ...baseStyles, halign:'center' }, headStyles, columnStyles:{ 0:{halign:'left', cellWidth:150} }
+    });
+    y = doc.lastAutoTable.finalY + 18;
+  }
+
+  // ---- RESUMEN: tablas de conteo + lo más urgente
+  if(f.tipo==='resumen'){
+    countTable('Por prioridad (fallas activas)', Object.keys(PRIORIDADES).map(k=>[PRIORIDADES[k].label, act.filter(i=>prioridadDe(i)===k).length]).filter(e=>e[1]>0), act.length);
+    countTable('Por estado', countBy(items, i=>i.Estado||'Sin revisar'), items.length);
+    countTable('Por área responsable', countBy(items.filter(i=>i.Area_Derivacion), i=>i.Area_Derivacion), items.filter(i=>i.Area_Derivacion).length);
+    const urgTop = act.filter(i=>['critica','alta'].includes(prioridadDe(i))).sort(cmpPrioridad).slice(0,15);
+    if(urgTop.length){
+      secTitle('Lo más urgente (críticas y altas, máx. 15)');
+      doc.autoTable({
+        startY: y, margin:{ left:marginX, right:marginX, bottom:40 },
+        head:[['Folio','Lugar','Tipo','Detalle','Prioridad','Días']],
+        body: urgTop.map(i=>[(esUrgente(i)?'URG ':'')+i.Folio, lugarLargo(i,true), i.Categoria, i.Detalle||'—', prioTxt(i), diasEntre(i.Fecha_Deteccion) ?? '—']),
+        theme:'plain', styles:{ ...baseStyles, fontSize:7.5 }, headStyles,
+        columnStyles:{ 0:{cellWidth:56}, 1:{cellWidth:96}, 2:{cellWidth:72}, 3:{cellWidth:'auto'}, 4:{cellWidth:48}, 5:{cellWidth:30, halign:'center'} }
+      });
+      y = doc.lastAutoTable.finalY + 18;
+    }
+  }
+
+  // ---- LISTADO agrupado (activas, filtraciones, deptos, gestión)
+  if(['activas','filtraciones','deptos','gestion'].includes(f.tipo)){
+    const mode = T.group;
+    secTitle('Detalle' + (mode==='area' ? ' por área responsable' : ' por torre'));
+    const groups = {};
+    items.forEach(i=>{ const k = infGroupKey(i, mode); (groups[k] = groups[k] || []).push(i); });
+    const keys = infGroupSort(Object.keys(groups), mode);
+    const ncol = f.tipo==='gestion' ? 7 : 7;
+    const body = [];
+    keys.forEach(k=>{
+      const lst = groups[k];
+      lst.sort(f.tipo==='gestion'
+        ? (a,b)=>(a.Fecha_Resolucion||'').localeCompare(b.Fecha_Resolucion||'')
+        : (a,b)=>cmpPrioridad(a,b) || ((b.Piso||0)-(a.Piso||0)));
+      body.push([{ content: (k==='Común'?'Áreas comunes':k) + '  (' + lst.length + ')', colSpan:ncol, styles:{ fillColor:[232,236,240], textColor:PDF_NAVY, fontStyle:'bold', fontSize:8.5 } }]);
+      lst.forEach(i=>{
+        if(f.tipo==='gestion'){
+          body.push([i.Folio, lugarLargo(i, mode!=='torre'), i.Categoria, i.Detalle||'—', (i.Fecha_Deteccion||'').slice(0,10), (i.Fecha_Resolucion||'').slice(0,10), diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion) ?? '—']);
+        } else {
+          const cerrada = esCerradaMod(i);
+          body.push([(esUrgente(i)&&!cerrada?'URG ':'')+i.Folio, lugarLargo(i, mode!=='torre'), i.Categoria, i.Detalle||'—', prioTxt(i), i.Estado||'Sin revisar', (cerrada ? diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion) : diasEntre(i.Fecha_Deteccion)) ?? '—']);
+        }
+      });
+    });
+    doc.autoTable({
+      startY: y, margin:{ left:marginX, right:marginX, bottom:40 },
+      head: [f.tipo==='gestion'
+        ? ['Folio','Lugar','Tipo','Detalle','Detectada','Resuelta','Días']
+        : ['Folio','Lugar','Tipo','Detalle','Prioridad','Estado','Días']],
+      body, theme:'plain', styles:{ ...baseStyles, fontSize:7.5 }, headStyles,
+      columnStyles: f.tipo==='gestion'
+        ? { 0:{cellWidth:54}, 1:{cellWidth:92}, 2:{cellWidth:72}, 3:{cellWidth:'auto'}, 4:{cellWidth:50}, 5:{cellWidth:50}, 6:{cellWidth:28, halign:'center'} }
+        : { 0:{cellWidth:56}, 1:{cellWidth:92}, 2:{cellWidth:72}, 3:{cellWidth:'auto'}, 4:{cellWidth:46}, 5:{cellWidth:50}, 6:{cellWidth:28, halign:'center'} },
+      didParseCell:(data)=>{
+        if(f.tipo!=='gestion') estadoColor(data, 5);
+        if(data.section==='body' && data.column.index===0 && typeof data.cell.raw==='string' && data.cell.raw.indexOf('URG')===0){ data.cell.styles.textColor = [214,83,74]; data.cell.styles.fontStyle = 'bold'; }
+      }
+    });
+    y = doc.lastAutoTable.finalY + 14;
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...PDF_GRAY);
+    doc.text('URG = urgencia inmediata.   Días = desde la detección hasta hoy (o hasta la resolución en fallas cerradas).', marginX, y); doc.setTextColor(0); y += 16;
+  }
+
+  // ---- Firmas
+  if(y > pageH - 100){ doc.addPage(); y = 60; }
+  y += 8;
+  doc.setDrawColor(...PDF_LINE); doc.line(marginX, y, pageW-marginX, y); y += 26;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y += 30;
   doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
 
   pdfFooterPages(doc, marginX, pageW, pageH);
-  doc.save('Fallas_Activas_' + new Date().toISOString().slice(0,10) + '.pdf');
+  doc.save('Informe_' + infSlug(T.nombre) + '_' + new Date().toISOString().slice(0,10) + '.pdf');
   showToast('PDF generado ✓');
 }
 
-/* ================= PDF: REPORTE DE GESTIÓN ================= */
-function openReportModal(){
-  const hoy = new Date().toISOString().slice(0,10);
-  const hace30 = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
-  showModal(`
-    <h2>📊 Reporte de gestión</h2>
-    <div class="sub">Fallas resueltas y tiempos de respuesta por área</div>
-    <div class="field"><label>Desde</label><input type="date" id="repDesde" value="${hace30}"></div>
-    <div class="field"><label>Hasta</label><input type="date" id="repHasta" value="${hoy}"></div>
-    <div class="field"><label>Torre (opcional)</label><select id="repTorre"><option value="">Todas</option>${TORRES_ALL.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
-    <div class="field"><label>Piso (opcional)</label><input type="number" id="repPiso" placeholder="Ej: 12"></div>
-    <div class="field"><label>Tipo de falla (opcional)</label><select id="repCategoria"><option value="">Todas</option>${STATE.categorias.map(c=>`<option value="${esc(c)}">${c}</option>`).join('')}</select></div>
-    <div class="field" style="display:flex;align-items:center;gap:8px;">
-      <input type="checkbox" id="repSeguimiento" style="width:auto;">
-      <label style="margin:0;text-transform:none;font-size:.82rem;color:var(--text-dim);" for="repSeguimiento">📌 Solo con seguimiento pendiente</label>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" style="margin-top:0" onclick="generarReporteGestion()">Generar PDF</button>
-    </div>
-  `);
-}
-function generarReporteGestion(){
-  const desde = document.getElementById('repDesde').value;
-  const hasta = document.getElementById('repHasta').value;
-  const torre = document.getElementById('repTorre').value;
-  const piso = document.getElementById('repPiso').value.trim();
-  const categoria = document.getElementById('repCategoria').value;
-  const soloSeguimiento = document.getElementById('repSeguimiento').checked;
-  closeModal(); showToast('Generando reporte...');
-  loadJsPdf(()=>buildPdfGestion(desde, hasta, torre, piso, categoria, soloSeguimiento));
-}
-function buildPdfGestion(desde, hasta, torre, piso, categoria, soloSeguimiento){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'pt', format:'a4'});
-  const marginX = 40; let y = 50;
-  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
-  function ensure(h){ if(y+h > pageH-60){ doc.addPage(); y=50; } }
-
-  const desdeD = new Date(desde+'T00:00:00'), hastaD = new Date(hasta+'T23:59:59');
-  let items = STATE.items.filter(i=>{
-    if(i.Estado !== 'Resuelto' || !i.Fecha_Resolucion) return false;
-    const fr = parseFH(i.Fecha_Resolucion);
-    return fr >= desdeD && fr <= hastaD;
+/* ================= EXCEL UNIFICADO ================= */
+function buildExcelInforme(items){
+  const f = STATE.inf, T = INF_TIPOS[f.tipo];
+  const sorted = items.slice().sort(f.tipo==='gestion'
+    ? (a,b)=>(a.Fecha_Resolucion||'').localeCompare(b.Fecha_Resolucion||'')
+    : (a,b)=>cmpPrioridad(a,b) || ((b.Piso||0)-(a.Piso||0)));
+  const rows = sorted.map(i=>{
+    const n = nivelesDe(i), p = prioridadDe(i), cerrada = esCerradaMod(i);
+    return {
+      'Folio': i.Folio, 'Torre': i.Torre||'Común', 'Piso': i.Piso, 'Lugar': i.Origen||'', 'Tipo de falla': i.Categoria||'',
+      'Detalle': i.Detalle||'', 'Prioridad': p ? PRIORIDADES[p].label : '', 'Gravedad': n.gravedad, 'Importancia': n.importancia, 'Urgencia': n.urgencia,
+      'Urgente': esUrgente(i) ? 'Sí' : '', 'Seguimiento': esSeguimiento(i) ? 'Sí' : '', 'Estado': i.Estado||'Sin revisar',
+      'Área responsable': i.Area_Derivacion||'', 'Grupo': i.Grupo||'',
+      'Fecha detección': i.Fecha_Deteccion||'', 'Última actualización': i.Fecha_Ultima_Actualizacion||'', 'Fecha resolución': i.Fecha_Resolucion||'',
+      'Días': (cerrada ? diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion) : diasEntre(i.Fecha_Deteccion)) ?? '',
+      'Atrasada': (!cerrada && isAtrasada(i)) ? 'Sí' : '',
+      'Actualizado por': i.Actualizado_Por||'', 'Notas': i.Notas||'',
+      'Foto detección': i.Foto_Deteccion_URL||'', 'Foto resolución': i.Foto_Resolucion_URL||''
+    };
   });
-  if(torre) items = items.filter(i=>i.Torre===torre);
-  if(piso) items = items.filter(i=>String(i.Piso)===String(piso));
-  if(categoria) items = items.filter(i=>i.Categoria===categoria);
-  if(soloSeguimiento) items = items.filter(i=>esSeguimiento(i));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:10},{wch:9},{wch:6},{wch:18},{wch:18},{wch:42},{wch:10},{wch:10},{wch:11},{wch:11},{wch:8},{wch:11},{wch:12},{wch:18},{wch:16},{wch:16},{wch:17},{wch:16},{wch:7},{wch:9},{wch:14},{wch:30},{wch:22},{wch:22}];
 
-  doc.setFont('helvetica','bold'); doc.setFontSize(15);
-  doc.text('Reporte de Gestión de Mantención', marginX, y); y+=20;
-  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90);
-  doc.text(COMUNIDAD, marginX, y); y+=14;
-  doc.text('Período: ' + desde + ' a ' + hasta, marginX, y); y+=14;
-  if(torre) { doc.text('Torre: ' + torre, marginX, y); y+=14; }
-  if(piso) { doc.text('Piso: ' + piso, marginX, y); y+=14; }
-  if(categoria) { doc.text('Tipo de falla: ' + categoria, marginX, y); y+=14; }
-  if(soloSeguimiento) { doc.text('Solo con seguimiento pendiente', marginX, y); y+=14; }
-  doc.text('Generado: ' + new Date().toLocaleString('es-CL'), marginX, y); y+=10;
-  doc.setDrawColor(200); y+=8; doc.line(marginX, y, pageW-marginX, y); y+=20;
-  doc.setTextColor(0);
+  const torresVis = TORRES_ALL.filter(t=>items.some(i=>(i.Torre||'Común')===t));
+  const resumen = infCantidades(items).map(([c,v])=>{
+    const r = { 'Tipo de falla': c, 'Total': v.total };
+    torresVis.forEach(t=>{ r[t] = v.por[t] || 0; });
+    return r;
+  });
+  const tot = { 'Tipo de falla': 'TOTAL', 'Total': items.length };
+  torresVis.forEach(t=>{ tot[t] = items.filter(i=>(i.Torre||'Común')===t).length; });
+  resumen.push(tot);
+  const ws2 = XLSX.utils.json_to_sheet(resumen);
+  ws2['!cols'] = [{wch:24},{wch:8},...torresVis.map(()=>({wch:10}))];
 
-  if(items.length===0){
-    doc.setFontSize(11); doc.text('No hay fallas resueltas que coincidan con el período y los filtros seleccionados.', marginX, y);
-    doc.save('Reporte_Gestion_'+desde+'_a_'+hasta+'.pdf'); showToast('PDF generado ✓'); return;
+  const info = [['Informe', T.titulo], ['Comunidad', COMUNIDAD], ['Generado', new Date().toLocaleString('es-CL')], ['Ítems incluidos', items.length], ['', ''], ['Filtros aplicados', '']]
+    .concat(infFiltroLineas().map(l=>['', l]));
+  const ws3 = XLSX.utils.aoa_to_sheet(info);
+  ws3['!cols'] = [{wch:20},{wch:70}];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Detalle');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen');
+  if(f.tipo==='gestion'){
+    const areas = [...new Set(items.map(i=>i.Area_Derivacion || 'Sin área asignada'))];
+    const ra = areas.map(a=>{
+      const lst = items.filter(i=>(i.Area_Derivacion||'Sin área asignada')===a);
+      const d = lst.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
+      return { 'Área': a, 'Resueltas': lst.length, 'Prom. días': d.length ? +(d.reduce((s,x)=>s+x,0)/d.length).toFixed(1) : '', 'Más lenta (días)': d.length ? Math.max(...d) : '' };
+    }).sort((a,b)=>b['Resueltas']-a['Resueltas']);
+    const ws4 = XLSX.utils.json_to_sheet(ra); ws4['!cols'] = [{wch:24},{wch:10},{wch:11},{wch:16}];
+    XLSX.utils.book_append_sheet(wb, ws4, 'Por área');
   }
-
-  const groupKey = it => it.Area_Derivacion || 'Sin área asignada';
-  const areas = [...new Set(items.map(groupKey))];
-  doc.setFont('helvetica','bold'); doc.setFontSize(12);
-  doc.text('Resumen por área', marginX, y); y+=18;
-
-  let totalDias = 0, totalCount = 0;
-  const resumenRows = areas.map(a=>{
-    const aItems = items.filter(i=>groupKey(i)===a);
-    const dias = aItems.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(d=>d!==null);
-    const prom = dias.length ? (dias.reduce((s,x)=>s+x,0)/dias.length) : 0;
-    totalDias += dias.reduce((s,x)=>s+x,0); totalCount += dias.length;
-    return { area:a, count:aItems.length, prom: prom.toFixed(1) };
-  }).sort((a,b)=>b.count-a.count);
-
-  doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
-  doc.text('Área', marginX, y); doc.text('Resueltos', marginX+260, y); doc.text('Prom. días', marginX+350, y); y+=6;
-  doc.setDrawColor(220); doc.line(marginX, y, pageW-marginX, y); y+=12;
-  doc.setFont('helvetica','normal');
-  resumenRows.forEach(r=>{
-    ensure(14);
-    doc.text(r.area, marginX, y); doc.text(String(r.count), marginX+260, y); doc.text(r.prom+'d', marginX+350, y); y+=14;
-  });
-  y+=6; ensure(16);
-  doc.setFont('helvetica','bold');
-  doc.text('Promedio general: ' + (totalCount? (totalDias/totalCount).toFixed(1):'0') + ' días · Total resueltos: ' + items.length, marginX, y);
-  y+=24;
-
-  ensure(20); doc.setFontSize(12); doc.text('Detalle', marginX, y); y+=16;
-  doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  items.sort((a,b)=>(a.Fecha_Resolucion||'').localeCompare(b.Fecha_Resolucion||'')).forEach(i=>{
-    const dias = diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion);
-    const text = '[' + i.Folio + '] ' + i.Torre + ' P' + i.Piso + ' · ' + i.Categoria + ' · ' + groupKey(i) + ' · ' + dias + 'd (' + i.Fecha_Deteccion + ' → ' + i.Fecha_Resolucion + ')';
-    const lines = doc.splitTextToSize(text, pageW-marginX*2);
-    ensure(lines.length*11+3);
-    lines.forEach((l,idx)=>{ doc.text(idx===0?'• '+l:'   '+l, marginX, y); y+=11; });
-  });
-
-  doc.save('Reporte_Gestion_'+desde+'_a_'+hasta+'.pdf');
-  showToast('PDF generado ✓');
+  XLSX.utils.book_append_sheet(wb, ws3, 'Info');
+  XLSX.writeFile(wb, 'Informe_' + infSlug(T.nombre) + '_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  showToast('Excel generado ✓');
 }
+
+/* ================= GUÍA PARA PRINCIPIANTES ================= */
+let GUIA_I = 0;
+function guiaPasos(){
+  const admin = CURRENT_USER && CURRENT_USER.rol === 'Admin';
+  if(admin) return [
+    { ico:'🏠', t:'Empieza siempre por Inicio',
+      x:'Ahí está lo más importante primero: el <b>semáforo</b> de cada torre, lo <b>urgente</b> y lo que lleva días sin movimiento. Toca cualquier tarjeta para entrar.' },
+    { ico:'➕', t:'Reportar una falla toma 4 pasos',
+      x:'Toca <b>“Reportar una falla”</b>: dónde está, qué es, una foto y un detalle. Si no puede esperar, marca <b>🚨 Urgente</b>. La app calcula la prioridad sola.' },
+    { ico:'📊', t:'Revisa, planifica e informa',
+      x:'<b>Torres:</b> toca un piso para ver sus fallas o marcarlo OK.<br><b>Panel:</b> resumen con gráficos; toca una barra para filtrar.<br><b>Plan:</b> qué atender hoy y esta semana.<br><b>🖨️ Informes:</b> PDF o Excel listos para imprimir.<br><br>Puedes volver a ver esta guía con el botón <b>❓</b>.' }
+  ];
+  return [
+    { ico:'🏠', t:'Inicio: lo que necesita atención',
+      x:'Aquí ves las fallas <b>urgentes</b> y las que llevan días sin movimiento. Toca una tarjeta para ver el detalle.' },
+    { ico:'➕', t:'Reportar una falla toma 4 pasos',
+      x:'Toca <b>“Reportar una falla”</b>: dónde está, qué es, una foto y un detalle. Si no puede esperar, marca <b>🚨 Urgente</b>.' },
+    { ico:'💧', t:'Filtraciones y Deptos y Comunes',
+      x:'Cada tarjeta es una falla. Toca una para cambiar su estado, agregar fotos o dejar un comentario. Usa los botones <b>A · B · C · D</b> para filtrar por torre y <b>Activas / Resueltas</b> para ver el historial.<br><br>Puedes volver a ver esta guía con el botón <b>❓</b>.' }
+  ];
+}
+function guiaVista(){ try{ return !!localStorage.getItem('mant_guia_vista'); }catch(e){ return true; } }
+function openGuia(){ GUIA_I = 0; try{ localStorage.setItem('mant_guia_vista','1'); }catch(e){} guiaRender(); }
+function guiaRender(){
+  const p = guiaPasos(), s = p[GUIA_I], last = GUIA_I === p.length-1;
+  showModal(`
+    <div class="wz-prog">${p.map((_,k)=>`<i class="${k<=GUIA_I?'on':''}"></i>`).join('')}</div>
+    <div class="gd-ico">${s.ico}</div>
+    <div class="gd-t">${s.t}</div>
+    <div class="gd-x">${s.x}</div>
+    <div class="btn-row" style="margin-top:18px">
+      ${GUIA_I>0 ? '<button class="btn btn-ghost" onclick="guiaIr(-1)">← Atrás</button>' : ''}
+      <button class="btn btn-primary" style="margin-top:0" onclick="${last ? 'closeModal()' : 'guiaIr(1)'}">${last ? '¡Entendido!' : 'Siguiente →'}</button>
+    </div>
+    ${last ? '' : '<button class="wz-link" style="display:block;margin:6px auto 0" onclick="closeModal()">Saltar guía</button>'}`);
+}
+function guiaIr(d){ GUIA_I = Math.max(0, Math.min(guiaPasos().length-1, GUIA_I + d)); guiaRender(); }
+
 </script>
 </body>
 </html>

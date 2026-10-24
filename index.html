@@ -204,6 +204,54 @@
   .prio-tile{border:1px solid var(--pc); border-radius:10px; padding:8px 4px; text-align:center; cursor:pointer; background:color-mix(in srgb, var(--pc) 8%, transparent);}
   .prio-tile .n{font-size:1.3rem; font-weight:800; color:var(--pc); font-family:ui-monospace,"SF Mono",monospace; line-height:1.1;}
   .prio-tile .l{font-size:.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
+
+  /* ===== Plan de trabajo ===== */
+  .plan-win{margin:14px 0 6px; border-left:4px solid var(--pc); padding-left:8px;}
+  .plan-win-head{display:flex; flex-direction:column; font-size:1rem; font-weight:800; color:var(--pc); margin-bottom:4px;}
+  .plan-win-sub{font-size:.7rem; font-weight:400; color:var(--text-dim);}
+  .plan-grp{font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--text-dim); margin:8px 0 4px;}
+  .plan-grp span{font-weight:400;}
+  .plan-banner{background:var(--panel-alt); border:1px dashed var(--line); border-radius:10px; padding:9px 12px; font-size:.78rem; color:var(--text-dim); margin:8px 0;}
+  .plan-table{width:100%; border-collapse:collapse; margin-top:8px; font-size:.78rem;}
+  .plan-table th{text-align:left; color:var(--text-dim); font-weight:600; font-size:.68rem; text-transform:uppercase; padding:4px 6px; border-bottom:1px solid var(--line);}
+  .plan-table td{padding:6px; border-bottom:1px solid var(--line);}
+  details.dash-card summary::-webkit-details-marker{display:none;}
+
+  /* ===== Torres: hero y mapa de pisos ===== */
+  .tw-hero{background:linear-gradient(135deg,#1f2d40 0%,#16202c 100%); border:1px solid var(--line); border-radius:16px; padding:14px 14px 12px; box-shadow:0 6px 18px rgba(0,0,0,.25);}
+  .tw-top{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .tw-name{font-size:1.3rem; font-weight:800;}
+  .tw-sub{font-size:.76rem; color:var(--text-dim); margin-top:2px;}
+  .tw-pct{text-align:right;}
+  .tw-pct b{font-size:1.6rem; font-family:ui-monospace,"SF Mono",monospace; color:var(--accent); display:block; line-height:1;}
+  .tw-pct span{font-size:.66rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
+  .tw-bar{height:8px; border-radius:6px; background:#0D1218; overflow:hidden; margin-top:10px;}
+  .tw-bar i{display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,#2FA86B,#7ed3a3);}
+  .fl-map{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:10px;}
+  .fl-row{display:grid; grid-template-columns:repeat(6,1fr); gap:7px; margin-bottom:7px;}
+  .fl-sub-title{font-size:.66rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em; margin:6px 2px 6px;}
+  .fl-tile{position:relative; aspect-ratio:1/1; border-radius:11px; border:1px solid var(--line); background:#2a3442; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .08s, opacity .15s;}
+  .fl-tile:active{transform:scale(.94);}
+  .fl-tile.dim{opacity:.22;}
+  .fl-num{font-weight:800; font-size:.95rem; font-family:ui-monospace,"SF Mono",monospace;}
+  .fl-tile.st-sin, .lg.st-sin{background:#2a3442; border-color:#3a4658; color:var(--text-dim);}
+  .fl-tile.st-vacio{background:transparent; border-style:dashed; color:var(--text-dim); opacity:.5;}
+  .fl-tile.st-parcial, .lg.st-parcial{background:#3a3a24; border-color:#6b6a35; color:#e6dc8f;}
+  .fl-tile.st-ok, .lg.st-ok{background:#16402b; border-color:#2FA86B; color:#7ed3a3;}
+  .fl-tile.st-fallas, .lg.st-fallas{background:color-mix(in srgb, var(--pc,#D6534A) 28%, #1B2430); border-color:var(--pc,#D6534A); color:#fff;}
+  .fl-badge{position:absolute; top:-6px; right:-6px; min-width:19px; height:19px; padding:0 5px; border-radius:99px; background:var(--pc,#D6534A); color:#fff; font-size:.7rem; font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.4);}
+  .fl-check{position:absolute; bottom:2px; right:5px; font-size:.62rem; color:#7ed3a3;}
+  .fl-legend{display:flex; gap:12px; flex-wrap:wrap; font-size:.68rem; color:var(--text-dim); margin:8px 2px 0;}
+  .fl-legend .lg{display:inline-block; width:11px; height:11px; border-radius:3px; border:1px solid; vertical-align:-1px; margin-right:4px;}
+  .fl-item{display:flex; align-items:center; gap:10px; padding:10px; margin-bottom:8px; background:var(--panel-alt); border:1px solid var(--line); border-left:4px solid var(--line); border-radius:11px; cursor:pointer;}
+  .fl-ico{font-size:1.4rem; width:34px; text-align:center; flex:0 0 auto;}
+  .fl-main{flex:1; min-width:0;}
+  .fl-cat{font-size:.88rem; font-weight:700;}
+  .fl-sub{font-size:.72rem; color:var(--text-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .fl-acts{display:flex; gap:6px; flex:0 0 auto;}
+  .fl-acts button{border-radius:9px; padding:9px 10px; font-size:.78rem; font-weight:700; cursor:pointer; border:1px solid;}
+  .fl-ok{background:#2FA86B; border-color:#2FA86B; color:#06210f;}
+  .fl-bad{background:transparent; border-color:#D6534A; color:#D6534A;}
 </style>
 </head>
 <body>
@@ -239,15 +287,6 @@
     <div class="tabs" id="tabsRow"></div>
   </header>
 
-  <div class="toolbar" id="toolbarBar">
-    <input type="text" id="searchInput" placeholder="Buscar folio, falla o detalle..." oninput="renderList()">
-    <div class="toggle-pend" onclick="togglePendOnly()">
-      <div class="switch" id="pendSwitch"><div class="knob"></div></div>
-      Solo activos
-    </div>
-  </div>
-
-  <div class="floor-dock" id="floorDock"></div>
   <div id="offlineBanner" class="banner warn hidden">Sin conexión — mostrando datos guardados. Tus cambios se enviarán al recuperar señal. <span style="text-decoration:underline;cursor:pointer" onclick="manualSync()">Reintentar</span></div>
   <main id="mainList"></main>
 </div>
@@ -526,7 +565,8 @@ function renderTabs(){
     `<div class="tab ${STATE.view==='checklist' && t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
-  document.getElementById('tabsRow').innerHTML = homeTab + torreTabs + dashTab + fugasTab + deptosTab;
+  const planTab = `<div class="tab ${STATE.view==='plan'?'active':''}" onclick="selectPlan()">📅 Plan</div>`;
+  document.getElementById('tabsRow').innerHTML = homeTab + torreTabs + dashTab + planTab + fugasTab + deptosTab;
 }
 function selectHome(){ STATE.view='home'; if(STATE.home) STATE.home.alerta=null; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 function selectAlerta(key){ ensureHomeState(); STATE.home.alerta=key; STATE.view='alerta'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -549,103 +589,29 @@ function renderSummary(){
     <div class="pill">Sin revisar <b>${count('Sin revisar')}</b></div>
   `;
 }
-function togglePendOnly(){
-  STATE.pendOnly = !STATE.pendOnly;
-  document.getElementById('pendSwitch').classList.toggle('on', STATE.pendOnly);
-  renderList();
-}
-
 /* ================= FLOOR DOCK ================= */
-function renderFloorDock(){
-  const dock = document.getElementById('floorDock');
-  dock.innerHTML = floorsList().map(p=>{
-    const items = STATE.items.filter(i=>i.Torre===STATE.currentTorre && i.Piso===p);
-    const hasActive = items.some(i=>ACTIVE_STATES.includes(i.Estado));
-    const allDone = items.length>0 && items.every(i=>['OK','Resuelto'].includes(i.Estado));
-    const led = hasActive ? '#D6534A' : (allDone ? '#2FA86B' : '#5B6675');
-    return `<div class="floor-chip" onclick="jumpToFloor(${p})">${p}<span class="led" style="background:${led}"></span></div>`;
-  }).join('');
-}
-function jumpToFloor(p){
-  const el = document.getElementById('floor-'+STATE.currentTorre.replace(' ','_')+'-'+p);
-  if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
 /* ================= RENDER PRINCIPAL ================= */
 function renderAll(){
   renderSummary();
-  const floorDock = document.getElementById('floorDock');
-  const toolbarBar = document.getElementById('toolbarBar');
   const onHome = (STATE.view === 'home' || STATE.view === 'alerta');
   document.getElementById('summaryRow').style.display = onHome ? 'none' : 'flex';
   if(STATE.view === 'home'){
-    floorDock.style.display = 'none';
-    toolbarBar.style.display = 'none';
     renderHome();
   } else if(STATE.view === 'alerta'){
-    floorDock.style.display = 'none';
-    toolbarBar.style.display = 'none';
     renderAlerta();
+  } else if(STATE.view === 'plan'){
+    renderPlan();
   } else if(STATE.view === 'dashboard'){
-    floorDock.style.display = 'none';
-    toolbarBar.style.display = 'none';
     renderDashboard();
   } else if(STATE.view === 'fugas'){
-    floorDock.style.display = 'none';
-    toolbarBar.style.display = 'none';
     renderFugas();
   } else if(STATE.view === 'deptos'){
-    floorDock.style.display = 'none';
-    toolbarBar.style.display = 'none';
     renderDeptos();
   } else if(STATE.view === 'simple'){
-    floorDock.style.display = 'none';
-    toolbarBar.style.display = 'none';
     renderSimple();
   } else {
-    floorDock.style.display = 'flex';
-    toolbarBar.style.display = 'flex';
-    renderFloorDock();
-    renderList();
+    renderTorre();
   }
-}
-
-function matchesFilters(i){
-  if(STATE.pendOnly && !ACTIVE_STATES.includes(i.Estado)) return false;
-  const s = STATE.search.trim().toLowerCase();
-  if(s){
-    const hay = (i.Folio+' '+i.Categoria+' '+i.Detalle+' '+(i.Notas||'')+' '+(i.Origen||'')+' '+(i.Grupo||'')).toLowerCase();
-    if(!hay.includes(s)) return false;
-  }
-  return true;
-}
-
-function renderList(){
-  STATE.search = document.getElementById('searchInput').value;
-  const main = document.getElementById('mainList');
-  const floors = floorsList();
-  let html = ''; let anyVisible = false;
-
-  floors.forEach(p=>{
-    let items = STATE.items.filter(i=>i.Torre===STATE.currentTorre && i.Piso===p);
-    items = items.slice().sort((a,b)=>catOrder(a.Categoria)-catOrder(b.Categoria));
-    const visibleItems = items.filter(matchesFilters);
-    if(STATE.pendOnly || STATE.search){ if(visibleItems.length===0) return; }
-    anyVisible = true;
-    const idSafe = STATE.currentTorre.replace(' ','_')+'-'+p;
-    const activeCount = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
-    html += `<div class="floor-card" id="floor-${idSafe}">
-      <div class="floor-head">
-        <div><span class="floor-num">${p}</span><span class="floor-tag">${p<=-1?'Subterráneo':''}</span></div>
-        <div class="floor-count">${activeCount>0 ? activeCount+' activo'+(activeCount>1?'s':'') : 'OK'}</div>
-      </div>`;
-    const toShow = (STATE.pendOnly || STATE.search) ? visibleItems : items;
-    toShow.forEach(i=>{ html += renderItemRow(i); });
-    html += `<button class="add-fault-btn" onclick="openAddReportModal('${STATE.currentTorre}', ${p})">+ Agregar falla en este piso</button></div>`;
-  });
-
-  if(!anyVisible){ html = `<div class="empty-note">No hay ítems que coincidan con el filtro actual.</div>`; }
-  main.innerHTML = html;
 }
 
 function renderItemRow(i){
@@ -987,6 +953,474 @@ function nivelesBlockHtml(item){
   `;
 }
 
+/* ================= PLAN DE TRABAJO (vivo y automático) ================= */
+const PLAZOS_DEF = { critica:1, alta:7, media:14, baja:30 }; // días desde la detección
+function getPlazos(){
+  try{ const o = JSON.parse(localStorage.getItem('mant_plazos')||'null'); if(o) return { ...PLAZOS_DEF, ...o }; }catch(e){}
+  return { ...PLAZOS_DEF };
+}
+function ensurePlanState(){ if(!STATE.plan){ STATE.plan = { torre:'', group:'torre' }; } }
+function fechaObjetivo(i, prio){
+  const base = parseFH(i.Fecha_Deteccion) || new Date();
+  return new Date(base.getTime() + getPlazos()[prio]*86400000);
+}
+function fmtDM(d){ return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0'); }
+function planLast(){ try{ return JSON.parse(localStorage.getItem('mant_plan_last')||'null'); }catch(e){ return null; } }
+function planEntries(){
+  ensurePlanState();
+  const last = planLast();
+  const lastSet = last ? new Set(last.folios) : null;
+  const now = new Date();
+  return STATE.items
+    .filter(i=>prioridadDe(i)!==null && (!STATE.plan.torre || i.Torre===STATE.plan.torre))
+    .map(i=>{
+      const prio = prioridadDe(i);
+      const obj = fechaObjetivo(i, prio);
+      const atraso = now > obj ? Math.max(1, Math.floor((now-obj)/86400000)) : 0;
+      return { i, prio, obj, atraso, nueva: !!(lastSet && !lastSet.has(i.Folio)) };
+    });
+}
+function planSort(a, b){
+  const to = t => { const k = TORRES_ALL.indexOf(t); return k===-1 ? 99 : k; };
+  return (to(a.i.Torre)-to(b.i.Torre)) || ((b.i.Piso||0)-(a.i.Piso||0)) || (esUrgente(b.i)-esUrgente(a.i)) || a.i.Folio.localeCompare(b.i.Folio);
+}
+function planGroupKey(e){
+  return STATE.plan.group === 'area' ? (e.i.Area_Derivacion || 'Sin área asignada') : (e.i.Torre || 'Común');
+}
+function planLugar(i){
+  const pisoTxt = (i.Piso===0 || i.Piso===undefined || i.Piso==='' || isNaN(i.Piso)) ? '' : (i.Piso<=-1 ? 'Subt. '+i.Piso : 'P'+i.Piso);
+  return [i.Torre, pisoTxt, i.Origen].filter(Boolean).join(' · ');
+}
+// tipo de falla × torre
+function planCantidades(entries){
+  const map = {};
+  entries.forEach(e=>{
+    const c = e.i.Categoria || 'OTROS';
+    if(!map[c]) map[c] = { total:0, porTorre:{} };
+    map[c].total++;
+    const t = e.i.Torre || 'Común';
+    map[c].porTorre[t] = (map[c].porTorre[t]||0) + 1;
+  });
+  return Object.entries(map).sort((a,b)=>b[1].total-a[1].total);
+}
+function planClosedSinceLast(){
+  const last = planLast(); if(!last) return 0;
+  const cerrados = new Set(STATE.items.filter(i=>['Resuelto','OK','Descartado'].includes(i.Estado)).map(i=>i.Folio));
+  return last.folios.filter(f=>cerrados.has(f) || !STATE.items.some(i=>i.Folio===f)).length;
+}
+function selectPlan(){ STATE.view='plan'; renderTabs(); renderAll(); window.scrollTo({top:0,behavior:'smooth'}); }
+function setPlanField(k, v){ ensurePlanState(); STATE.plan[k] = v; renderPlan(); }
+
+function planRowHtml(e){
+  const i = e.i; const est = i.Estado || 'Sin revisar';
+  const color = ESTADO_COLORS[est] || '#5B6675';
+  const venc = e.atraso
+    ? `<span class="stale-badge" style="color:#D6534A;font-weight:700">⚠ atrasada ${e.atraso}d</span>`
+    : `<span class="stale-badge" style="color:var(--text-dim)">vence ${fmtDM(e.obj)}</span>`;
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
+    <div class="dot" style="background:${color}"></div>
+    <div class="item-main">
+      <div class="item-cat">${esUrgente(i)?'🚨 ':''}${i.Categoria} <span class="folio-tag">${i.Folio}</span>${e.nueva?' <span class="prio-chip" style="--pc:#3B82C4">🆕 nueva</span>':''}</div>
+      <div class="item-detalle">${planLugar(i)}${i.Detalle ? ' — '+i.Detalle : ''}</div>
+      <span class="stale-badge" style="color:${color}">${est}</span> ${venc}${i.Area_Derivacion ? ` <span class="stale-badge">→ ${i.Area_Derivacion}</span>`:''}
+    </div>
+    <div class="chev">›</div>
+  </div>`;
+}
+
+function renderPlan(){
+  ensurePlanState();
+  const main = document.getElementById('mainList');
+  const entries = planEntries();
+  const atrasadas = entries.filter(e=>e.atraso).length;
+  const criticas = entries.filter(e=>e.prio==='critica').length;
+  const nuevas = entries.filter(e=>e.nueva).length;
+  const last = planLast();
+  const lastTxt = last ? new Date(last.fecha).toLocaleDateString('es-CL') : '';
+  const cerradas = planClosedSinceLast();
+
+  const cant = planCantidades(entries);
+  const cantHtml = cant.length ? `<table class="plan-table"><tr><th>Tipo de falla</th><th>Total</th><th>Por torre</th></tr>${
+    cant.map(([c,v])=>`<tr><td>${catIcon(c)} ${c}</td><td><b>${v.total}</b></td><td>${Object.entries(v.porTorre).map(([t,n])=>`${t.replace('Torre ','')}:${n}`).join(' · ')}</td></tr>`).join('')
+  }</table>` : '<div class="empty-note">Sin fallas en el plan.</div>';
+
+  let ventanas = '';
+  Object.keys(PRIORIDADES).forEach(k=>{
+    const P = PRIORIDADES[k];
+    const grp = entries.filter(e=>e.prio===k);
+    if(!grp.length) return;
+    const groups = {};
+    grp.forEach(e=>{ const key = planGroupKey(e); (groups[key] = groups[key] || []).push(e); });
+    const keys = Object.keys(groups).sort((a,b)=>{
+      if(STATE.plan.group==='torre'){ const f = t=>{ const x = TORRES_ALL.indexOf(t); return x===-1?99:x; }; return f(a)-f(b); }
+      return a.localeCompare(b);
+    });
+    ventanas += `<div class="plan-win" style="--pc:${P.color}">
+      <div class="plan-win-head"><span>${P.ico} ${PRIO_VENTANA[k]}</span><span class="plan-win-sub">Prioridad ${P.label} · plazo ${getPlazos()[k]} día${getPlazos()[k]===1?'':'s'} · ${grp.length} falla${grp.length===1?'':'s'}</span></div>
+      ${keys.map(key=>`<div class="plan-grp">${key} <span>(${groups[key].length})</span></div>
+        <div class="floor-card" style="margin-bottom:8px">${groups[key].sort(planSort).map(planRowHtml).join('')}</div>`).join('')}
+    </div>`;
+  });
+  if(!ventanas) ventanas = '<div class="empty-note">No hay fallas activas con prioridad. ✅</div>';
+
+  main.innerHTML = `
+    <div class="home-greet">📅 Plan de trabajo</div>
+    <div class="home-sub">Se actualiza solo con cada falla nueva o cerrada · ${new Date().toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</div>
+    <div class="dash-tiles" style="grid-template-columns:repeat(4,1fr)">
+      <div class="tile"><div class="tile-num">${entries.length}</div><div class="tile-label">En plan</div></div>
+      <div class="tile"><div class="tile-num" style="color:#D6534A">${criticas}</div><div class="tile-label">Críticas</div></div>
+      <div class="tile"><div class="tile-num" style="color:#E8A33D">${atrasadas}</div><div class="tile-label">Atrasadas</div></div>
+      <div class="tile"><div class="tile-num" style="color:#3B82C4">${nuevas}</div><div class="tile-label">Nuevas</div></div>
+    </div>
+    ${last ? `<div class="plan-banner">🆕 <b>${nuevas}</b> nueva${nuevas===1?'':'s'} y ✅ <b>${cerradas}</b> cerrada${cerradas===1?'':'s'} desde el plan del ${lastTxt}. <span onclick="planMarcarVisto()" style="text-decoration:underline;cursor:pointer">Marcar como visto</span></div>` : `<div class="plan-banner">Aún no hay un plan guardado como referencia. Al descargar el PDF o el Excel se guarda y desde ahí te avisa qué fallas son nuevas.</div>`}
+    <div class="dash-card">
+      <div class="field" style="margin-top:0"><label>Torre</label>
+        <select onchange="setPlanField('torre', this.value)"><option value="">Todas</option>${TORRES_ALL.map(t=>`<option value="${t}" ${STATE.plan.torre===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Agrupar dentro de cada ventana por</label>
+        <div class="seg"><button class="${STATE.plan.group==='torre'?'on':''}" onclick="setPlanField('group','torre')">Torre y piso</button><button class="${STATE.plan.group==='area'?'on':''}" onclick="setPlanField('group','area')">Área responsable</button></div></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generarPdfPlan()">📄 PDF</button>
+        <button class="btn btn-primary" style="background:#2FA86B" onclick="generarExcelPlan()">📥 Excel</button>
+        <button class="btn btn-ghost" onclick="openPlazosModal()">⚙ Plazos</button>
+      </div>
+    </div>
+    <details class="dash-card" open><summary style="cursor:pointer;font-weight:700;font-size:.88rem">📦 Qué hay que atender (cantidades)</summary>${cantHtml}</details>
+    ${ventanas}
+  `;
+}
+
+function planMarcarVisto(){
+  localStorage.setItem('mant_plan_last', JSON.stringify({ fecha:new Date().toISOString(), folios: planEntries().map(e=>e.i.Folio) }));
+  showToast('Plan guardado como referencia ✓'); renderPlan();
+}
+function openPlazosModal(){
+  const pl = getPlazos();
+  showModal(`
+    <h2>⚙ Plazos del plan</h2>
+    <div class="sub">Días máximos desde la detección, según prioridad. Se guardan en este equipo.</div>
+    ${Object.keys(PRIORIDADES).map(k=>`<div class="field"><label>${PRIORIDADES[k].ico} ${PRIORIDADES[k].label} (${PRIO_VENTANA[k]})</label><input type="number" min="1" id="plz_${k}" value="${pl[k]}"></div>`).join('')}
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" style="margin-top:0" onclick="guardarPlazos()">Guardar</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="localStorage.removeItem('mant_plazos'); closeModal(); renderPlan();">Restablecer valores por defecto</button>
+  `);
+}
+function guardarPlazos(){
+  const o = {};
+  Object.keys(PRIORIDADES).forEach(k=>{ const v = parseInt(document.getElementById('plz_'+k).value,10); o[k] = (isNaN(v)||v<1) ? PLAZOS_DEF[k] : v; });
+  localStorage.setItem('mant_plazos', JSON.stringify(o));
+  closeModal(); renderPlan(); showToast('Plazos guardados ✓');
+}
+
+/* ---- PDF del plan ---- */
+function generarPdfPlan(){
+  const entries = planEntries();
+  if(!entries.length){ showToast('No hay fallas en el plan para imprimir'); return; }
+  showToast('Generando PDF...');
+  loadJsPdf(()=>buildPdfPlan(entries));
+}
+function buildPdfPlan(entries){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'a4'});
+  const marginX = 36;
+  const pageH = doc.internal.pageSize.getHeight(), pageW = doc.internal.pageSize.getWidth();
+  const hexRgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+
+  pdfHeaderBand(doc, 'Plan de Trabajo de Mantención', marginX, pageW);
+  const pl = getPlazos();
+  const lines = [
+    (STATE.plan.torre ? 'Torre: '+STATE.plan.torre : 'Todas las torres y áreas') + ' · Agrupado por ' + (STATE.plan.group==='area' ? 'área responsable' : 'torre y piso'),
+    'Plazos desde detección: Crítica ' + pl.critica + 'd · Alta ' + pl.alta + 'd · Media ' + pl.media + 'd · Baja ' + pl.baja + 'd'
+  ];
+  let y = pdfMeta(doc, marginX, 78, pageW, lines);
+  const atrasadas = entries.filter(e=>e.atraso).length;
+  y = pdfKpiRow(doc, marginX, y+4, pageW, [
+    { label:'Fallas en plan', value: entries.length },
+    { label:'Críticas (hoy)', value: entries.filter(e=>e.prio==='critica').length, color:hexRgb(PRIORIDADES.critica.color) },
+    { label:'Altas (semana)', value: entries.filter(e=>e.prio==='alta').length, color:hexRgb(PRIORIDADES.alta.color) },
+    { label:'Atrasadas', value: atrasadas, color:[214,83,74] },
+    { label:'Nuevas', value: entries.filter(e=>e.nueva).length, color:[59,130,196] }
+  ]);
+
+  // Resumen de cantidades
+  const cant = planCantidades(entries);
+  const torresCols = TORRES_ALL.filter(t=>entries.some(e=>(e.i.Torre||'Común')===t));
+  doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(...PDF_NAVY);
+  doc.text('Qué hay que atender', marginX, y); doc.setTextColor(0); y += 6;
+  doc.autoTable({
+    startY: y, margin:{ left:marginX, right:marginX, bottom:40 },
+    head: [['Tipo de falla','Total', ...torresCols.map(t=>t.replace('Torre ','T. '))]],
+    body: cant.map(([c,v])=>[c, v.total, ...torresCols.map(t=>v.porTorre[t]||'')]),
+    theme:'grid', styles:{ font:'helvetica', fontSize:8, cellPadding:4, halign:'center' },
+    headStyles:{ fillColor:PDF_NAVY, textColor:255, fontStyle:'bold' },
+    columnStyles:{ 0:{halign:'left', cellWidth:150}, 1:{fontStyle:'bold'} }
+  });
+  y = doc.lastAutoTable.finalY + 18;
+
+  // Plan por ventanas
+  const body = [];
+  Object.keys(PRIORIDADES).forEach(k=>{
+    const P = PRIORIDADES[k];
+    const grp = entries.filter(e=>e.prio===k);
+    if(!grp.length) return;
+    body.push([{ content: PRIO_VENTANA[k].toUpperCase() + '  ·  Prioridad ' + P.label + '  ·  ' + grp.length + ' falla' + (grp.length===1?'':'s') + '  ·  plazo ' + pl[k] + ' día' + (pl[k]===1?'':'s'),
+      colSpan:8, styles:{ fillColor:hexRgb(P.color), textColor:255, fontStyle:'bold', fontSize:9 } }]);
+    const groups = {};
+    grp.forEach(e=>{ const key = planGroupKey(e); (groups[key] = groups[key]||[]).push(e); });
+    const keys = Object.keys(groups).sort((a,b)=>{
+      if(STATE.plan.group==='torre'){ const f=t=>{ const x=TORRES_ALL.indexOf(t); return x===-1?99:x; }; return f(a)-f(b); }
+      return a.localeCompare(b);
+    });
+    keys.forEach(key=>{
+      body.push([{ content: key + '  (' + groups[key].length + ')', colSpan:8, styles:{ fillColor:[232,236,240], textColor:PDF_NAVY, fontStyle:'bold', fontSize:8.5 } }]);
+      groups[key].sort(planSort).forEach(e=>{
+        const i = e.i;
+        body.push([
+          (esUrgente(i)?'URG ':'') + i.Folio + (e.nueva?' *':''),
+          planLugar(i), i.Categoria, i.Detalle || '—', i.Area_Derivacion || '—', i.Estado || 'Sin revisar',
+          fmtDM(e.obj) + (e.atraso ? ' (atr. '+e.atraso+'d)' : ''), ''
+        ]);
+      });
+    });
+  });
+  doc.autoTable({
+    startY: y, margin:{ left:marginX, right:marginX, bottom:40 },
+    head: [['Folio','Lugar','Tipo','Detalle','Área','Estado','Vence','Hecho']],
+    body, theme:'plain',
+    styles:{ font:'helvetica', fontSize:7.5, cellPadding:4, overflow:'linebreak', valign:'middle', lineColor:PDF_LINE, lineWidth:0.3 },
+    headStyles:{ fillColor:PDF_NAVY, textColor:255, fontStyle:'bold', fontSize:8 },
+    columnStyles:{ 0:{cellWidth:54}, 1:{cellWidth:88}, 2:{cellWidth:68}, 3:{cellWidth:'auto'}, 4:{cellWidth:52}, 5:{cellWidth:48}, 6:{cellWidth:52}, 7:{cellWidth:36, halign:'center'} },
+    didParseCell:(data)=>{
+      if(data.section==='body' && data.column.index===5 && typeof data.cell.raw==='string'){
+        data.cell.styles.textColor = ESTADO_RGB[data.cell.raw] || [0,0,0]; data.cell.styles.fontStyle='bold';
+      }
+      if(data.section==='body' && data.column.index===6 && typeof data.cell.raw==='string' && data.cell.raw.indexOf('atr.')>-1){
+        data.cell.styles.textColor = [214,83,74]; data.cell.styles.fontStyle='bold';
+      }
+    },
+    didDrawCell:(data)=>{
+      if(data.section==='body' && data.column.index===7 && data.row.raw && data.row.raw.length===8 && typeof data.row.raw[0]==='string'){
+        const s = 9, cx = data.cell.x + data.cell.width/2 - s/2, cy = data.cell.y + data.cell.height/2 - s/2;
+        doc.setDrawColor(120); doc.rect(cx, cy, s, s);
+      }
+    }
+  });
+  y = doc.lastAutoTable.finalY + 22;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...PDF_GRAY);
+  doc.text('* = falla nueva desde el último plan guardado.   URG = urgencia inmediata.', marginX, y); doc.setTextColor(0); y += 24;
+  if(y > pageH - 90){ doc.addPage(); y = 60; }
+  doc.setDrawColor(...PDF_LINE); doc.line(marginX, y, pageW-marginX, y); y += 24;
+  doc.setFontSize(9.5);
+  doc.text('Entregado por (Administración): _____________________________     Fecha: __________', marginX, y); y += 30;
+  doc.text('Recibido por (Mantención): _____________________________     Fecha: __________', marginX, y);
+
+  pdfFooterPages(doc, marginX, pageW, pageH);
+  doc.save('Plan_de_Trabajo_' + new Date().toISOString().slice(0,10) + '.pdf');
+  planMarcarVistoSilencioso(entries);
+  showToast('PDF generado ✓ · plan guardado como referencia');
+}
+function planMarcarVistoSilencioso(entries){
+  // Guarda como referencia TODO el plan vigente (sin filtro de torre), para comparar la próxima vez
+  const prevTorre = STATE.plan.torre; STATE.plan.torre = '';
+  const all = planEntries().map(e=>e.i.Folio);
+  STATE.plan.torre = prevTorre;
+  localStorage.setItem('mant_plan_last', JSON.stringify({ fecha:new Date().toISOString(), folios: all }));
+}
+
+/* ---- Excel del plan ---- */
+function generarExcelPlan(){
+  const entries = planEntries();
+  if(!entries.length){ showToast('No hay fallas en el plan para exportar'); return; }
+  showToast('Generando Excel...');
+  loadXlsxLib(()=>buildExcelPlan(entries));
+}
+function buildExcelPlan(entries){
+  const ordenPrio = Object.keys(PRIORIDADES);
+  const sorted = entries.slice().sort((a,b)=> (ordenPrio.indexOf(a.prio)-ordenPrio.indexOf(b.prio)) || planSort(a,b));
+  const rows = sorted.map(e=>{
+    const i = e.i, n = nivelesDe(i);
+    return {
+      'Ventana': PRIO_VENTANA[e.prio], 'Prioridad': PRIORIDADES[e.prio].label, 'Folio': i.Folio,
+      'Torre': i.Torre, 'Piso': i.Piso, 'Lugar': i.Origen||'', 'Tipo de falla': i.Categoria, 'Detalle': i.Detalle||'',
+      'Gravedad': n.gravedad, 'Importancia': n.importancia, 'Urgencia': n.urgencia,
+      'Área responsable': i.Area_Derivacion||'', 'Estado': i.Estado||'Sin revisar',
+      'Fecha detección': i.Fecha_Deteccion||'', 'Fecha objetivo': e.obj.toISOString().slice(0,10),
+      'Días de atraso': e.atraso || 0, 'Nueva desde último plan': e.nueva ? 'Sí' : '',
+      'Seguimiento': esSeguimiento(i) ? 'Sí' : ''
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:18},{wch:10},{wch:10},{wch:9},{wch:6},{wch:18},{wch:16},{wch:40},{wch:10},{wch:11},{wch:11},{wch:18},{wch:12},{wch:16},{wch:12},{wch:8},{wch:10},{wch:10}];
+  const torresCols = TORRES_ALL;
+  const resumen = planCantidades(entries).map(([c,v])=>{
+    const r = { 'Tipo de falla': c, 'Total': v.total };
+    torresCols.forEach(t=>{ r[t] = v.porTorre[t] || 0; });
+    return r;
+  });
+  const ws2 = XLSX.utils.json_to_sheet(resumen);
+  ws2['!cols'] = [{wch:20},{wch:8},...torresCols.map(()=>({wch:9}))];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Plan');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen');
+  XLSX.writeFile(wb, 'Plan_de_Trabajo_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  planMarcarVistoSilencioso(entries);
+  showToast('Excel generado ✓ · plan guardado como referencia');
+}
+
+/* ================= TORRES: MAPA DE PISOS ================= */
+function ensureTorreUi(){ if(!STATE.torreUi){ STATE.torreUi = { filtro:'todos', verTodas:false }; } }
+function setTorreFiltro(f){ ensureTorreUi(); STATE.torreUi.filtro = f; renderTorre(); }
+function toggleVerTodasTorre(){ ensureTorreUi(); STATE.torreUi.verTodas = !STATE.torreUi.verTodas; renderTorre(); }
+
+const CERRADOS = ['OK','Resuelto','Descartado'];
+function floorStats(torre, piso){
+  const items = STATE.items.filter(i=>i.Torre===torre && i.Piso===piso);
+  const fallas = items.filter(i=>prioridadDe(i)!==null);
+  const sinRev = items.filter(i=>(i.Estado||'Sin revisar')==='Sin revisar' && !esUrgente(i)).length;
+  const cerrados = items.filter(i=>CERRADOS.includes(i.Estado)).length;
+  let peor = null;
+  fallas.forEach(i=>{ const p = prioridadDe(i); if(peor===null || PRIORIDADES[p].ord < PRIORIDADES[peor].ord) peor = p; });
+  let estado = 'vacio';
+  if(items.length){
+    if(fallas.length) estado = 'fallas';
+    else if(sinRev === 0) estado = 'ok';
+    else if(cerrados > 0) estado = 'parcial';
+    else estado = 'sin';
+  }
+  return { items, fallas: fallas.length, peor, sinRev, cerrados, estado, total: items.length };
+}
+function torreStats(torre){
+  const items = STATE.items.filter(i=>i.Torre===torre);
+  const revisados = items.filter(i=>(i.Estado||'Sin revisar')!=='Sin revisar' || esUrgente(i)).length;
+  const porPrio = {};
+  Object.keys(PRIORIDADES).forEach(k=>{ porPrio[k] = items.filter(i=>prioridadDe(i)===k).length; });
+  return { total: items.length, revisados, pct: items.length ? Math.round(revisados*100/items.length) : 0, porPrio, activas: items.filter(i=>prioridadDe(i)!==null).length };
+}
+
+function renderTorre(){
+  ensureTorreUi();
+  const t = STATE.currentTorre;
+  const ui = STATE.torreUi;
+  const st = torreStats(t);
+  const main = document.getElementById('mainList');
+
+  const prioStrip = Object.keys(PRIORIDADES).map(k=>
+    `<div class="prio-tile" style="--pc:${PRIORIDADES[k].color}"><div class="n">${st.porPrio[k]}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('');
+
+  const filtros = [['todos','Todos'],['fallas','Con fallas'],['sin','Sin revisar']]
+    .map(([k,l])=>`<button class="${ui.filtro===k?'on':''}" onclick="setTorreFiltro('${k}')">${l}</button>`).join('');
+
+  const tile = p=>{
+    const s = floorStats(t, p);
+    const match = ui.filtro==='todos' || (ui.filtro==='fallas' && s.estado==='fallas') || (ui.filtro==='sin' && (s.estado==='sin' || s.estado==='parcial'));
+    const pc = s.peor ? PRIORIDADES[s.peor].color : '';
+    return `<div class="fl-tile st-${s.estado} ${match?'':'dim'}" ${pc?`style="--pc:${pc}"`:''} onclick="openFloorSheet('${t}',${p})">
+      <div class="fl-num">${p}</div>
+      ${s.estado==='fallas' ? `<div class="fl-badge">${s.fallas}</div>` : (s.estado==='ok' ? '<div class="fl-check">✓</div>' : '')}
+    </div>`;
+  };
+  const sobre = floorsList().filter(p=>p>=1);
+  const subt = floorsList().filter(p=>p<=-1);
+  // filas de 6 pisos, de arriba hacia abajo
+  let rows = '';
+  for(let k=0;k<sobre.length;k+=6){ rows += `<div class="fl-row">${sobre.slice(k,k+6).map(tile).join('')}</div>`; }
+
+  // Fallas activas de la torre
+  const activas = STATE.items.filter(i=>i.Torre===t && prioridadDe(i)!==null).sort(cmpPrioridad);
+  const shown = ui.verTodas ? activas : activas.slice(0,6);
+
+  main.innerHTML = `
+    <div class="tw-hero">
+      <div class="tw-top">
+        <div><div class="tw-name">🏢 ${t}</div><div class="tw-sub">${st.activas} falla${st.activas===1?'':'s'} activa${st.activas===1?'':'s'} · ${st.total} ítems</div></div>
+        <div class="tw-pct"><b>${st.pct}%</b><span>revisado</span></div>
+      </div>
+      <div class="tw-bar"><i style="width:${st.pct}%"></i></div>
+    </div>
+    <div class="prio-strip" style="margin:10px 0 4px">${prioStrip}</div>
+
+    <div class="section-label">Mapa de pisos <span style="text-transform:none;letter-spacing:0">· toca un piso para revisarlo</span></div>
+    <div class="seg" style="margin-bottom:10px">${filtros}</div>
+    <div class="fl-map">${rows}
+      <div class="fl-sub-title">Subterráneos</div>
+      <div class="fl-row">${subt.map(tile).join('')}</div>
+    </div>
+    <div class="fl-legend"><span><i class="lg st-fallas"></i> con fallas (el color indica la prioridad)</span><span><i class="lg st-ok"></i> todo OK</span><span><i class="lg st-parcial"></i> en revisión</span><span><i class="lg st-sin"></i> sin revisar</span></div>
+
+    <div class="section-label">Fallas activas en ${t}</div>
+    ${activas.length ? `<div class="floor-card">${shown.map(renderAlertaRow).join('')}</div>
+      ${activas.length>6 ? `<button class="btn btn-ghost btn-sm" style="width:100%" onclick="toggleVerTodasTorre()">${ui.verTodas ? 'Ver menos ▴' : `Ver las ${activas.length} fallas ▾`}</button>` : ''}`
+      : `<div class="empty-note">✅ Sin fallas activas en esta torre.<br>Si ves algo, toca un piso y elige <b>⚠ Falla</b>.</div>`}
+  `;
+}
+
+/* ---- Hoja de un piso ---- */
+function floorItemHtml(i){
+  const est = i.Estado || 'Sin revisar';
+  const color = ESTADO_COLORS[est] || '#5B6675';
+  const sinRev = est === 'Sin revisar' && !esUrgente(i);
+  const acts = sinRev ? `<div class="fl-acts">
+      <button class="fl-ok" onclick="event.stopPropagation(); quickOk('${i.Folio}')">✓ OK</button>
+      <button class="fl-bad" onclick="event.stopPropagation(); quickFalla('${i.Folio}')">⚠ Falla</button></div>` : `<div class="chev">›</div>`;
+  return `<div class="fl-item" onclick="openItemModal('${i.Folio}')" style="border-left-color:${color}">
+    <div class="fl-ico">${catIcon(i.Categoria)}</div>
+    <div class="fl-main">
+      <div class="fl-cat">${esUrgente(i)?'🚨 ':''}${i.Categoria} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
+      <div class="fl-sub"><span style="color:${color};font-weight:700">${est}</span>${i.Detalle ? ' · '+i.Detalle : ''}${i.Origen ? ' · '+i.Origen : ''}</div>
+    </div>${acts}</div>`;
+}
+function openFloorSheet(torre, piso){
+  STATE.floorSheet = { torre, piso };
+  const s = floorStats(torre, piso);
+  const items = s.items.slice().sort((a,b)=>(catOrder(a.Categoria)-catOrder(b.Categoria)) || a.Folio.localeCompare(b.Folio));
+  const hechos = s.total - s.sinRev;
+  const pct = s.total ? Math.round(hechos*100/s.total) : 0;
+  showModal(`
+    <h2>${torre} · ${piso<=-1?'Subterráneo ':'Piso '}${piso}</h2>
+    <div class="sub">${s.total ? `${hechos} de ${s.total} revisados` : 'Sin ítems en este piso'}${s.fallas ? ` · ${s.fallas} con falla` : ''}</div>
+    <div class="tw-bar" style="margin:6px 0 12px"><i style="width:${pct}%"></i></div>
+    ${items.length ? items.map(floorItemHtml).join('') : '<div class="empty-note">Este piso no tiene ítems todavía. Puedes agregar una falla abajo.</div>'}
+    ${s.sinRev ? `<button class="btn btn-primary" style="background:#2FA86B" onclick="markFloorOk('${torre}',${piso})">✓ Marcar los ${s.sinRev} sin revisar como OK</button>` : ''}
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="openAddReportModal('${torre}',${piso})">➕ Agregar otra falla en este piso</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="closeModal()">Cerrar</button>
+  `);
+}
+function refreshFloorSheet(){ if(STATE.floorSheet) openFloorSheet(STATE.floorSheet.torre, STATE.floorSheet.piso); }
+
+function applyOkLocal(item){
+  const ts = new Date().toISOString().slice(0,16).replace('T',' ');
+  item.Estado = 'OK'; item.Fecha_Ultima_Actualizacion = ts; item.Actualizado_Por = CURRENT_USER.nombre || item.Actualizado_Por;
+}
+function saveCacheLocal(){
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
+}
+function okPayload(folio){ return { action:'transition', folio, estado_nuevo:'OK', motivo:'', nota:'', ...userTag() }; }
+function quickOk(folio){
+  const item = STATE.items.find(x=>x.Folio===folio); if(!item) return;
+  applyOkLocal(item); saveCacheLocal();
+  const payload = okPayload(folio);
+  if(navigator.onLine){ apiPost(payload).then(res=>{ if(!res.success){ showToast('No se pudo guardar en el servidor'); queueAdd(payload); } }).catch(()=>queueAdd(payload)); }
+  else { queueAdd(payload); showToast('Sin conexión: guardado localmente'); }
+  refreshFloorSheet(); renderAll();
+}
+function quickFalla(folio){
+  const t = TRANSICIONES['Sin revisar'].find(x=>x.code==='REPORTAR');
+  showTransitionForm(folio, t.label, t.to, t.code, 0, 1, 0);
+}
+function markFloorOk(torre, piso){
+  const pend = STATE.items.filter(i=>i.Torre===torre && i.Piso===piso && (i.Estado||'Sin revisar')==='Sin revisar' && !esUrgente(i));
+  if(!pend.length) return;
+  if(!confirm(`¿Marcar como OK los ${pend.length} ítems sin revisar del ${piso<=-1?'subterráneo ':'piso '}${piso} de ${torre}?`)) return;
+  pend.forEach(applyOkLocal); saveCacheLocal();
+  const payloads = pend.map(i=>okPayload(i.Folio));
+  if(navigator.onLine){
+    payloads.reduce((p, pl)=> p.then(()=> apiPost(pl).then(r=>{ if(!r.success) queueAdd(pl); }).catch(()=>queueAdd(pl))), Promise.resolve())
+      .then(()=>showToast('Piso marcado OK ✓'));
+  } else { payloads.forEach(queueAdd); showToast('Sin conexión: se enviará al recuperar señal'); }
+  refreshFloorSheet(); renderAll();
+}
+
 /* ================= PANTALLA DE INICIO ================= */
 const ALERTAS = {
   urgentes:    { icon:'🚨', label:'Urgentes',         hint:'Requieren atención ya',          color:'#D6534A', test:i=>esUrgente(i) && !['Resuelto','OK','Descartado'].includes(i.Estado) },
@@ -1042,8 +1476,10 @@ function renderHome(){
   mods += modCard('🔧', 'Deptos y Comunes', metaN(deptosN), 'selectDeptos()');
   if(isAdmin){
     mods += modCard('📊', 'Panel', 'Mediciones y filtros', 'selectDashboard()');
+    const planAtr = planEntries().filter(e=>e.atraso).length;
+    mods += modCard('📅', 'Plan de trabajo', planAtr ? `<b>${planAtr}</b> atrasada${planAtr===1?'':'s'}` : 'Al día', 'selectPlan()');
     mods += modCard('🖨️', 'Informes', 'PDF y reportes', 'openInformesMenu()');
-    mods += modCard('📱', 'Modo rápido', 'Revisar · Agregar · Editar · Derivar', 'selectSimple()', 'wide');
+    mods += modCard('📱', 'Modo rápido', 'Revisar · Agregar · Editar', 'selectSimple()');
   }
 
   main.innerHTML = `
@@ -1098,6 +1534,7 @@ function openInformesMenu(){
     <div class="action-list">
       <button class="btn btn-primary" style="margin-top:0" onclick="closeModal(); openPdfActivasModal()">📄 Fallas activas (PDF)</button>
       <button class="btn btn-ghost" onclick="closeModal(); openReportModal()">📊 Reporte de gestión (PDF)</button>
+      <button class="btn btn-ghost" onclick="closeModal(); selectPlan()">📅 Plan de trabajo (PDF y Excel)</button>
       <button class="btn btn-ghost" onclick="closeModal(); selectDashboard()">📈 Panel con Excel y PDF por filtros</button>
       <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
     </div>

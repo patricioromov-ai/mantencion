@@ -186,6 +186,24 @@
   .wz-done{text-align:center; padding:8px 0 4px;}
   .wz-check{width:58px; height:58px; margin:0 auto; border-radius:50%; background:#2FA86B22; color:#2FA86B; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:800;}
   .wz-folio{font-family:ui-monospace,"SF Mono",monospace; font-size:1.3rem; font-weight:800; color:var(--accent);}
+
+  /* ===== Niveles y prioridad ===== */
+  .prio-chip{display:inline-block; font-size:.62rem; font-weight:700; padding:1px 7px; border-radius:99px; border:1px solid var(--pc); color:var(--pc); margin-left:4px; vertical-align:middle; white-space:nowrap;}
+  .prio-box{border:1px solid var(--pc); border-left-width:5px; border-radius:10px; padding:10px 12px; background:color-mix(in srgb, var(--pc) 10%, transparent); margin-bottom:8px;}
+  .prio-big{font-size:1.05rem; font-weight:800; color:var(--pc);}
+  .prio-sub{font-size:.72rem; color:var(--text-dim); margin-top:2px;}
+  .niv-row{margin:10px 0;}
+  .niv-k{font-size:.8rem; font-weight:700; margin-bottom:5px;}
+  .niv-k span{font-weight:400; color:var(--text-dim); font-size:.68rem; margin-left:4px;}
+  .seg{display:flex; gap:6px;}
+  .seg button{flex:1; padding:10px 4px; border-radius:9px; border:1px solid var(--line); background:var(--panel-alt); color:var(--text-dim); font-size:.8rem; font-weight:600; cursor:pointer;}
+  .seg button.on{border-color:var(--accent); color:var(--accent); background:#3a2c111a;}
+  .seg button.on.danger{border-color:#D6534A; color:#D6534A; background:#D6534A18;}
+  .seg-sug{font-size:.64rem; color:var(--text-dim); margin-top:3px; font-style:italic;}
+  .prio-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:10px;}
+  .prio-tile{border:1px solid var(--pc); border-radius:10px; padding:8px 4px; text-align:center; cursor:pointer; background:color-mix(in srgb, var(--pc) 8%, transparent);}
+  .prio-tile .n{font-size:1.3rem; font-weight:800; color:var(--pc); font-family:ui-monospace,"SF Mono",monospace; line-height:1.1;}
+  .prio-tile .l{font-size:.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
 </style>
 </head>
 <body>
@@ -639,7 +657,7 @@ function renderItemRow(i){
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${urgentPrefix}${i.Categoria} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${urgentPrefix}${i.Categoria} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
         ${staleBadge}${seguimientoTag}
       </div>
@@ -767,6 +785,10 @@ function renderDashMetrics(){
       <div class="tile"><div class="tile-num" style="color:var(--accent)">${promDias}</div><div class="tile-label">Días prom. resolución</div></div>
       <div class="tile"><div class="tile-num" style="color:#3B82C4">${conSeguimiento}</div><div class="tile-label">📌 Con seguimiento</div></div>
     </div>
+    <div class="section-label">Por prioridad (fallas activas)</div>
+    <div class="prio-strip">${Object.keys(PRIORIDADES).map(k=>`<div class="prio-tile" style="--pc:${PRIORIDADES[k].color}"><div class="n">${items.filter(i=>prioridadDe(i)===k).length}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('')}</div>
+    <div class="section-label">🔥 Lo más urgente</div>
+    <div class="floor-card">${(()=>{ const top = items.filter(i=>['critica','alta'].includes(prioridadDe(i))).sort(cmpPrioridad).slice(0,8); return top.length ? top.map(renderAlertaRow).join('') : '<div class="empty-note">Nada crítico ni de prioridad alta en este filtro. ✅</div>'; })()}</div>
     <div class="section-label">Por estado</div>
     ${byEstado.map(([k,v])=>barRow(k,v,maxE,ESTADO_COLORS[k])).join('') || '<div class="empty-note">Sin datos</div>'}
     <div class="section-label">Por torre</div>
@@ -837,6 +859,134 @@ function buildPdfDashboard(){
   });
 }
 
+/* ================= NIVELES: GRAVEDAD / IMPORTANCIA / URGENCIA → PRIORIDAD ================= */
+const NIV_OPTS = {
+  gravedad:    ['Leve','Moderada','Grave'],
+  importancia: ['Baja','Media','Alta'],
+  urgencia:    ['Programable','Pronto','Inmediata']
+};
+const NIV_LABEL = { gravedad:'Gravedad', importancia:'Importancia', urgencia:'Urgencia' };
+const NIV_HELP = {
+  gravedad:'Qué tan grave es el daño o el riesgo',
+  importancia:'A cuántos residentes afecta / qué tan sensible es la zona',
+  urgencia:'Qué tan rápido hay que actuar'
+};
+const PRIORIDADES = {
+  critica:{ label:'Crítica', ico:'🔴', color:'#D6534A', ord:0 },
+  alta:   { label:'Alta',    ico:'🟠', color:'#E8803D', ord:1 },
+  media:  { label:'Media',   ico:'🟡', color:'#D9B72E', ord:2 },
+  baja:   { label:'Baja',    ico:'🟢', color:'#2FA86B', ord:3 }
+};
+const PRIO_VENTANA = { critica:'Hoy', alta:'Esta semana', media:'Próximas 2 semanas', baja:'Programable' };
+
+function nivIdx(campo, valor){ const i = NIV_OPTS[campo].indexOf(valor); return i === -1 ? null : i; }
+
+// Sugerencia según tipo de falla y lugar. Devuelve {gravedad, importancia, urgencia}
+function sugerirNiveles(cat, origen, torre){
+  const c = String(cat||'').toLowerCase();
+  const o = String(origen||'').toLowerCase();
+  let g = 1, imp = 1, u = 0; // índices 0..2
+  if(/filtr|fuga|gotera/.test(c))            { g = 2; imp = 2; u = 1; }
+  else if(/el[eé]ctric|cortocirc|tablero/.test(c)) { g = 2; imp = 2; u = 1; }
+  else if(/ascens/.test(c))                  { g = 2; imp = 2; u = 1; }
+  else if(/emerg|cartel/.test(c))            { g = 1; imp = 2; u = 1; }
+  else if(/c[aá]mar|seguridad|citof|port[oó]n/.test(c)) { g = 1; imp = 2; u = 1; }
+  else if(/techo|cielo/.test(c))             { g = 1; imp = 1; u = 1; }
+  else if(/luz|luces|ilumin/.test(c))        { g = 0; imp = 1; u = 0; }
+  else if(/puert|manilla|cerradura|ventan|vidrio/.test(c)) { g = 1; imp = 1; u = 0; }
+  else if(/pintur|sucied|limpi|aseo|piso|suelo|baldos/.test(c)) { g = 0; imp = 0; u = 0; }
+  else { g = 1; imp = 1; u = 0; }
+  const zonaCritica = /pasillo|escalera|shaft/.test(o);
+  const zonaComun = zonaCritica || /ascensor|acceso|piscina|gimnasio|sal[oó]n|quincho|conserj|lavander|ba[ñn]o/.test(o) || torre === 'Común';
+  if(zonaComun) imp = Math.min(2, imp + 1);
+  if(zonaCritica && /luz|luces|ilumin|emerg|cartel/.test(c)){ g = Math.max(g, 1); u = Math.max(u, 1); }
+  return { gravedad: NIV_OPTS.gravedad[g], importancia: NIV_OPTS.importancia[imp], urgencia: NIV_OPTS.urgencia[u] };
+}
+
+// Niveles efectivos de un ítem: lo guardado, o la sugerencia. Urgente ≡ Inmediata.
+function nivelesDe(item){
+  const sug = sugerirNiveles(item.Categoria, item.Origen, item.Torre);
+  const guardadoUrg = NIV_OPTS.urgencia.includes(item.Urgencia) ? item.Urgencia : '';
+  return {
+    gravedad:    NIV_OPTS.gravedad.includes(item.Gravedad) ? item.Gravedad : sug.gravedad,
+    importancia: NIV_OPTS.importancia.includes(item.Importancia) ? item.Importancia : sug.importancia,
+    urgencia:    esUrgente(item) ? 'Inmediata' : (guardadoUrg && guardadoUrg !== 'Inmediata' ? guardadoUrg : sug.urgencia),
+    sugerido: {
+      gravedad: !NIV_OPTS.gravedad.includes(item.Gravedad),
+      importancia: !NIV_OPTS.importancia.includes(item.Importancia),
+      urgencia: !esUrgente(item) && !(guardadoUrg && guardadoUrg !== 'Inmediata')
+    }
+  };
+}
+function calcPrioridad(n){
+  const g = nivIdx('gravedad', n.gravedad) + 1;
+  const i = nivIdx('importancia', n.importancia) + 1;
+  const u = nivIdx('urgencia', n.urgencia) + 1;
+  const score = g + i + 2*u;
+  if(u === 3 && (g + i) >= 4) return 'critica';
+  if(u === 3) return 'alta';
+  if(score >= 11) return 'critica';
+  if(score >= 9) return 'alta';
+  if(score >= 6) return 'media';
+  return 'baja';
+}
+// Prioridad de un ítem; null si ya está cerrado (OK/Resuelto/Descartado) o sin revisar sin urgencia
+function prioridadDe(item){
+  const est = item.Estado || 'Sin revisar';
+  if(['OK','Resuelto','Descartado'].includes(est)) return null;
+  if(est === 'Sin revisar' && !esUrgente(item)) return null;
+  return calcPrioridad(nivelesDe(item));
+}
+function prioOrd(item){ const p = prioridadDe(item); return p ? PRIORIDADES[p].ord : 9; }
+function cmpPrioridad(a, b){
+  return (prioOrd(a) - prioOrd(b)) || (esUrgente(b) - esUrgente(a)) || recencyStr(b).localeCompare(recencyStr(a));
+}
+function prioChip(item){
+  const p = prioridadDe(item);
+  if(!p) return '';
+  const P = PRIORIDADES[p];
+  return ` <span class="prio-chip" style="--pc:${P.color}">${P.ico} ${P.label}</span>`;
+}
+
+function segHtml(campo, valor, onclickFn, sugerido){
+  return `<div class="seg">${NIV_OPTS[campo].map(v=>
+    `<button class="${v===valor?'on':''} ${(campo==='urgencia'&&v==='Inmediata'&&v===valor)?'danger':''}" onclick="${onclickFn(campo, v)}">${v}</button>`
+  ).join('')}</div>${sugerido ? '<div class="seg-sug">sugerido automáticamente — toca para confirmar o cambiar</div>' : ''}`;
+}
+
+function setNivel(folio, campo, valor){
+  const item = STATE.items.find(x=>x.Folio===folio);
+  if(!item) return;
+  const n = nivelesDe(item);
+  n[campo] = valor;
+  item.Gravedad = n.gravedad; item.Importancia = n.importancia;
+  item.Urgencia = n.urgencia;
+  item.Urgente = n.urgencia === 'Inmediata' ? 'Sí' : '';
+  item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
+  localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
+  const payload = { action:'updateFields', folio, gravedad:n.gravedad, importancia:n.importancia, urgencia:n.urgencia, soloNiveles:true, ...userTag() };
+  if(navigator.onLine){ apiPost(payload).then(res=>{ if(!res.success) showToast('No se pudo guardar en el servidor'); }).catch(()=>queueAdd(payload)); }
+  else { queueAdd(payload); showToast('Sin conexión: guardado localmente'); }
+  openItemModal(folio);
+  renderAll();
+}
+function nivelesBlockHtml(item){
+  const n = nivelesDe(item);
+  const p = prioridadDe(item) || calcPrioridad(n);
+  const P = PRIORIDADES[p];
+  const cerrado = ['OK','Resuelto','Descartado'].includes(item.Estado||'');
+  return `
+    <div class="section-label">Prioridad ${cerrado ? '<span style="text-transform:none;letter-spacing:0">(referencial: ya está cerrada)</span>' : ''}</div>
+    <div class="prio-box" style="--pc:${P.color}">
+      <div class="prio-big">${P.ico} ${P.label}</div>
+      <div class="prio-sub">${PRIO_VENTANA[p]} · calculada con los tres niveles</div>
+    </div>
+    ${['gravedad','importancia','urgencia'].map(c=>`
+      <div class="niv-row"><div class="niv-k">${NIV_LABEL[c]} <span>${NIV_HELP[c]}</span></div>${segHtml(c, n[c], (cc,v)=>`setNivel('${item.Folio}','${cc}','${v}')`, false)}</div>`).join('')}
+    ${(n.sugerido.gravedad||n.sugerido.importancia||n.sugerido.urgencia) ? '<div class="seg-sug">Niveles sugeridos automáticamente según tipo de falla y lugar. Toca uno para confirmarlo o cambiarlo.</div>' : ''}
+  `;
+}
+
 /* ================= PANTALLA DE INICIO ================= */
 const ALERTAS = {
   urgentes:    { icon:'🚨', label:'Urgentes',         hint:'Requieren atención ya',          color:'#D6534A', test:i=>esUrgente(i) && !['Resuelto','OK','Descartado'].includes(i.Estado) },
@@ -844,6 +994,9 @@ const ALERTAS = {
   nuevos:      { icon:'🆕', label:'Nuevos sin gestión', hint:'Reportados, falta confirmar',  color:'#3B82C4', test:i=>i.Estado==='Nuevo' },
   seguimiento: { icon:'📌', label:'En seguimiento',   hint:'Marcados para vigilar',          color:'#9B7FE0', test:i=>esSeguimiento(i) }
 };
+Object.keys(PRIORIDADES).forEach(k=>{
+  ALERTAS['prio_'+k] = { icon:PRIORIDADES[k].ico, label:'Prioridad '+PRIORIDADES[k].label, hint:'', color:PRIORIDADES[k].color, test:i=>prioridadDe(i)===k };
+});
 function ensureHomeState(){ if(!STATE.home){ STATE.home = { alerta:null }; } }
 function homeScopeItems(){
   const isAdmin = CURRENT_USER && CURRENT_USER.rol === 'Admin';
@@ -867,7 +1020,7 @@ function renderHome(){
   const activos = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
   const main = document.getElementById('mainList');
 
-  const alertCards = Object.keys(ALERTAS).map(k=>{
+  const alertCards = ['urgentes','estancados','nuevos','seguimiento'].map(k=>{
     const a = ALERTAS[k]; const n = items.filter(a.test).length;
     return `<div class="alert-card ${n===0?'zero':''}" style="--ac:${a.color}" onclick="selectAlerta('${k}')">
       <div><div class="a-num">${n}</div><div class="a-label">${a.icon} ${a.label}</div></div>
@@ -898,6 +1051,8 @@ function renderHome(){
     <div class="home-sub">${activos} falla${activos===1?'':'s'} activa${activos===1?'':'s'} en total</div>
     <div class="section-label">Requiere atención</div>
     <div class="alert-grid">${alertCards}</div>
+    <div class="section-label">Por prioridad</div>
+    <div class="prio-strip">${Object.keys(PRIORIDADES).map(k=>`<div class="prio-tile" style="--pc:${PRIORIDADES[k].color}" onclick="selectAlerta('prio_${k}')"><div class="n">${items.filter(i=>prioridadDe(i)===k).length}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('')}</div>
     <button class="btn btn-primary" style="margin-top:14px;padding:15px;font-size:1rem" onclick="openReportDeptoModal()">➕ Reportar una falla</button>
     <div class="section-label">Ir a</div>
     <div class="mod-grid">${mods}</div>
@@ -911,7 +1066,7 @@ function renderAlerta(){
   const main = document.getElementById('mainList');
   if(!a){ selectHome(); return; }
   const items = homeScopeItems().filter(a.test)
-    .sort((x,y)=>(esUrgente(y)-esUrgente(x)) || recencyStr(y).localeCompare(recencyStr(x)));
+    .sort((x,y)=>cmpPrioridad(x,y));
   main.innerHTML = `
     <div class="alert-head">
       <button class="back" onclick="selectHome()">← Inicio</button>
@@ -929,7 +1084,7 @@ function renderAlertaRow(i){
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${esUrgente(i)?'🚨 ':''}${i.Categoria||''} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${esUrgente(i)?'🚨 ':''}${i.Categoria||''} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
         <div class="item-detalle">${dondeTxt}${i.Detalle ? ' — '+i.Detalle : ''}</div>
         <span class="stale-badge" style="color:${color}">${est}</span>${staleBadge}${seg}
       </div>
@@ -988,7 +1143,7 @@ function renderSimple(){
     const q = s.search.toLowerCase();
     items = items.filter(i=>(i.Folio+' '+i.Categoria+' '+i.Detalle+' '+(i.Origen||'')).toLowerCase().includes(q));
   }
-  items = items.slice().sort((a,b)=>(esUrgente(b)-esUrgente(a)) || recencyStr(b).localeCompare(recencyStr(a)));
+  items = items.slice().sort(cmpPrioridad);
 
   main.innerHTML = `
     <button class="btn btn-ghost btn-sm" style="margin-bottom:10px" onclick="simpleGo('home')">← Volver</button>
@@ -1067,7 +1222,7 @@ function renderFugasList(){
     if(!grp || grp.length===0) return;
     html += `<div class="floor-card">
       <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort((a,b)=>(esUrgente(b)-esUrgente(a)) || recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderFugaRow(i); });
+    grp.slice().sort(cmpPrioridad).forEach(i=>{ html += renderFugaRow(i); });
     html += `</div>`;
   });
   wrap.innerHTML = html;
@@ -1089,7 +1244,7 @@ function renderFugaRow(i){
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${urgentPrefix}${ubic} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${urgentPrefix}${ubic} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
         ${staleBadge}${seguimientoTag}
       </div>
@@ -1116,7 +1271,7 @@ function openReportWizard(opts){
   W = {
     opts, step:0, ubic:'', torre:'', depto:'', piso:'', pisoTouched:false,
     zona:'', zonaOtra:false, zonaTxt:'', cat: opts.cat || '', catOtra:false, catTxt:'', catAll:false,
-    detalle:'', urgente:false, grupo:'', origenExtra:'',
+    detalle:'', niv:null, nivTouched:{}, grupo:'', origenExtra:'',
     fixedLoc: !!opts.torre, fixedCat: !!opts.cat, sending:false, done:null
   };
   if(opts.torre){ W.ubic = 'piso'; W.torre = opts.torre; W.piso = opts.piso; }
@@ -1143,7 +1298,6 @@ function wizSave(){
   if(g('wDetalle')) W.detalle = g('wDetalle').value;
   if(g('wGrupo')) W.grupo = g('wGrupo').value.trim();
   if(g('wOrigen')) W.origenExtra = g('wOrigen').value.trim();
-  if(g('wUrg')) W.urgente = g('wUrg').checked;
 }
 function wizPick(key, val){ wizSave(); W[key] = val; wizRender(); }
 function wizPickZona(i){ wizSave(); W.zona = wizZonas()[i]; W.zonaOtra = false; wizRender(); }
@@ -1337,15 +1491,29 @@ function wizStepDetalle(){
   const r = wizResolve();
   return `<div class="wz-q">Detalle <span style="font-weight:400;color:var(--text-dim);font-size:.8rem">(opcional si hay foto)</span></div>
     <div class="field" style="margin-top:0"><textarea id="wDetalle" placeholder="Ej: Gotea sobre la ducha, se moja el piso">${W.detalle.replace(/</g,'&lt;')}</textarea></div>
-    <label class="wz-urg"><input type="checkbox" id="wUrg" ${W.urgente?'checked':''}> 🚨 Marcar como urgente</label>
+    ${wizNivBlock()}
     ${W.ubic==='piso' ? `<div class="field"><label>Origen (depto / área, opcional)</label><input type="text" id="wOrigen" placeholder="Ej: Depto 1204" value="${esc(W.origenExtra)}"></div>` : ''}
     <div class="field"><label>Grupo (opcional)</label><input type="text" id="wGrupo" placeholder="Ej: Reclamo-Depto1204" value="${esc(W.grupo)}"></div>
     <div class="wz-summary">
       <div><b>Lugar:</b> ${wizUbicLabel()}</div>
       <div><b>Tipo:</b> ${catIcon(r.cat)} ${r.cat}</div>
       <div><b>Foto:</b> ${pendingPhoto.base64 ? 'sí ✓' : 'sin foto'}</div>
+      <div><b>Prioridad:</b> ${PRIORIDADES[calcPrioridad(W.niv)].ico} ${PRIORIDADES[calcPrioridad(W.niv)].label}</div>
     </div>`;
 }
+
+function wizNivBlock(){
+  const r = wizResolve();
+  const sug = sugerirNiveles(r.cat, r.origen, r.torre);
+  if(!W.niv) W.niv = { ...sug };
+  ['gravedad','importancia','urgencia'].forEach(k=>{ if(!W.nivTouched[k]) W.niv[k] = sug[k]; });
+  const P = PRIORIDADES[calcPrioridad(W.niv)];
+  return `<div class="wz-q2" style="margin-top:12px">Prioridad</div>
+    <div class="prio-box" style="--pc:${P.color}"><div class="prio-big">${P.ico} ${P.label}</div>
+      <div class="prio-sub">Sugerida según tipo de falla y lugar. Ajústala si hace falta.</div></div>
+    ${['gravedad','importancia','urgencia'].map(c=>`<div class="niv-row"><div class="niv-k">${NIV_LABEL[c]} <span>${NIV_HELP[c]}</span></div>${segHtml(c, W.niv[c], (cc,v)=>`wizNivel('${cc}','${v}')`, false)}</div>`).join('')}`;
+}
+function wizNivel(k, v){ wizSave(); W.niv[k] = v; W.nivTouched[k] = true; wizRender(); }
 
 function wizSubmit(){
   const r = wizResolve();
@@ -1364,6 +1532,7 @@ function wizSubmit(){
   }
 
   const det = W.detalle.trim();
+  const urg = W.niv.urgencia === 'Inmediata';
   const tempFolio = 'TEMP-' + Date.now();
   const ts = new Date().toISOString().slice(0,16).replace('T',' ');
   STATE.items.push({
@@ -1371,16 +1540,17 @@ function wizSubmit(){
     Estado:'Nuevo', Detalle: det, Area_Derivacion:'', Codigo_Ubicacion:'',
     Fecha_Deteccion: ts, Fecha_Ultima_Actualizacion: ts, Fecha_Resolucion:'',
     Foto_Deteccion_URL:'', Foto_Resolucion_URL:'',
-    Actualizado_Por: CURRENT_USER.nombre||'', Notas:'', Urgente: W.urgente ? 'Sí' : ''
+    Actualizado_Por: CURRENT_USER.nombre||'', Notas:'', Urgente: urg ? 'Sí' : '',
+    Gravedad: W.niv.gravedad, Importancia: W.niv.importancia, Urgencia: W.niv.urgencia
   });
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 
-  const payload = { action:'add', torre:r.torre, piso:r.piso, categoria:r.cat, detalle:det, origen:r.origen, grupo:W.grupo, urgente:W.urgente, ...userTag() };
+  const payload = { action:'add', torre:r.torre, piso:r.piso, categoria:r.cat, detalle:det, origen:r.origen, grupo:W.grupo, urgente:urg, gravedad:W.niv.gravedad, importancia:W.niv.importancia, urgencia:W.niv.urgencia, ...userTag() };
   if(pendingPhoto.base64){ payload.foto_base64 = pendingPhoto.base64; payload.foto_mime = pendingPhoto.mime; }
 
   const label = wizUbicLabel();
   const finish = (folio, queued)=>{
-    W.done = { folio, queued, label, cat:r.cat, urgente:W.urgente };
+    W.done = { folio, queued, label, cat:r.cat, urgente:urg, prio:calcPrioridad(W.niv) };
     wizRender(); renderAll();
   };
   if(navigator.onLine){
@@ -1399,6 +1569,7 @@ function wizRenderDone(){
       <h2 style="margin:6px 0 2px">${d.queued ? 'Guardada en este equipo' : 'Falla reportada'}</h2>
       ${d.folio ? `<div class="wz-folio">${d.folio}</div>` : ''}
       <div class="wz-hint" style="margin-top:6px">${d.urgente?'🚨 ':''}${d.cat} · ${d.label}</div>
+      <div style="margin-top:4px"><span class="prio-chip" style="--pc:${PRIORIDADES[d.prio].color}">${PRIORIDADES[d.prio].ico} Prioridad ${PRIORIDADES[d.prio].label}</span></div>
       ${d.queued ? '<div class="wz-hint">Sin señal o sin respuesta del servidor: se enviará sola al recuperar conexión.</div>' : '<div class="wz-hint">Quedó en estado <b>Nuevo</b>.</div>'}
     </div>
     <div class="action-list">
@@ -1411,7 +1582,7 @@ function wizRenderDone(){
 function wizAnother(){
   pendingPhoto = { base64:null, mime:null };
   W.done = null; W.sending = false;
-  W.detalle = ''; W.urgente = false; W.grupo = ''; W.origenExtra = '';
+  W.detalle = ''; W.niv = null; W.nivTouched = {}; W.grupo = ''; W.origenExtra = '';
   if(!W.fixedCat){ W.cat = ''; W.catOtra = false; W.catTxt = ''; }
   W.step = W.fixedLoc ? 0 : 1;
   wizRender();
@@ -1564,7 +1735,7 @@ function renderDeptosList(){
     if(!grp || grp.length===0) return;
     html += `<div class="floor-card">
       <div class="floor-head"><div class="floor-num" style="font-size:.92rem">${t}</div><div class="floor-count">${grp.length} ítem(s)</div></div>`;
-    grp.slice().sort((a,b)=>(esUrgente(b)-esUrgente(a)) || recencyStr(b).localeCompare(recencyStr(a))).forEach(i=>{ html += renderDeptoRow(i); });
+    grp.slice().sort(cmpPrioridad).forEach(i=>{ html += renderDeptoRow(i); });
     html += `</div>`;
   });
   wrap.innerHTML = html;
@@ -1579,7 +1750,7 @@ function renderDeptoRow(i){
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
-        <div class="item-cat">${urgentPrefix}${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span></div>
+        <div class="item-cat">${urgentPrefix}${i.Categoria} · ${i.Origen||'—'} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
         <div class="item-detalle">${i.Detalle ? i.Detalle : est}</div>
         ${staleBadge}${seguimientoTag}
       </div>
@@ -1733,6 +1904,8 @@ function itemDetailHtml(item){
     ${diasResTxt ? `<div class="kv"><div class="k">Resolución</div><div>${diasResTxt}</div></div>` : ''}
     <div class="kv"><div class="k">Última actualización</div><div>${item.Fecha_Ultima_Actualizacion || '—'} · ${item.Actualizado_Por||'—'}</div></div>
 
+    ${nivelesBlockHtml(item)}
+
     <div class="section-label">Notas y comentarios</div>
     ${notasHtml}
     <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:6px" onclick="openAddPhotoForm('${item.Folio}')">📷 Agregar foto</button>
@@ -1758,6 +1931,7 @@ function toggleUrgente(folio){
   if(!item) return;
   const nuevo = !esUrgente(item);
   item.Urgente = nuevo ? 'Sí' : '';
+  if(nuevo) item.Urgencia = 'Inmediata'; else if(item.Urgencia === 'Inmediata') item.Urgencia = '';
   item.Fecha_Ultima_Actualizacion = new Date().toISOString().slice(0,16).replace('T',' ');
   localStorage.setItem('mant_cache', JSON.stringify({checklist:STATE.items, bitacora:STATE.bitacora, categorias:STATE.categorias, derivaciones:STATE.derivaciones, motivos:STATE.motivos, ubicaciones:STATE.ubicaciones}));
 

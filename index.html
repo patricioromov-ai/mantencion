@@ -1105,6 +1105,8 @@ const UBIC_TIPOS = [
   {k:'acceso',  ico:'🚪', t:'Acceso torre'},
   {k:'comun',   ico:'🏊', t:'Área común'}
 ];
+const ZONAS_TORRE = ['Pasillo','Shaft','Escalera de emergencia']; // zonas que pertenecen a una torre (y piso)
+function esZonaTorre(z){ return ZONAS_TORRE.includes(z); }
 const CAT_ICONS = [[/filtr|fuga|gotera/i,'💧'],[/luz|luces|ilumin/i,'💡'],[/el[eé]ctric|enchuf/i,'⚡'],[/puert/i,'🚪'],[/pintur/i,'🎨'],[/sucied|limpi|aseo/i,'🧹'],[/manilla|cerradura/i,'🔧'],[/emerg|cartel/i,'🪧'],[/c[aá]mar/i,'📷'],[/ascens/i,'🛗'],[/piso|suelo|baldos/i,'🧱'],[/cielo|techo/i,'🏚️'],[/ventan|vidrio/i,'🪟'],[/timbre|citof/i,'🔔']];
 function catIcon(c){ for(const [re,ic] of CAT_ICONS){ if(re.test(c)) return ic; } return '🔧'; }
 
@@ -1180,10 +1182,14 @@ function wizCatsAll(){
 }
 function wizZonas(){
   const z = STATE.ubicaciones.filter(u=>u && !String(u).startsWith('Ascensor') && !String(u).startsWith('Acceso Principal'));
-  return z.length ? z : ['Salón de adultos','Salón de juegos','Salón de niños','Baños','Gimnasio','Lavandería','Piscina','Quincho','Conserjería'];
+  const base = z.length ? z : ['Salón de adultos','Salón de juegos','Salón de niños','Baños','Gimnasio','Lavandería','Piscina','Quincho','Conserjería'];
+  const norm = t => String(t).toLowerCase().replace(/s$/,'');
+  const resto = base.filter(u=>!ZONAS_TORRE.some(zt=>norm(zt)===norm(u) || norm(u).startsWith('escalera')));
+  return [...ZONAS_TORRE, ...resto];
 }
 function wizZonaIcon(z){
   const t = String(z).toLowerCase();
+  if(/pasillo/.test(t)) return '🚶'; if(/shaft/.test(t)) return '🕳️'; if(/escalera/.test(t)) return '🪜';
   if(/gimnas/.test(t)) return '🏋️'; if(/lavand/.test(t)) return '🧺'; if(/piscin/.test(t)) return '🏊';
   if(/quincho/.test(t)) return '🔥'; if(/conserj/.test(t)) return '🛎️'; if(/ba[ñn]o/.test(t)) return '🚻';
   if(/sal[oó]n|sala/.test(t)) return '🛋️'; if(/estacion/.test(t)) return '🅿️';
@@ -1196,6 +1202,7 @@ function wizResolve(){
   else if(W.ubic === 'depto'){ torre = W.torre; piso = parseInt(W.piso,10); origen = 'Depto ' + W.depto; }
   else if(W.ubic === 'ascensor'){ torre = W.torre; piso = 0; origen = 'Ascensor'; }
   else if(W.ubic === 'acceso'){ torre = W.torre; piso = 0; origen = 'Acceso Principal'; }
+  else if(!W.zonaOtra && esZonaTorre(W.zona)){ torre = W.torre; piso = parseInt(W.piso,10); if(isNaN(piso)) piso = 0; origen = W.zona; }
   else { torre = 'Común'; piso = 0; origen = W.zonaOtra ? W.zonaTxt : W.zona; }
   const cat = W.catOtra ? W.catTxt : W.cat;
   return { torre, piso, origen, cat };
@@ -1204,6 +1211,7 @@ function wizUbicLabel(){
   const r = wizResolve();
   if(W.ubic === 'piso') return `${r.torre} · Piso ${r.piso}` + (r.origen ? ' · '+r.origen : '');
   if(W.ubic === 'depto') return `${r.torre} · ${r.origen} (piso ${r.piso})`;
+  if(W.ubic === 'comun' && r.torre !== 'Común') return `${r.torre} · ${r.origen}` + (r.piso ? ` · piso ${r.piso}` : '');
   if(W.ubic === 'comun') return `Común · ${r.origen}`;
   return `${r.torre} · ${r.origen}`;
 }
@@ -1216,6 +1224,7 @@ function wizValidate(step){
       if(isNaN(parseInt(W.piso,10))) return 'Ingresa el piso';
     }
     if(W.ubic === 'comun' && !(W.zonaOtra ? W.zonaTxt : W.zona)) return 'Elige la zona';
+    if(W.ubic === 'comun' && !W.zonaOtra && esZonaTorre(W.zona) && !W.torre) return 'Elige la torre';
   }
   if(step === 'cat'){
     if(!(W.catOtra ? W.catTxt : W.cat)) return 'Elige el tipo de falla';
@@ -1292,7 +1301,8 @@ function wizStepUbic(){
     const zonas = wizZonas().map((z,zi)=>`<button class="wz-btn sm ${(!W.zonaOtra && W.zona===z)?'sel':''}" onclick="wizPickZona(${zi})"><span class="ico">${wizZonaIcon(z)}</span>${z}</button>`).join('');
     extra = `<div class="wz-q2">Zona</div><div class="wz-grid">${zonas}
       <button class="wz-btn sm ${W.zonaOtra?'sel':''}" onclick="wizToggle('zonaOtra')"><span class="ico">✏️</span>Otra…</button></div>
-      ${W.zonaOtra ? `<div class="field"><input type="text" id="wZonaTxt" placeholder="Nombre de la zona" value="${esc(W.zonaTxt)}"></div>` : ''}`;
+      ${W.zonaOtra ? `<div class="field"><input type="text" id="wZonaTxt" placeholder="Nombre de la zona" value="${esc(W.zonaTxt)}"></div>` : ''}
+      ${(!W.zonaOtra && esZonaTorre(W.zona)) ? torres + `<div class="field"><label>Piso (opcional)</label><input type="number" id="wPiso" placeholder="Ej: 12" value="${esc(W.piso)}" oninput="W.pisoTouched=true"></div>` : ''}`;
   }
   return `<div class="wz-q">¿Dónde está la falla?</div><div class="wz-grid">${tipos}</div>${extra}`;
 }
@@ -1483,7 +1493,8 @@ function deptoItems(){
     const esDepto = origen.startsWith('depto');
     const esAscensorOAcceso = origen==='ascensor' || origen==='acceso principal';
     const esComun = i.Torre === 'Común';
-    return esDepto || esAscensorOAcceso || esComun;
+    const esZonaDeTorre = ZONAS_TORRE.some(z=>origen===z.toLowerCase());
+    return esDepto || esAscensorOAcceso || esComun || esZonaDeTorre;
   });
 }
 function deptoFilteredItems(){

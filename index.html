@@ -4,10 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Checklist Mantención · Jardines de Vicuña Mackenna</title>
+<meta name="theme-color" content="#1F2A44">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#10161D; --panel:#1B2430; --panel-alt:#232F3E; --line:#2C3947;
-    --text:#E8EDF2; --text-dim:#8B98A8; --accent:#E8A33D; --accent-dim:#8a6423;
+    --ink:#1F2A44; --ink-soft:#4A5568; --paper:#EAEAE4; --paper-card:#F7F7F2; --ochre:#C98A2C;
+    --torre-a:#C1544B; --torre-b:#3F7D6B; --torre-c:#C98A2C; --torre-d:#5B4B8A;
+    --serif:'Fraunces',Georgia,'Times New Roman',serif; --mono:'IBM Plex Mono',ui-monospace,'SF Mono',monospace;
+    --bg:#EAEAE4; --panel:#F7F7F2; --panel-alt:#EDEDE6; --line:#D8D8D0;
+    --text:#1F2A44; --text-dim:#5F6B7A; --accent:#1F2A44; --accent-dim:#C5CAD6;
     --radius:10px; --safe-b: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box;}
@@ -38,11 +44,11 @@
   .btn{border:none; border-radius:9px; padding:12px 16px; font-size:.92rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px;}
   .btn-primary{background:var(--accent); color:#1a1206; width:100%; margin-top:14px;}
   .btn-ghost{background:transparent; color:var(--text-dim); border:1px solid var(--line);}
-  .btn-danger{background:#D6534A; color:#fff;}
+  .btn-danger{background:#C1544B; color:#fff;}
   .btn-sm{padding:9px 12px; font-size:.82rem; border-radius:7px;}
   .btn-row{display:flex; gap:8px; margin-top:12px;}
   .btn-row .btn{flex:1; margin-top:0;}
-  .err-msg{color:#D6534A; font-size:.82rem; margin-top:10px;}
+  .err-msg{color:#C1544B; font-size:.82rem; margin-top:10px;}
 
   header.app-header{position:sticky; top:0; z-index:20; background:linear-gradient(180deg,#141B24,#10161D); border-bottom:1px solid var(--line); padding:12px 14px 0;}
   .h-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
@@ -71,7 +77,7 @@
   .floor-dock{display:flex; gap:5px; overflow-x:auto; padding:9px 14px; background:var(--panel); border-bottom:1px solid var(--line); scrollbar-width:none;}
   .floor-dock::-webkit-scrollbar{display:none;}
   .floor-chip{flex:0 0 auto; width:34px; height:34px; border-radius:6px; background:#0D1218; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:700; color:var(--text-dim); cursor:pointer; position:relative; overflow:hidden;}
-  .floor-chip .led{position:absolute; bottom:2px; left:4px; right:4px; height:3px; border-radius:2px; background:#5B6675;}
+  .floor-chip .led{position:absolute; bottom:2px; left:4px; right:4px; height:3px; border-radius:2px; background:#8A8A80;}
 
   main{padding:12px 14px 24px;}
   .floor-card{background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-bottom:12px; overflow:hidden; scroll-margin-top:150px;}
@@ -86,7 +92,7 @@
   .item-main{flex:1; min-width:0;}
   .item-cat{font-size:.86rem; font-weight:600; display:flex; align-items:center; gap:6px;}
   .folio-tag{font-size:.63rem; color:var(--text-dim); font-family:ui-monospace,monospace; font-weight:400;}
-  .stale-badge{font-size:.68rem; color:#E8A33D; display:inline-block; margin-top:2px;}
+  .stale-badge{font-size:.68rem; color:#B7791F; display:inline-block; margin-top:2px;}
   .item-detalle{font-size:.76rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px;}
   .chev{color:var(--text-dim); font-size:.9rem;}
 
@@ -126,7 +132,7 @@
   .action-list .btn{width:100%; margin-top:0;}
 
   .banner{padding:9px 14px; font-size:.78rem; text-align:center;}
-  .banner.warn{background:#3A1E1C; color:#D6534A;}
+  .banner.warn{background:#3A1E1C; color:#C1544B;}
   .empty-note{color:var(--text-dim); font-size:.82rem; text-align:center; padding:30px 10px;}
   .section-label{font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); margin:16px 0 8px;}
 
@@ -145,7 +151,7 @@
   .home-greet{font-size:1.15rem; font-weight:800; margin:2px 0 2px;}
   .home-sub{font-size:.78rem; color:var(--text-dim); margin-bottom:6px;}
   .alert-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
-  .alert-card{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--ac,#5B6675); border-radius:12px; padding:13px 12px; cursor:pointer; min-height:92px; display:flex; flex-direction:column; justify-content:space-between;}
+  .alert-card{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--ac,#8A8A80); border-radius:12px; padding:13px 12px; cursor:pointer; min-height:92px; display:flex; flex-direction:column; justify-content:space-between;}
   .alert-card:active, .mod-card:active{transform:scale(.98);}
   .alert-card .a-num{font-size:1.9rem; font-weight:800; font-family:ui-monospace,"SF Mono",monospace; line-height:1; color:var(--ac,#E8EDF2);}
   .alert-card.zero .a-num{color:var(--text-dim);}
@@ -182,10 +188,10 @@
   .wz-two{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
   .wz-link{background:none; border:none; color:var(--accent); font-size:.82rem; margin-top:10px; padding:6px 0; cursor:pointer;}
   .wz-urg{display:flex; align-items:center; gap:10px; margin:12px 0 2px; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--panel-alt); font-size:.9rem; font-weight:600; cursor:pointer;}
-  .wz-urg input{width:20px; height:20px; accent-color:#D6534A;}
+  .wz-urg input{width:20px; height:20px; accent-color:#C1544B;}
   .wz-summary{margin-top:14px; padding:10px 12px; border-radius:10px; background:var(--panel-alt); border:1px dashed var(--line); font-size:.8rem; line-height:1.6;}
   .wz-done{text-align:center; padding:8px 0 4px;}
-  .wz-check{width:58px; height:58px; margin:0 auto; border-radius:50%; background:#2FA86B22; color:#2FA86B; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:800;}
+  .wz-check{width:58px; height:58px; margin:0 auto; border-radius:50%; background:#3F7D6B22; color:#3F7D6B; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:800;}
   .wz-folio{font-family:ui-monospace,"SF Mono",monospace; font-size:1.3rem; font-weight:800; color:var(--accent);}
 
   /* ===== Niveles y prioridad ===== */
@@ -199,7 +205,7 @@
   .seg{display:flex; gap:6px;}
   .seg button{flex:1; padding:10px 4px; border-radius:9px; border:1px solid var(--line); background:var(--panel-alt); color:var(--text-dim); font-size:.8rem; font-weight:600; cursor:pointer;}
   .seg button.on{border-color:var(--accent); color:var(--accent); background:#3a2c111a;}
-  .seg button.on.danger{border-color:#D6534A; color:#D6534A; background:#D6534A18;}
+  .seg button.on.danger{border-color:#C1544B; color:#C1544B; background:#C1544B18;}
   .seg-sug{font-size:.64rem; color:var(--text-dim); margin-top:3px; font-style:italic;}
   .prio-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:10px;}
   .prio-tile{border:1px solid var(--pc); border-radius:10px; padding:8px 4px; text-align:center; cursor:pointer; background:color-mix(in srgb, var(--pc) 8%, transparent);}
@@ -227,7 +233,7 @@
   .tw-pct b{font-size:1.6rem; font-family:ui-monospace,"SF Mono",monospace; color:var(--accent); display:block; line-height:1;}
   .tw-pct span{font-size:.66rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;}
   .tw-bar{height:8px; border-radius:6px; background:#0D1218; overflow:hidden; margin-top:10px;}
-  .tw-bar i{display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,#2FA86B,#7ed3a3);}
+  .tw-bar i{display:block; height:100%; border-radius:6px; background:linear-gradient(90deg,#3F7D6B,#7ed3a3);}
   .fl-map{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:10px;}
   .fl-row{display:grid; grid-template-columns:repeat(6,1fr); gap:7px; margin-bottom:7px;}
   .fl-sub-title{font-size:.66rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em; margin:6px 2px 6px;}
@@ -238,9 +244,9 @@
   .fl-tile.st-sin, .lg.st-sin{background:#2a3442; border-color:#3a4658; color:var(--text-dim);}
   .fl-tile.st-vacio{background:transparent; border-style:dashed; color:var(--text-dim); opacity:.5;}
   .fl-tile.st-parcial, .lg.st-parcial{background:#3a3a24; border-color:#6b6a35; color:#e6dc8f;}
-  .fl-tile.st-ok, .lg.st-ok{background:#16402b; border-color:#2FA86B; color:#7ed3a3;}
-  .fl-tile.st-fallas, .lg.st-fallas{background:color-mix(in srgb, var(--pc,#D6534A) 28%, #1B2430); border-color:var(--pc,#D6534A); color:#fff;}
-  .fl-badge{position:absolute; top:-6px; right:-6px; min-width:19px; height:19px; padding:0 5px; border-radius:99px; background:var(--pc,#D6534A); color:#fff; font-size:.7rem; font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.4);}
+  .fl-tile.st-ok, .lg.st-ok{background:#16402b; border-color:#3F7D6B; color:#7ed3a3;}
+  .fl-tile.st-fallas, .lg.st-fallas{background:color-mix(in srgb, var(--pc,#C1544B) 28%, #1B2430); border-color:var(--pc,#C1544B); color:#fff;}
+  .fl-badge{position:absolute; top:-6px; right:-6px; min-width:19px; height:19px; padding:0 5px; border-radius:99px; background:var(--pc,#C1544B); color:#fff; font-size:.7rem; font-weight:800; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.4);}
   .fl-check{position:absolute; bottom:2px; right:5px; font-size:.62rem; color:#7ed3a3;}
   .fl-legend{display:flex; gap:12px; flex-wrap:wrap; font-size:.68rem; color:var(--text-dim); margin:8px 2px 0;}
   .fl-legend .lg{display:inline-block; width:11px; height:11px; border-radius:3px; border:1px solid; vertical-align:-1px; margin-right:4px;}
@@ -251,8 +257,8 @@
   .fl-sub{font-size:.72rem; color:var(--text-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .fl-acts{display:flex; gap:6px; flex:0 0 auto;}
   .fl-acts button{border-radius:9px; padding:9px 10px; font-size:.78rem; font-weight:700; cursor:pointer; border:1px solid;}
-  .fl-ok{background:#2FA86B; border-color:#2FA86B; color:#06210f;}
-  .fl-bad{background:transparent; border-color:#D6534A; color:#D6534A;}
+  .fl-ok{background:#3F7D6B; border-color:#3F7D6B; color:#06210f;}
+  .fl-bad{background:transparent; border-color:#C1544B; color:#C1544B;}
 
   /* ===== Semáforo ===== */
   .sem-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
@@ -293,9 +299,9 @@
   .fx-search input:focus{border-color:var(--accent);}
   .fx-gh{display:flex; align-items:center; justify-content:space-between; margin:16px 2px 8px; font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim);}
   .fx-gh i{font-style:normal; background:var(--panel-alt); color:var(--text); border-radius:99px; padding:1px 9px; font-size:.7rem;}
-  .fx-card{display:flex; gap:11px; background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--pc,#5B6675); border-radius:13px; padding:10px; margin-bottom:9px; cursor:pointer;}
+  .fx-card{display:flex; gap:11px; background:var(--panel); border:1px solid var(--line); border-left:5px solid var(--pc,#8A8A80); border-radius:13px; padding:10px; margin-bottom:9px; cursor:pointer;}
   .fx-card:active{transform:scale(.99);}
-  .fx-card.urg{background:linear-gradient(90deg,#D6534A1c,var(--panel) 60%);}
+  .fx-card.urg{background:linear-gradient(90deg,#C1544B1c,var(--panel) 60%);}
   .fx-card.done{opacity:.72;}
   .fx-thumb{position:relative; width:62px; height:62px; flex:0 0 auto; border-radius:10px; overflow:hidden; background:var(--panel-alt); border:1px solid var(--line); display:flex; align-items:center; justify-content:center;}
   .fx-thumb span{font-size:1.7rem;}
@@ -310,9 +316,9 @@
   .fx-l3{display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; align-items:center;}
   .fx-est{font-size:.66rem; font-weight:800; color:var(--ec); border:1px solid var(--ec); border-radius:99px; padding:1px 8px;}
   .fx-flag{font-size:.66rem; color:var(--text-dim);}
-  .fx-flag.warn{color:#E8A33D;}
-  .fx-flag.late{color:#E8803D; font-weight:700;}
-  .fx-flag.seg{color:#3B82C4;}
+  .fx-flag.warn{color:#B7791F;}
+  .fx-flag.late{color:#CF6A1F; font-weight:700;}
+  .fx-flag.seg{color:#2F6FA8;}
   .fx-days{text-align:center; flex:0 0 auto; align-self:center; min-width:34px;}
   .fx-days b{display:block; font-size:1.15rem; font-family:ui-monospace,"SF Mono",monospace;}
   .fx-days span{font-size:.56rem; color:var(--text-dim); text-transform:uppercase;}
@@ -363,6 +369,173 @@
   .gd-t{font-size:1.1rem; font-weight:800; text-align:center;}
   .gd-x{font-size:.88rem; color:var(--text-dim); line-height:1.6; margin-top:10px; text-align:center;}
   .gd-x b{color:var(--text);}
+  /* =====================================================================
+     TEMA JDVM · papel + tinta (mismo lenguaje visual que el Panel de Comunicados)
+     ===================================================================== */
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--paper); color:var(--ink); font-size:15px; line-height:1.45;}
+  .mono,.folio-tag{font-family:var(--mono);}
+  .tile-num,.a-num,.prio-tile .n,.fx-tile b,.inf-kpis b,.sem-meta b,.tw-pct b,.fx-days b,.inf-n b,.wz-folio,.dh-num,.dh-stats b,.stat-card .num,.fl-num{font-family:var(--serif); font-weight:600;}
+  .home-greet,.fx-h1,.tw-name,.gd-t,.wz-q,.modal h2,.alert-head .a-title,.plan-win-head,.m-title,.card-setup h1,.dg h3,.it-n,.h-title{font-family:var(--serif); font-weight:600; letter-spacing:-.01em;}
+
+  /* cabecera */
+  header.app-header{background:var(--ink); border-bottom:none; box-shadow:0 2px 12px rgba(31,42,68,.22); padding:12px 14px 0;}
+  .h-title{font-size:1.15rem; color:#fff;}
+  .h-sub{color:#AEB5C4;}
+  .icon-btn{background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:#fff;}
+  .icon-btn:active{background:rgba(255,255,255,.2);}
+  .summary-row .pill{border-color:rgba(255,255,255,.22); color:#C7CBD6; background:transparent;}
+  .summary-row .pill b{color:#fff;}
+  .summary-row .pill.p-act b{color:#F2A29A;} .summary-row .pill.p-ok b{color:#9ED3BF;} .summary-row .pill.p-res b{color:#9CC4EA;}
+  .tabs{gap:2px; margin-top:8px;}
+  .tab{min-width:0; padding:10px 13px; border:none; border-bottom:3px solid transparent; border-radius:0; background:transparent; color:#B8BDC9; font-weight:600; font-size:.86rem;}
+  .tab:active{background:rgba(255,255,255,.06);}
+  .tab.active{background:rgba(255,255,255,.07); color:#fff; border-bottom-color:var(--tc,var(--ochre));}
+  .td{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:var(--tc,#8A8A80); vertical-align:1px;}
+  .td.t-a{background:var(--torre-a);} .td.t-b{background:var(--torre-b);} .td.t-c{background:var(--torre-c);} .td.t-d{background:var(--torre-d);} .td.t-x{background:var(--ink);}
+
+  /* superficies */
+  .floor-card,.dash-card,.tile,.alert-card,.mod-card,.sem-card,.inf-type,.fx-card,.fx-tile,.fl-map,.stat-card,.card-setup{box-shadow:0 1px 2px rgba(31,42,68,.06);}
+  .field input,.field textarea,.field select,.fx-sel,.fx-search input,.toolbar input[type=text]{background:#fff; color:var(--ink); border-color:var(--line);}
+  .field input:focus,.field textarea:focus,.field select:focus,.fx-search input:focus{border-color:var(--ink); box-shadow:0 0 0 3px rgba(201,138,44,.28);}
+  button:focus-visible,.tab:focus-visible{outline:2px solid var(--ochre); outline-offset:2px;}
+  .btn-primary{background:var(--ink); color:#fff;}
+  .btn-primary:active{background:#151d33;}
+  .btn-ghost{background:#fff; color:var(--ink-soft); border:1px solid var(--line);}
+  .btn-danger{background:var(--torre-a); color:#fff;}
+  .fab{background:var(--ink); color:#fff; box-shadow:0 6px 16px rgba(31,42,68,.35);}
+  .chip{background:#fff;}
+  .chip.selected{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .seg button{background:#fff;}
+  .seg button.on{background:var(--ink); border-color:var(--ink); color:#fff;}
+  .seg button.on.danger{background:var(--torre-a); border-color:var(--torre-a); color:#fff;}
+  .wz-btn{background:#fff;}
+  .wz-btn.sel{background:#E7E9F0; border-color:var(--ink); color:var(--ink);}
+  .wz-link{color:#8A5D12;}
+  .wz-check{background:#E4EEE9;}
+  .wz-urg{background:#fff;}
+  .wz-summary{background:#fff;}
+  .modal-bg{background:rgba(31,42,68,.5);}
+  .modal{background:#FBFBF8; box-shadow:0 -8px 30px rgba(31,42,68,.2);}
+  .toast{background:var(--ink); color:#fff; border:none; box-shadow:0 6px 18px rgba(31,42,68,.3);}
+  .banner.warn{background:#F7E4E4; color:#9E3F37;}
+  .item-row:active{background:var(--panel-alt);}
+  .stale-badge{color:#8A5D12;}
+  .switch.on{background:var(--accent-dim);}
+  .card-setup{background:#FBFBF8; border-radius:14px;}
+  .card-setup h1{font-size:1.35rem;}
+
+  /* prioridad */
+  .prio-chip{background:color-mix(in srgb, var(--pc) 11%, #fff); border-color:color-mix(in srgb, var(--pc) 55%, transparent); color:color-mix(in srgb, var(--pc) 68%, #1F2A44);}
+  .prio-box{background:color-mix(in srgb, var(--pc) 9%, #fff);}
+  .prio-big{color:color-mix(in srgb, var(--pc) 72%, #1F2A44);}
+  .prio-tile{background:color-mix(in srgb, var(--pc) 8%, #fff);}
+  .prio-tile .l{color:var(--ink-soft);}
+
+  /* alertas y módulos del inicio */
+  .alert-card{background:var(--panel); border-left-width:5px;}
+  .alert-card .a-num{color:var(--ac,var(--ink));}
+  .mod-card{background:var(--panel);}
+  .mod-card .m-meta b{color:var(--ink);}
+  .mod-card.t-a{border-top:4px solid var(--torre-a);} .mod-card.t-b{border-top:4px solid var(--torre-b);}
+  .mod-card.t-c{border-top:4px solid var(--torre-c);} .mod-card.t-d{border-top:4px solid var(--torre-d);}
+  .alert-head .back{background:#fff;}
+
+  /* torres */
+  .tw-hero{background:linear-gradient(135deg,#1F2A44 0%,#2D3C60 100%); color:#fff; border:none; border-left:6px solid var(--tc,var(--ochre)); box-shadow:0 8px 22px rgba(31,42,68,.22);}
+  .tw-sub{color:#C7CBD6;} .tw-pct b{color:#fff;} .tw-pct span{color:#AEB5C4;}
+  .tw-bar{background:rgba(255,255,255,.16);} .tw-bar i{background:linear-gradient(90deg,#6FBFA3,#B5E5D2);}
+  .tw-light{background:rgba(255,255,255,.07); color:#fff; border-color:var(--sc); font-weight:600;}
+  .fl-map{background:var(--panel);}
+  .fl-tile{background:#E2E2DA; border-color:#CFCFC5;}
+  .fl-tile.st-sin,.lg.st-sin{background:#E2E2DA; border-color:#CFCFC5; color:var(--ink-soft);}
+  .fl-tile.st-vacio{background:transparent; color:var(--text-dim);}
+  .fl-tile.st-parcial,.lg.st-parcial{background:#F2E8DA; border-color:var(--ochre); color:#7A5410;}
+  .fl-tile.st-ok,.lg.st-ok{background:#DCEBE4; border-color:var(--torre-b); color:#2A5E4D;}
+  .fl-tile.st-fallas,.lg.st-fallas{background:color-mix(in srgb, var(--pc,#C1544B) 24%, #fff); border-color:var(--pc,#C1544B); color:var(--ink);}
+  .fl-check{color:#2A5E4D;}
+  .fl-badge{box-shadow:0 2px 5px rgba(31,42,68,.3);}
+  .fl-ok{background:var(--torre-b); border-color:var(--torre-b); color:#fff;}
+  .fl-bad{background:#fff; border-color:var(--torre-a); color:var(--torre-a);}
+  .fl-item{background:#fff;}
+
+  /* semáforo */
+  .sem-card{background:linear-gradient(135deg,color-mix(in srgb,var(--sc) 11%,#fff),var(--panel));}
+  .sem-state{color:color-mix(in srgb,var(--sc) 70%,#1F2A44);}
+  .tw-hero .tw-light{color:#fff;}
+  .dash-hero .tw-light{color:#fff;}
+
+  /* tarjetas de fallas */
+  .fx-tile{background:var(--panel);}
+  .fx-tile.on{background:color-mix(in srgb, var(--tc) 10%, #fff);}
+  .fx-pill{background:#fff;}
+  .fx-pill.on{background:var(--ink); border-color:var(--ink); color:#fff;}
+  .fx-pill.on i{background:rgba(255,255,255,.22); color:#fff;}
+  .fx-gh span{display:inline-flex; align-items:center;}
+  .fx-gh b{font-weight:600; background:var(--panel-alt); border:1px solid var(--line); color:var(--ink); border-radius:99px; padding:1px 9px; font-size:.7rem;}
+  .fx-card{background:var(--panel);}
+  .fx-card.urg{background:linear-gradient(90deg,color-mix(in srgb,var(--torre-a) 10%,#fff),var(--panel) 62%);}
+  .fx-thumb{background:#E2E2DA;}
+  .fx-torre{border:none; color:#fff; background:var(--ink);}
+  .fx-torre.t-a{background:var(--torre-a);} .fx-torre.t-b{background:var(--torre-b);} .fx-torre.t-c{background:var(--torre-c);} .fx-torre.t-d{background:var(--torre-d);}
+  .fx-sub{color:#8A5D12;}
+  .fx-est{background:color-mix(in srgb, var(--ec) 10%, #fff); color:color-mix(in srgb, var(--ec) 78%, #1F2A44);}
+  .fx-flag.warn{color:#8A5D12;} .fx-flag.late{color:#B4551A;}
+  .fx-addbar{background:linear-gradient(180deg,rgba(234,234,228,0),var(--paper) 42%);}
+  .fx-addbar .btn{box-shadow:0 6px 18px rgba(31,42,68,.3);}
+  .fx-addbar .btn-primary{background:var(--ink); color:#fff;}
+
+  /* panel */
+  .dash-hero{background:linear-gradient(135deg,#1F2A44 0%,#2D3C60 100%); color:#fff; border-radius:16px; padding:16px 16px 14px; margin-bottom:12px; box-shadow:0 8px 22px rgba(31,42,68,.2);}
+  .dh-top{display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap;}
+  .dh-num{font-size:3.1rem; line-height:1; color:#fff;}
+  .dh-lbl{font-size:.8rem; color:#C7CBD6; margin-top:3px;}
+  .dh-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px;}
+  .dh-stats div{background:rgba(255,255,255,.09); border-radius:10px; padding:9px 4px; text-align:center;}
+  .dh-stats b{display:block; font-size:1.35rem; color:#fff;}
+  .dh-stats span{font-size:.62rem; color:#C7CBD6; text-transform:uppercase; letter-spacing:.04em;}
+  .grid-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:6px;}
+  .stat-card{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 10px; text-align:center;}
+  .stat-card .num{font-size:1.55rem; line-height:1.1;}
+  .stat-card .lbl{font-size:.64rem; color:var(--text-dim); margin-top:3px; line-height:1.25;}
+  .dash-grid{display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:12px;}
+  .dg{margin-bottom:0;}
+  .dg h3{font-size:1.02rem; margin:0 0 2px; color:var(--ink);}
+  .dg-hint{font-size:.68rem; color:var(--text-dim); margin-bottom:8px;}
+  .dg-list .item-row{padding-left:2px; padding-right:2px;}
+  .dash-card.dg .floor-card{box-shadow:none; border:none; background:transparent;}
+  .bar-track{background:#E2E2DA;}
+  .bar-row.drill:active{background:var(--panel-alt);}
+  .dash-more{margin-top:6px; font-size:.78rem; color:var(--text-dim);}
+  .tile{background:var(--panel);}
+
+  /* informes */
+  .inf-type{background:var(--panel);}
+  .inf-type.on{border-color:var(--ink); background:#E7E9F0; box-shadow:0 0 0 1px var(--ink);}
+  .inf-kpis div{background:var(--panel-alt);}
+  .inf-n b{color:var(--ink);}
+
+  /* ===== pantallas anchas (computador / tablet) ===== */
+  @media (min-width:760px){
+    header.app-header{padding-left:max(14px, calc((100vw - 1000px)/2)); padding-right:max(14px, calc((100vw - 1000px)/2));}
+    main{max-width:1000px; margin:0 auto; padding:22px 20px 40px;}
+    #offlineBanner{max-width:1000px; margin:0 auto;}
+    .dash-grid{grid-template-columns:1fr 1fr; align-items:start;}
+    .alert-grid{grid-template-columns:repeat(4,1fr);}
+    .mod-grid{grid-template-columns:repeat(4,1fr);}
+    .sem-grid{grid-template-columns:repeat(5,1fr);}
+    .sem-card.wide{grid-column:auto;}
+    .sem-card{flex-direction:column; align-items:flex-start; text-align:left;}
+    .sem-meta{align-self:stretch; display:flex; align-items:baseline; gap:6px; text-align:left;}
+    .sem-meta span br{display:none;} .sem-meta span::before{content:' ';white-space:pre;}
+    .inf-types{grid-template-columns:repeat(4,1fr);}
+    .fx-card{padding:12px 14px;}
+    .fx-tiles{grid-template-columns:repeat(4,1fr);}
+    .fx-addbar .btn{max-width:420px; margin:0 auto; display:flex;}
+    .modal-bg{align-items:center;}
+    .modal{border-radius:14px; max-height:86vh;}
+    .grid-stats{grid-template-columns:repeat(3,1fr);}
+    .dh-num{font-size:3.6rem;}
+  }
 </style>
 </head>
 <body>
@@ -409,6 +582,8 @@
 const CATS_FIJAS = ['LUCES','MANILLAS','PUERTAS','CARTEL S. EMERGENCIA'];
 const TORRES = ['Torre A','Torre B','Torre C','Torre D'];
 const TORRES_ALL = [...TORRES, 'Común'];
+const TORRE_COLOR = { 'Torre A':'#C1544B', 'Torre B':'#3F7D6B', 'Torre C':'#C98A2C', 'Torre D':'#5B4B8A', 'Común':'#1F2A44' };
+function torreCls(t){ return ({ 'Torre A':'t-a', 'Torre B':'t-b', 'Torre C':'t-c', 'Torre D':'t-d' })[t] || 't-x'; }
 const CATEGORIA_FUGA = 'FILTRACIONES';
 const CATEGORIA_FUGA_LEGACY = 'FUGAS/FILTRACIONES'; // compatibilidad con reportes ya creados antes del cambio de nombre
 const CATEGORIAS_NUEVAS = ['FILTRACIÓN ESTACIONAMIENTO','FILTRACIÓN VERTICAL SUBTERRÁNEO','FILTRACIÓN HORIZONTAL SUBTERRÁNEO',
@@ -420,8 +595,8 @@ const ACTIVE_STATES = ['Nuevo','Pendiente','Derivado','En proceso'];
 const COMUNIDAD = 'Jardines de Vicuña Mackenna';
 
 const ESTADO_COLORS = {
-  'Sin revisar':'#5B6675', 'Nuevo':'#2FB6A3', 'Pendiente':'#D6534A', 'Derivado':'#9B7FE0',
-  'En proceso':'#E8A33D', 'Resuelto':'#3B82C4', 'OK':'#2FA86B', 'Descartado':'#8A7A68'
+  'Sin revisar':'#8A8A80', 'Nuevo':'#2B8A9E', 'Pendiente':'#C1544B', 'Derivado':'#5B4B8A',
+  'En proceso':'#B7791F', 'Resuelto':'#2F6FA8', 'OK':'#3F7D6B', 'Descartado':'#8A7A68'
 };
 
 const TRANSICIONES = {
@@ -678,7 +853,7 @@ function renderTabs(){
     return;
   }
   const torreTabs = TORRES.map(t=>
-    `<div class="tab ${STATE.view==='checklist' && t===STATE.currentTorre?'active':''}" onclick="selectTorre('${t}')">${t.replace('Torre ','T. ')}</div>`
+    `<div class="tab ${STATE.view==='checklist' && t===STATE.currentTorre?'active':''}" style="--tc:${TORRE_COLOR[t]}" onclick="selectTorre('${t}')"><i class="td"></i>${t.replace('Torre ','T. ')}</div>`
   ).join('');
   const dashTab = `<div class="tab ${STATE.view==='dashboard'?'active':''}" onclick="selectDashboard()">📊 Panel</div>`;
   const planTab = `<div class="tab ${STATE.view==='plan'?'active':''}" onclick="selectPlan()">📅 Plan</div>`;
@@ -699,10 +874,10 @@ function renderSummary(){
   const activos = items.filter(i=>ACTIVE_STATES.includes(i.Estado)).length;
   const count = est => items.filter(i=>i.Estado===est).length;
   document.getElementById('summaryRow').innerHTML = `
-    <div class="pill" style="border-color:#D6534A;color:#D6534A">Activos <b>${activos}</b></div>
-    <div class="pill" style="border-color:#2FA86B;color:#2FA86B">OK <b>${count('OK')}</b></div>
-    <div class="pill" style="border-color:#3B82C4;color:#3B82C4">Resueltos <b>${count('Resuelto')}</b></div>
-    <div class="pill" style="border-color:#8A7A68;color:#8A7A68">Descartados <b>${count('Descartado')}</b></div>
+    <div class="pill p-act">Activos <b>${activos}</b></div>
+    <div class="pill p-ok">OK <b>${count('OK')}</b></div>
+    <div class="pill p-res">Resueltos <b>${count('Resuelto')}</b></div>
+    <div class="pill">Descartados <b>${count('Descartado')}</b></div>
     <div class="pill">Sin revisar <b>${count('Sin revisar')}</b></div>
   `;
 }
@@ -735,11 +910,11 @@ function renderAll(){
 
 function renderItemRow(i){
   const est = i.Estado || 'Sin revisar';
-  const color = ESTADO_COLORS[est] || '#5B6675';
+  const color = ESTADO_COLORS[est] || '#8A8A80';
   const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ Sin movimiento ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d</span>` : '';
   const urgentPrefix = esUrgente(i) ? '🚨 ' : '';
-  const seguimientoTag = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#3B82C4">📌 Seguimiento</span>' : '';
-  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
+  const seguimientoTag = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#2F6FA8">📌 Seguimiento</span>' : '';
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#C1544B14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
         <div class="item-cat">${urgentPrefix}${i.Categoria} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
@@ -837,16 +1012,14 @@ function dashTrendHtml(items){
   days.forEach((x,k)=>{
     const cx = k*slot + slot/2;
     const h1 = Math.round(x.rep/max*54), h2 = Math.round(x.res/max*54);
-    if(h1) bars += `<rect x="${(cx-bw-1).toFixed(1)}" y="${60-h1}" width="${bw}" height="${h1}" rx="2" fill="#E8A33D"/>`;
-    if(h2) bars += `<rect x="${(cx+1).toFixed(1)}" y="${60-h2}" width="${bw}" height="${h2}" rx="2" fill="#2FA86B"/>`;
-    if(k===0 || k===13 || k===7) bars += `<text x="${cx.toFixed(1)}" y="72" text-anchor="middle" font-size="8" fill="#8B98A8">${fmtDM(x.d)}</text>`;
+    if(h1) bars += `<rect x="${(cx-bw-1).toFixed(1)}" y="${60-h1}" width="${bw}" height="${h1}" rx="2" fill="#C98A2C"/>`;
+    if(h2) bars += `<rect x="${(cx+1).toFixed(1)}" y="${60-h2}" width="${bw}" height="${h2}" rx="2" fill="#3F7D6B"/>`;
+    if(k===0 || k===13 || k===7) bars += `<text x="${cx.toFixed(1)}" y="72" text-anchor="middle" font-size="8" fill="#5F6B7A">${fmtDM(x.d)}</text>`;
   });
   const trend = res >= rep ? '👍 Se está resolviendo al ritmo en que se reporta' : '⚠️ Se reporta más de lo que se resuelve';
-  return `<div class="dash-card">
-    <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Fallas reportadas y resueltas, últimos 14 días"><line x1="0" y1="60.5" x2="${W}" y2="60.5" stroke="#2C3947"/>${bars}</svg>
-    <div class="dt-legend"><span><i style="background:#E8A33D"></i>Reportadas <b>${rep}</b></span><span><i style="background:#2FA86B"></i>Resueltas <b>${res}</b></span></div>
-    <div class="dt-note">${trend}</div>
-  </div>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Fallas reportadas y resueltas, últimos 14 días"><line x1="0" y1="60.5" x2="${W}" y2="60.5" stroke="#D8D8D0"/>${bars}</svg>
+    <div class="dt-legend"><span><i style="background:#C98A2C"></i>Reportadas <b>${rep}</b></span><span><i style="background:#3F7D6B"></i>Resueltas <b>${res}</b></span></div>
+    <div class="dt-note">${trend}</div>`;
 }
 
 let DASH_DRILL = { torre:[], cat:[], est:[], area:[] };
@@ -870,13 +1043,13 @@ function dashDrill(kind, idx){
 }
 function drillSection(titulo, entries, kind, colorFn, labelFn, maxShow){
   DASH_DRILL[kind] = entries.map(e=>e[0]);
-  if(!entries.length) return `<div class="section-label">${titulo}</div><div class="empty-note" style="padding:12px">Sin datos</div>`;
+  if(!entries.length) return `<div class="dash-card dg"><h3>${titulo}</h3><div class="empty-note" style="padding:12px">Sin datos</div></div>`;
   const max = Math.max(1, ...entries.map(e=>e[1]));
   const row = (e,k)=>drillRow(labelFn ? labelFn(e[0]) : e[0], e[1], max, colorFn ? colorFn(e[0]) : null, kind, k);
   const head = entries.slice(0, maxShow||entries.length).map((e,k)=>row(e,k)).join('');
   const rest = (maxShow && entries.length>maxShow)
     ? `<details class="dash-more"><summary>Ver los ${entries.length-maxShow} restantes</summary>${entries.slice(maxShow).map((e,k)=>row(e,k+maxShow)).join('')}</details>` : '';
-  return `<div class="section-label">${titulo} <span class="sl-hint">· toca para filtrar</span></div>${head}${rest}`;
+  return `<div class="dash-card dg"><h3>${titulo}</h3><div class="dg-hint">Toca una barra para filtrar</div>${head}${rest}</div>`;
 }
 
 function renderDashboard(){
@@ -892,7 +1065,7 @@ function renderDashboard(){
   const promDias = diasArr.length ? (diasArr.reduce((s,x)=>s+x,0)/diasArr.length).toFixed(1) : '—';
   const chips = dashFiltrosActivos();
   const nF = chips.length;
-  const tile = (n,l,c,ico) => `<div class="tile"><div class="tile-num" style="color:${c}">${n}</div><div class="tile-label">${ico?ico+' ':''}${l}</div></div>`;
+  const sm = semaforoDe(items), SM = SEMAFORO[sm.nivel];
   const sub = soloActivas ? 'Resumen de fallas activas' : 'Resumen según tus filtros';
 
   const urgTop = act.filter(i=>['critica','alta'].includes(prioridadDe(i))).sort(cmpPrioridad).slice(0,6);
@@ -900,37 +1073,49 @@ function renderDashboard(){
   const byCat = countBy(base, i=>i.Categoria);
   const byEst = countBy(items.filter(i=>i.Estado!=='Sin revisar'), i=>i.Estado||'Sin revisar');
   const byArea = countBy(base.filter(i=>i.Area_Derivacion), i=>i.Area_Derivacion);
+  const stat = (n,l,c) => `<div class="stat-card"><div class="num" style="color:${c||'var(--ink)'}">${n}</div><div class="lbl">${l}</div></div>`;
 
   document.getElementById('mainList').innerHTML = `
     <div class="fx-head">
-      <div><div class="fx-h1">📊 Panel</div><div class="fx-h2">${sub} · ${items.length} ítems</div></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="openDashFiltros()">🔍 Filtros${nF?` (${nF})`:''}</button>
-      </div>
+      <div><div class="fx-h1">Panel</div><div class="fx-h2">${sub} · ${items.length} ítems</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="openDashFiltros()">🔍 Filtros${nF?` (${nF})`:''}</button>
     </div>
     ${nF ? `<div class="chip-row dash-active">${chips.map(c=>`<div class="chip selected" onclick="dashQuitar('${c.k}')">${c.t} ✕</div>`).join('')}<div class="chip" onclick="dashLimpiar()">Limpiar todo</div></div>` : ''}
-    ${semaforoSectionHtml()}
-    <div class="section-label">Cifras clave</div>
-    <div class="dash-tiles three">
-      ${tile(act.length,'Activas','var(--text)','')}
-      ${tile(act.filter(esUrgente).length,'Urgentes','#D6534A','🚨')}
-      ${tile(act.filter(isAtrasada).length,'Atrasadas','#E8803D','⌛')}
-      ${tile(act.filter(isStale).length,'Sin mov.','#E8A33D','⏰')}
-      ${tile(res30.length,'Resueltas 30d','#2FA86B','✅')}
-      ${tile(promDias,'Días prom.','#3B82C4','⏱')}
+    <div class="dash-hero">
+      <div class="dh-top">
+        <div><div class="dh-num">${act.length}</div><div class="dh-lbl">fallas activas</div></div>
+        <div class="tw-light" style="--sc:${SM.color}">${SM.ico} ${SM.label} · ${sm.motivo}</div>
+      </div>
+      <div class="dh-stats">
+        <div><b>${act.filter(esUrgente).length}</b><span>🚨 Urgentes</span></div>
+        <div><b>${act.filter(isAtrasada).length}</b><span>⌛ Atrasadas</span></div>
+        <div><b>${act.filter(isStale).length}</b><span>⏰ Sin mov.</span></div>
+      </div>
     </div>
-    <div class="section-label">Por prioridad</div>
-    <div class="prio-strip">${Object.keys(PRIORIDADES).map(k=>`<div class="prio-tile" style="--pc:${PRIORIDADES[k].color}" onclick="selectAlerta('prio_${k}')"><div class="n">${act.filter(i=>prioridadDe(i)===k).length}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('')}</div>
-    <div class="section-label">Últimos 14 días</div>
-    ${dashTrendHtml(items)}
-    <div class="section-label">🔥 Lo más urgente</div>
-    <div class="floor-card">${urgTop.length ? urgTop.map(renderAlertaRow).join('') : '<div class="empty-note">Nada crítico ni de prioridad alta con estos filtros. ✅</div>'}</div>
-    <button class="btn btn-ghost" style="width:100%" onclick="selectPlan()">📅 Ver el plan de trabajo completo</button>
-    ${drillSection('Por torre / área común', byTorre, 'torre', null, t=>t==='Común'?'Áreas comunes':t.replace('Torre ','Torre '))}
-    ${drillSection('Por tipo de falla', byCat, 'cat', null, null, 8)}
-    ${drillSection('Por estado', byEst, 'est', e=>ESTADO_COLORS[e])}
-    ${drillSection('Por área responsable', byArea, 'area')}
-    <div class="btn-row" style="margin-top:16px">
+    <div class="grid-stats">
+      ${stat(res30.length,'Resueltas en 30 días','var(--torre-b)')}
+      ${stat(promDias,'Días promedio de resolución','#2F6FA8')}
+      ${stat(items.filter(esSeguimiento).length,'📌 En seguimiento','var(--torre-d)')}
+    </div>
+    ${semaforoSectionHtml()}
+    <div class="dash-grid">
+      <div class="dash-card dg"><h3>Por prioridad</h3>
+        <div class="prio-strip" style="margin-top:6px">${Object.keys(PRIORIDADES).map(k=>`<div class="prio-tile" style="--pc:${PRIORIDADES[k].color}" onclick="selectAlerta('prio_${k}')"><div class="n">${act.filter(i=>prioridadDe(i)===k).length}</div><div class="l">${PRIORIDADES[k].ico} ${PRIORIDADES[k].label}</div></div>`).join('')}</div>
+        <div class="dg-hint" style="margin-top:8px">Toca una prioridad para ver sus fallas</div>
+      </div>
+      <div class="dash-card dg"><h3>Últimos 14 días</h3>${dashTrendHtml(items)}</div>
+    </div>
+    <div class="dash-card dg" style="padding-bottom:4px"><h3>🔥 Lo más urgente</h3>
+      <div class="dg-list">${urgTop.length ? urgTop.map(renderAlertaRow).join('') : '<div class="empty-note">Nada crítico ni de prioridad alta con estos filtros. ✅</div>'}</div>
+      <button class="btn btn-ghost" style="width:100%;margin:10px 0 8px" onclick="selectPlan()">📅 Ver el plan de trabajo completo</button>
+    </div>
+    <div class="dash-grid">
+      ${drillSection('Por torre / área común', byTorre, 'torre', t=>TORRE_COLOR[t]||null, t=>t==='Común'?'Áreas comunes':t)}
+      ${drillSection('Por tipo de falla', byCat, 'cat', null, null, 8)}
+      ${drillSection('Por estado', byEst, 'est', e=>ESTADO_COLORS[e])}
+      ${drillSection('Por área responsable', byArea, 'area')}
+    </div>
+    <div class="btn-row" style="margin-top:6px">
       <button class="btn btn-primary" style="margin-top:0" onclick="informeDesdePanel()">🖨️ Informe de esta vista (PDF / Excel)</button>
     </div>
     <div style="height:10px"></div>`;
@@ -997,10 +1182,10 @@ const NIV_HELP = {
   urgencia:'Qué tan rápido hay que actuar'
 };
 const PRIORIDADES = {
-  critica:{ label:'Crítica', ico:'🔴', color:'#D6534A', ord:0 },
-  alta:   { label:'Alta',    ico:'🟠', color:'#E8803D', ord:1 },
-  media:  { label:'Media',   ico:'🟡', color:'#D9B72E', ord:2 },
-  baja:   { label:'Baja',    ico:'🟢', color:'#2FA86B', ord:3 }
+  critica:{ label:'Crítica', ico:'🔴', color:'#C1544B', ord:0 },
+  alta:   { label:'Alta',    ico:'🟠', color:'#CF6A1F', ord:1 },
+  media:  { label:'Media',   ico:'🟡', color:'#C99A10', ord:2 },
+  baja:   { label:'Baja',    ico:'🟢', color:'#3F7D6B', ord:3 }
 };
 const PRIO_VENTANA = { critica:'Hoy', alta:'Esta semana', media:'Próximas 2 semanas', baja:'Programable' };
 
@@ -1177,14 +1362,14 @@ function setPlanField(k, v){ ensurePlanState(); STATE.plan[k] = v; renderPlan();
 
 function planRowHtml(e){
   const i = e.i; const est = i.Estado || 'Sin revisar';
-  const color = ESTADO_COLORS[est] || '#5B6675';
+  const color = ESTADO_COLORS[est] || '#8A8A80';
   const venc = e.atraso
-    ? `<span class="stale-badge" style="color:#D6534A;font-weight:700">⚠ atrasada ${e.atraso}d</span>`
+    ? `<span class="stale-badge" style="color:#C1544B;font-weight:700">⚠ atrasada ${e.atraso}d</span>`
     : `<span class="stale-badge" style="color:var(--text-dim)">vence ${fmtDM(e.obj)}</span>`;
   return `<div class="item-row" onclick="openItemModal('${i.Folio}')">
     <div class="dot" style="background:${color}"></div>
     <div class="item-main">
-      <div class="item-cat">${esUrgente(i)?'🚨 ':''}${i.Categoria} <span class="folio-tag">${i.Folio}</span>${e.nueva?' <span class="prio-chip" style="--pc:#3B82C4">🆕 nueva</span>':''}</div>
+      <div class="item-cat">${esUrgente(i)?'🚨 ':''}${i.Categoria} <span class="folio-tag">${i.Folio}</span>${e.nueva?' <span class="prio-chip" style="--pc:#2F6FA8">🆕 nueva</span>':''}</div>
       <div class="item-detalle">${planLugar(i)}${i.Detalle ? ' — '+i.Detalle : ''}</div>
       <span class="stale-badge" style="color:${color}">${est}</span> ${venc}${i.Area_Derivacion ? ` <span class="stale-badge">→ ${i.Area_Derivacion}</span>`:''}
     </div>
@@ -1232,9 +1417,9 @@ function renderPlan(){
     <div class="home-sub">Se actualiza solo con cada falla nueva o cerrada · ${new Date().toLocaleString('es-CL',{dateStyle:'short',timeStyle:'short'})}</div>
     <div class="dash-tiles" style="grid-template-columns:repeat(4,1fr)">
       <div class="tile"><div class="tile-num">${entries.length}</div><div class="tile-label">En plan</div></div>
-      <div class="tile"><div class="tile-num" style="color:#D6534A">${criticas}</div><div class="tile-label">Críticas</div></div>
-      <div class="tile"><div class="tile-num" style="color:#E8A33D">${atrasadas}</div><div class="tile-label">Atrasadas</div></div>
-      <div class="tile"><div class="tile-num" style="color:#3B82C4">${nuevas}</div><div class="tile-label">Nuevas</div></div>
+      <div class="tile"><div class="tile-num" style="color:#C1544B">${criticas}</div><div class="tile-label">Críticas</div></div>
+      <div class="tile"><div class="tile-num" style="color:#B7791F">${atrasadas}</div><div class="tile-label">Atrasadas</div></div>
+      <div class="tile"><div class="tile-num" style="color:#2F6FA8">${nuevas}</div><div class="tile-label">Nuevas</div></div>
     </div>
     ${last ? `<div class="plan-banner">🆕 <b>${nuevas}</b> nueva${nuevas===1?'':'s'} y ✅ <b>${cerradas}</b> cerrada${cerradas===1?'':'s'} desde el plan del ${lastTxt}. <span onclick="planMarcarVisto()" style="text-decoration:underline;cursor:pointer">Marcar como visto</span></div>` : `<div class="plan-banner">Aún no hay un plan guardado como referencia. Al descargar el PDF o el Excel se guarda y desde ahí te avisa qué fallas son nuevas.</div>`}
     <div class="dash-card">
@@ -1244,7 +1429,7 @@ function renderPlan(){
         <div class="seg"><button class="${STATE.plan.group==='torre'?'on':''}" onclick="setPlanField('group','torre')">Torre y piso</button><button class="${STATE.plan.group==='area'?'on':''}" onclick="setPlanField('group','area')">Área responsable</button></div></div>
       <div class="btn-row">
         <button class="btn btn-primary" onclick="generarPdfPlan()">📄 PDF</button>
-        <button class="btn btn-primary" style="background:#2FA86B" onclick="generarExcelPlan()">📥 Excel</button>
+        <button class="btn btn-primary" style="background:#3F7D6B" onclick="generarExcelPlan()">📥 Excel</button>
         <button class="btn btn-ghost" onclick="openPlazosModal()">⚙ Plazos</button>
       </div>
     </div>
@@ -1303,8 +1488,8 @@ function buildPdfPlan(entries){
     { label:'Fallas en plan', value: entries.length },
     { label:'Críticas (hoy)', value: entries.filter(e=>e.prio==='critica').length, color:hexRgb(PRIORIDADES.critica.color) },
     { label:'Altas (semana)', value: entries.filter(e=>e.prio==='alta').length, color:hexRgb(PRIORIDADES.alta.color) },
-    { label:'Atrasadas', value: atrasadas, color:[214,83,74] },
-    { label:'Nuevas', value: entries.filter(e=>e.nueva).length, color:[59,130,196] }
+    { label:'Atrasadas', value: atrasadas, color:[193,84,75] },
+    { label:'Nuevas', value: entries.filter(e=>e.nueva).length, color:[47,111,168] }
   ]);
 
   // Resumen de cantidades
@@ -1360,7 +1545,7 @@ function buildPdfPlan(entries){
         data.cell.styles.textColor = ESTADO_RGB[data.cell.raw] || [0,0,0]; data.cell.styles.fontStyle='bold';
       }
       if(data.section==='body' && data.column.index===6 && typeof data.cell.raw==='string' && data.cell.raw.indexOf('atr.')>-1){
-        data.cell.styles.textColor = [214,83,74]; data.cell.styles.fontStyle='bold';
+        data.cell.styles.textColor = [193,84,75]; data.cell.styles.fontStyle='bold';
       }
     },
     didDrawCell:(data)=>{
@@ -1495,7 +1680,7 @@ function renderTorre(){
   const shown = ui.verTodas ? activas : activas.slice(0,6);
 
   main.innerHTML = `
-    <div class="tw-hero">
+    <div class="tw-hero" style="--tc:${TORRE_COLOR[t]}">
       <div class="tw-top">
         <div><div class="tw-name">🏢 ${t}</div><div class="tw-sub">${st.activas} falla${st.activas===1?'':'s'} activa${st.activas===1?'':'s'} · ${st.total} ítems</div>
           ${(()=>{ const sm = semaforoUnidad(t), S = SEMAFORO[sm.nivel]; return `<div class="tw-light" style="--sc:${S.color}">${S.ico} Semáforo ${S.label} · ${sm.motivo}</div>`; })()}</div>
@@ -1523,7 +1708,7 @@ function renderTorre(){
 /* ---- Hoja de un piso ---- */
 function floorItemHtml(i){
   const est = i.Estado || 'Sin revisar';
-  const color = ESTADO_COLORS[est] || '#5B6675';
+  const color = ESTADO_COLORS[est] || '#8A8A80';
   const sinRev = est === 'Sin revisar' && !esUrgente(i);
   const acts = sinRev ? `<div class="fl-acts">
       <button class="fl-ok" onclick="event.stopPropagation(); quickOk('${i.Folio}')">✓ OK</button>
@@ -1546,7 +1731,7 @@ function openFloorSheet(torre, piso){
     <div class="sub">${s.total ? `${hechos} de ${s.total} revisados` : 'Sin ítems en este piso'}${s.fallas ? ` · ${s.fallas} con falla` : ''}</div>
     <div class="tw-bar" style="margin:6px 0 12px"><i style="width:${pct}%"></i></div>
     ${items.length ? items.map(floorItemHtml).join('') : '<div class="empty-note">Este piso no tiene ítems todavía. Puedes agregar una falla abajo.</div>'}
-    ${s.sinRev ? `<button class="btn btn-primary" style="background:#2FA86B" onclick="markFloorOk('${torre}',${piso})">✓ Marcar los ${s.sinRev} sin revisar como OK</button>` : ''}
+    ${s.sinRev ? `<button class="btn btn-primary" style="background:#3F7D6B" onclick="markFloorOk('${torre}',${piso})">✓ Marcar los ${s.sinRev} sin revisar como OK</button>` : ''}
     <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="openAddReportModal('${torre}',${piso})">➕ Agregar otra falla en este piso</button>
     <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px" onclick="closeModal()">Cerrar</button>
   `);
@@ -1588,10 +1773,10 @@ function markFloorOk(torre, piso){
 
 /* ================= SEMÁFORO DE GESTIÓN (por torre y áreas comunes) ================= */
 const SEMAFORO = {
-  rojo:     { ico:'🔴', label:'Rojo',     color:'#D6534A' },
-  naranja:  { ico:'🟠', label:'Naranja',  color:'#E8803D' },
-  amarillo: { ico:'🟡', label:'Amarillo', color:'#D9B72E' },
-  verde:    { ico:'🟢', label:'Verde',    color:'#2FA86B' }
+  rojo:     { ico:'🔴', label:'Rojo',     color:'#C1544B' },
+  naranja:  { ico:'🟠', label:'Naranja',  color:'#CF6A1F' },
+  amarillo: { ico:'🟡', label:'Amarillo', color:'#C99A10' },
+  verde:    { ico:'🟢', label:'Verde',    color:'#3F7D6B' }
 };
 const SEMAFORO_UNIDADES = ['Torre A','Torre B','Torre C','Torre D','Común'];
 function semaforoDe(items){
@@ -1645,15 +1830,15 @@ function semaforoGridHtml(){
       “Atrasada” = pasó el plazo de su prioridad (ver ⚙ Plazos en el Plan de trabajo).</div></details>`;
 }
 function semaforoSectionHtml(){
-  return `<div class="section-label">🚦 Semáforo de gestión <span style="text-transform:none;letter-spacing:0">· toca para entrar</span></div>${semaforoGridHtml()}`;
+  return `<div class="section-label">🚦 Semáforo de gestión <span class="sl-hint">· toca para entrar</span></div>${semaforoGridHtml()}`;
 }
 
 /* ================= PANTALLA DE INICIO ================= */
 const ALERTAS = {
-  urgentes:    { icon:'🚨', label:'Urgentes',         hint:'Requieren atención ya',          color:'#D6534A', test:i=>esUrgente(i) && !['Resuelto','OK','Descartado'].includes(i.Estado) },
-  estancados:  { icon:'⏰', label:'Sin movimiento',   hint:'2 días o más sin gestión',       color:'#E8A33D', test:i=>isStale(i) },
-  nuevos:      { icon:'🆕', label:'Nuevos sin gestión', hint:'Reportados, falta confirmar',  color:'#3B82C4', test:i=>i.Estado==='Nuevo' },
-  seguimiento: { icon:'📌', label:'En seguimiento',   hint:'Marcados para vigilar',          color:'#9B7FE0', test:i=>esSeguimiento(i) }
+  urgentes:    { icon:'🚨', label:'Urgentes',         hint:'Requieren atención ya',          color:'#C1544B', test:i=>esUrgente(i) && !['Resuelto','OK','Descartado'].includes(i.Estado) },
+  estancados:  { icon:'⏰', label:'Sin movimiento',   hint:'2 días o más sin gestión',       color:'#B7791F', test:i=>isStale(i) },
+  nuevos:      { icon:'🆕', label:'Nuevos sin gestión', hint:'Reportados, falta confirmar',  color:'#2F6FA8', test:i=>i.Estado==='Nuevo' },
+  seguimiento: { icon:'📌', label:'En seguimiento',   hint:'Marcados para vigilar',          color:'#5B4B8A', test:i=>esSeguimiento(i) }
 };
 Object.keys(PRIORIDADES).forEach(k=>{
   ALERTAS['prio_'+k] = { icon:PRIORIDADES[k].ico, label:'Prioridad '+PRIORIDADES[k].label, hint:'', color:PRIORIDADES[k].color, test:i=>prioridadDe(i)===k };
@@ -1697,7 +1882,7 @@ function renderHome(){
 
   let mods = '';
   if(isAdmin){
-    mods += TORRES.map(t=>modCard('🏢', t, metaN(activosDeTorre(t)), `selectTorre('${t}')`)).join('');
+    mods += TORRES.map(t=>modCard('🏢', t, metaN(activosDeTorre(t)), `selectTorre('${t}')`, torreCls(t))).join('');
   }
   mods += modCard('💧', 'Filtraciones', metaN(fugasN), 'selectFugas()');
   mods += modCard('🔧', 'Deptos y Comunes', metaN(deptosN), 'selectDeptos()');
@@ -1741,11 +1926,11 @@ function renderAlerta(){
 }
 function renderAlertaRow(i){
   const est = i.Estado || 'Sin revisar';
-  const color = ESTADO_COLORS[est] || '#5B6675';
+  const color = ESTADO_COLORS[est] || '#8A8A80';
   const dondeTxt = [i.Torre, i.Origen || (i.Piso!==undefined && i.Piso!=='' ? 'Piso '+i.Piso : '')].filter(Boolean).join(' · ');
   const staleBadge = isStale(i) ? ` <span class="stale-badge">⏰ ${diasEntre(i.Fecha_Ultima_Actualizacion||i.Fecha_Deteccion)}d sin movimiento</span>` : '';
-  const seg = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#3B82C4">📌</span>' : '';
-  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#D6534A14':''}">
+  const seg = esSeguimiento(i) ? ' <span class="stale-badge" style="color:#2F6FA8">📌</span>' : '';
+  return `<div class="item-row" onclick="openItemModal('${i.Folio}')" style="${esUrgente(i)?'background:#C1544B14':''}">
       <div class="dot" style="background:${color}"></div>
       <div class="item-main">
         <div class="item-cat">${esUrgente(i)?'🚨 ':''}${i.Categoria||''} <span class="folio-tag">${i.Folio}</span>${prioChip(i)}</div>
@@ -1769,9 +1954,9 @@ function renderSimple(){
     main.innerHTML = `
       <div class="section-label" style="margin-top:4px">Acciones rápidas</div>
       <button class="btn btn-primary" style="width:100%;margin-bottom:12px;padding:20px;font-size:1.05rem" onclick="simpleGo('revisar')">🔍 Revisar</button>
-      <button class="btn btn-primary" style="width:100%;margin-bottom:12px;padding:20px;font-size:1.05rem;background:#2FA86B" onclick="openReportDeptoModal()">➕ Agregar falla</button>
-      <button class="btn btn-primary" style="width:100%;margin-bottom:12px;padding:20px;font-size:1.05rem;background:#5B6675" onclick="simpleGo('editar')">✏️ Editar</button>
-      <button class="btn btn-primary" style="width:100%;margin-bottom:12px;padding:20px;font-size:1.05rem;background:#9B7FE0" onclick="simpleGo('derivar')">🔀 Derivar</button>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:12px;padding:20px;font-size:1.05rem;background:#3F7D6B" onclick="openReportDeptoModal()">➕ Agregar falla</button>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:12px;padding:20px;font-size:1.05rem;background:#8A8A80" onclick="simpleGo('editar')">✏️ Editar</button>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:12px;padding:20px;font-size:1.05rem;background:#5B4B8A" onclick="simpleGo('derivar')">🔀 Derivar</button>
     `;
     return;
   }
@@ -1857,9 +2042,9 @@ function modTilesHtml(kind){
   const act = modScope(kind).filter(esActivaMod);
   const tiles = [
     { k:'',      n:act.length,                      l:'Activas',        c:'var(--text)' },
-    { k:'urg',   n:act.filter(esUrgente).length,    l:'🚨 Urgentes',    c:'#D6534A' },
-    { k:'stale', n:act.filter(isStale).length,      l:'⏰ Sin mov.',    c:'#E8A33D' },
-    { k:'atras', n:act.filter(isAtrasada).length,   l:'⌛ Atrasadas',   c:'#E8803D' }
+    { k:'urg',   n:act.filter(esUrgente).length,    l:'🚨 Urgentes',    c:'#C1544B' },
+    { k:'stale', n:act.filter(isStale).length,      l:'⏰ Sin mov.',    c:'#B7791F' },
+    { k:'atras', n:act.filter(isAtrasada).length,   l:'⌛ Atrasadas',   c:'#CF6A1F' }
   ];
   return `<div class="fx-tiles">${tiles.map(t=>`<div class="fx-tile ${(f.filtro||'')===t.k?'on':''} ${t.n===0&&t.k?'zero':''}" style="--tc:${t.c}" onclick="modTile('${kind}','${t.k}')"><b>${t.n}</b><span>${t.l}</span></div>`).join('')}</div>`;
 }
@@ -1874,7 +2059,7 @@ function modPillsHtml(kind){
 }
 function modCardHtml(i, kind){
   const est = i.Estado || 'Sin revisar';
-  const ec = ESTADO_COLORS[est] || '#5B6675';
+  const ec = ESTADO_COLORS[est] || '#8A8A80';
   const p = prioridadDe(i);
   const pc = p ? PRIORIDADES[p].color : ec;
   const cerrada = esCerradaMod(i);
@@ -1893,7 +2078,7 @@ function modCardHtml(i, kind){
   return `<div class="fx-card ${urg?'urg':''} ${cerrada?'done':''}" style="--pc:${pc}" onclick="openItemModal('${i.Folio}')">
     <div class="fx-thumb"><span>${ico}</span>${img}</div>
     <div class="fx-main">
-      <div class="fx-l1"><span class="fx-torre">${(i.Torre||'Común').replace('Torre ','')}</span>${prioChip(i)}${urg?'<span class="fx-urg">🚨</span>':''}<span class="folio-tag">${i.Folio}</span></div>
+      <div class="fx-l1"><span class="fx-torre ${torreCls(i.Torre||'Común')}">${(i.Torre||'Común').replace('Torre ','')}</span>${prioChip(i)}${urg?'<span class="fx-urg">🚨</span>':''}<span class="folio-tag">${i.Folio}</span></div>
       <div class="fx-title">${title}</div>
       ${sub}
       <div class="fx-detalle">${i.Detalle ? i.Detalle : '<i>Sin detalle</i>'}</div>
@@ -1935,7 +2120,7 @@ function modDyn(kind){
     grp.sort(f.ver==='resueltas'
       ? (a,b)=>(b.Fecha_Resolucion||'').localeCompare(a.Fecha_Resolucion||'')
       : cmpPrioridad);
-    html += `<div class="fx-gh"><span>${t==='Común'?'Áreas comunes':t}</span><i>${grp.length}</i></div>`;
+    html += `<div class="fx-gh"><span><i class="td ${torreCls(t)}"></i>${t==='Común'?'Áreas comunes':t}</span><b>${grp.length}</b></div>`;
     for(const i of grp){
       if(shown >= (f.lim||40)) break;
       html += modCardHtml(i, kind); shown++;
@@ -2403,7 +2588,7 @@ function fueAutoMarcadoUrgente(item){ return ultimoMotivo(item) === 'Auto-marcad
 
 function itemDetailHtml(item){
   const est = item.Estado || 'Sin revisar';
-  const color = ESTADO_COLORS[est] || '#5B6675';
+  const color = ESTADO_COLORS[est] || '#8A8A80';
   const transiciones = TRANSICIONES[est] || [];
   const diasDetTxt = item.Fecha_Deteccion ? (diasEntre(item.Fecha_Deteccion) + ' días desde detección') : '';
   const diasResTxt = (item.Fecha_Deteccion && item.Fecha_Resolucion) ? ('Resuelto en ' + diasEntre(item.Fecha_Deteccion, item.Fecha_Resolucion) + ' días') : '';
@@ -2433,8 +2618,8 @@ function itemDetailHtml(item){
   let urgenteBadge = '';
   if(urgente){
     urgenteBadge = fueAutoMarcadoUrgente(item)
-      ? `<span class="badge" style="background:#D6534A22;color:#D6534A;border:1px solid #D6534A;margin-left:6px">⚠ Sin atención (2h)</span>`
-      : `<span class="badge" style="background:#D6534A22;color:#D6534A;border:1px solid #D6534A;margin-left:6px">🚨 Urgente</span>`;
+      ? `<span class="badge" style="background:#C1544B22;color:#C1544B;border:1px solid #C1544B;margin-left:6px">⚠ Sin atención (2h)</span>`
+      : `<span class="badge" style="background:#C1544B22;color:#C1544B;border:1px solid #C1544B;margin-left:6px">🚨 Urgente</span>`;
   }
 
   return `
@@ -2442,8 +2627,8 @@ function itemDetailHtml(item){
     <div class="sub">${item.Torre} · ${item.Piso<=-1?'Subterráneo ':'Piso '}${item.Piso}</div>
     <span class="badge" style="background:${color}22;color:${color};border:1px solid ${color}">${est}</span>
     ${urgenteBadge}
-    ${seguimiento ? `<span class="badge" style="background:#3B82C422;color:#3B82C4;border:1px solid #3B82C4;margin-left:6px">📌 Seguimiento</span>` : ''}
-    ${fueRevertidoAutomatico(item) ? `<span class="badge" style="background:#E8A33D22;color:#E8A33D;border:1px solid #E8A33D;margin-left:6px">🔁 Reabierto automático (3h sin gestión)</span>` : ''}
+    ${seguimiento ? `<span class="badge" style="background:#2F6FA822;color:#2F6FA8;border:1px solid #2F6FA8;margin-left:6px">📌 Seguimiento</span>` : ''}
+    ${fueRevertidoAutomatico(item) ? `<span class="badge" style="background:#B7791F22;color:#B7791F;border:1px solid #B7791F;margin-left:6px">🔁 Reabierto automático (3h sin gestión)</span>` : ''}
     <div style="margin-top:12px; font-size:.88rem; line-height:1.4;">${item.Detalle || '<span style="color:var(--text-dim)">Sin detalle registrado</span>'}</div>
     ${photos}
     <div class="kv"><div class="k">Origen</div><div>${item.Origen || '—'}</div></div>
@@ -2787,7 +2972,7 @@ function loadJsPdf(cb){
 }
 
 /* ---- Estilo ejecutivo compartido entre los PDF ---- */
-const PDF_NAVY = [26, 38, 56];      // encabezados de sección
+const PDF_NAVY = [31, 42, 68];      // encabezados de sección
 const PDF_NAVY_TXT = [255,255,255];
 const PDF_GRAY = [110, 120, 130];   // texto secundario
 const PDF_LINE = [215, 220, 225];
@@ -2836,8 +3021,8 @@ function pdfFooterPages(doc, marginX, pageW, pageH){
   }
 }
 const ESTADO_RGB = {
-  'Sin revisar':[91,102,117], 'Nuevo':[47,182,163], 'Pendiente':[214,83,74], 'Derivado':[155,127,224],
-  'En proceso':[214,155,40], 'Resuelto':[59,130,196], 'OK':[47,168,107], 'Descartado':[138,122,104]
+  'Sin revisar':[138,138,128], 'Nuevo':[43,138,158], 'Pendiente':[193,84,75], 'Derivado':[91,75,138],
+  'En proceso':[201,138,44], 'Resuelto':[47,111,168], 'OK':[63,125,107], 'Descartado':[138,122,104]
 };
 
 /* ================= EXPORTAR A EXCEL (Panel) ================= */
@@ -2995,7 +3180,7 @@ function renderInformes(){
     <div style="height:84px"></div>
     <div class="fx-addbar"><div class="btn-row">
       <button class="btn btn-primary" onclick="infPdf()">📄 PDF</button>
-      <button class="btn btn-primary" style="background:#2FA86B;color:#06210f" onclick="infExcel()">📥 Excel</button>
+      <button class="btn btn-primary" style="background:#3F7D6B;color:#fff" onclick="infExcel()">📥 Excel</button>
     </div></div>`;
   infPreview();
 }
@@ -3121,7 +3306,7 @@ function buildPdfInforme(items){
     const dias = items.map(i=>diasEntre(i.Fecha_Deteccion, i.Fecha_Resolucion)).filter(x=>x!==null);
     const prom = dias.length ? (dias.reduce((s,x)=>s+x,0)/dias.length).toFixed(1) : '—';
     y = pdfKpiRow(doc, marginX, y+4, pageW, [
-      { label:'Fallas resueltas', value: items.length, color:[47,168,107] },
+      { label:'Fallas resueltas', value: items.length, color:[63,125,107] },
       { label:'Días promedio', value: prom },
       { label:'Áreas', value: new Set(items.map(i=>i.Area_Derivacion||'Sin área')).size },
       { label:'Torres / áreas', value: torresVis.length }
@@ -3129,10 +3314,10 @@ function buildPdfInforme(items){
   } else {
     y = pdfKpiRow(doc, marginX, y+4, pageW, [
       { label:'Total ítems', value: items.length },
-      { label:'Urgentes', value: items.filter(i=>esUrgente(i) && !esCerradaMod(i)).length, color:[214,83,74] },
+      { label:'Urgentes', value: items.filter(i=>esUrgente(i) && !esCerradaMod(i)).length, color:[193,84,75] },
       { label:'Críticas + altas', value: act.filter(i=>['critica','alta'].includes(prioridadDe(i))).length, color:hexRgb(PRIORIDADES.alta.color) },
-      { label:'Atrasadas', value: act.filter(isAtrasada).length, color:[232,128,61] },
-      { label:'Con seguimiento', value: items.filter(esSeguimiento).length, color:[59,130,196] }
+      { label:'Atrasadas', value: act.filter(isAtrasada).length, color:[207,106,31] },
+      { label:'Con seguimiento', value: items.filter(esSeguimiento).length, color:[47,111,168] }
     ]);
   }
 
@@ -3294,7 +3479,7 @@ function buildPdfInforme(items){
         : { 0:{cellWidth:56}, 1:{cellWidth:92}, 2:{cellWidth:72}, 3:{cellWidth:'auto'}, 4:{cellWidth:46}, 5:{cellWidth:50}, 6:{cellWidth:28, halign:'center'} },
       didParseCell:(data)=>{
         if(f.tipo!=='gestion') estadoColor(data, 5);
-        if(data.section==='body' && data.column.index===0 && typeof data.cell.raw==='string' && data.cell.raw.indexOf('URG')===0){ data.cell.styles.textColor = [214,83,74]; data.cell.styles.fontStyle = 'bold'; }
+        if(data.section==='body' && data.column.index===0 && typeof data.cell.raw==='string' && data.cell.raw.indexOf('URG')===0){ data.cell.styles.textColor = [193,84,75]; data.cell.styles.fontStyle = 'bold'; }
       }
     });
     y = doc.lastAutoTable.finalY + 14;
